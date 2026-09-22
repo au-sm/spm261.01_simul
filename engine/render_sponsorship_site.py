@@ -65,7 +65,6 @@ def render(config, deals, finances):
               <header><h3>{b["name"]}</h3><span class="slots">{max(0,remaining)}/{b["qty"]} open</span></header>
               <p class="flavor">{b["flavor"]}</p>
               <div class="terms">
-                <span><b>Revenue</b> {money(b["base_revenue"])}/season</span>
                 <span><b>Clause</b> {b["base_clause"]}</span>
               </div>
               <p class="owners"><b>Signed by:</b> {owners_html}</p>
@@ -214,9 +213,10 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
       <p style="margin-top:10px;">On your turn, target an open brand in whichever category you're filling. Two separate
       things are on the table:</p>
       <div class="asks-grid">
-        <div class="ask-chip"><b>Revenue</b>Take the listed Base amount (guaranteed), or Negotiate &mdash; lands anywhere
-        from &minus;10% to +10% of base, set by your <b>Negotiating Leverage</b> (roster avg. Star Power + a standings
-        bonus once the season starts). Negotiating is not risk-free: a weak hand can land below base.</div>
+        <div class="ask-chip"><b>Revenue</b>Take the Base amount (guaranteed) &mdash; your sponsor rep tells you the
+        number, it isn't posted here &mdash; or Negotiate: lands anywhere from &minus;10% to +10% of base, set by your
+        <b>Negotiating Leverage</b> (roster avg. Star Power + a standings bonus once the season starts). Negotiating is
+        not risk-free: a weak hand can land below base.</div>
         <div class="ask-chip"><b>Clause</b>A separate ask &mdash; push for a looser clause at Modest/Bold/Very Bold
         intensity, gated by the same leverage. This one CAN walk away if you overreach; the revenue side never does.</div>
       </div>

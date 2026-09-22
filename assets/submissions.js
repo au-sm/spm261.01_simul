@@ -300,7 +300,7 @@ function initSponsorshipForm() {
     brandSel.innerHTML = brands.map(b => {
       const taken = slotsTaken(b.name);
       const soldOut = taken >= b.qty;
-      return `<option value="${b.name}" ${soldOut ? 'disabled' : ''}>${b.name} -- $${b.base_revenue.toLocaleString()} (${taken}/${b.qty} slots)${soldOut ? ' SOLD OUT' : ''}</option>`;
+      return `<option value="${b.name}" ${soldOut ? 'disabled' : ''}>${b.name} (${taken}/${b.qty} slots)${soldOut ? ' SOLD OUT' : ''}</option>`;
     }).join('');
   }
   function updateOwnedNote() {
