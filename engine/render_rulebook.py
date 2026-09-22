@@ -70,10 +70,12 @@ def render(config, deals, calendar=None):
       (built from your roster's average Star Power, plus a standings bonus once the season starts): leverage 0 lands at
       &minus;10%, leverage 50 lands exactly at base, leverage 100 lands at +10%. Negotiating is not risk-free the way
       taking Base is &mdash; a weak hand can genuinely land below base.</p>
-      <p><strong>The commission:</strong> if a negotiated deal lands ABOVE base, the overage is ALSO credited as bonus
-      revenue to whichever team's student played the sponsor rep in that negotiation &mdash; playing sponsor well pays
-      off for your own team too, upside-only (landing at or below base costs the rep's team nothing, but earns them
-      nothing either).</p>
+      <p><strong>The commission:</strong> whenever a negotiated deal lands away from base &mdash; in EITHER direction
+      &mdash; that gap is ALSO credited as bonus revenue to whichever team's student played the sponsor rep in that
+      negotiation. Land above base (good for the signing team) and the overage goes to the rep's team; talk the team
+      down below base (good for the sponsor) and the savings goes to the rep's team instead. Landing exactly at base
+      earns nobody a commission, since nothing was actually negotiated. Never a deduction from the signing team's own
+      booked revenue either way.</p>
       <h3>Clause</h3>
       <p>A separate ask: push for a looser clause at Modest / Bold / Very Bold intensity, gated by the same leverage
       number. Ask beyond what your leverage supports and the brand walks away on the clause specifically &mdash; that

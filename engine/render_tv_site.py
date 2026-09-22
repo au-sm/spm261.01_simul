@@ -173,9 +173,10 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
         <div class="ask-chip"><b>Revenue</b>Take the market-tier Base exactly (guaranteed), or Negotiate &mdash; lands
         anywhere from &minus;10% to +10% of base, set by your <b>Negotiating Leverage</b> (roster avg. Star Power + a
         standings bonus once the season starts). A weak hand can genuinely land below base.</div>
-        <div class="ask-chip"><b>The commission</b>Land ABOVE base, and the overage is credited &mdash; immediately, not
-        at the Round 3 split &mdash; as bonus revenue to whichever team played the network rep. Landing at or below base
-        costs the rep's team nothing, but earns them nothing either.</div>
+        <div class="ask-chip"><b>The commission</b>Land the rate away from base, in EITHER direction, and that gap is
+        credited &mdash; immediately, not at the Round 3 split &mdash; as bonus revenue to whichever team played the
+        network rep. Above base rewards the negotiating team's win; below base (a good deal for the network) rewards
+        the rep instead. Landing exactly at base earns nobody a commission.</div>
       </div>
       <p style="margin-top:12px;"><b>This negotiation sets the RATE only.</b> The money itself is still paid at the
       league's Round 3 TV Revenue Day, with the Star Power modifier (+15% if your starting XI is top-3 league-wide then)
@@ -215,7 +216,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
           </select>
         </div>
         <div class="sub-field" id="tv-revenue-field" hidden><label for="tv-revenue">Final agreed rate ($/season)</label><input type="number" id="tv-revenue" placeholder="e.g. 1320000"></div>
-        <div class="sub-field" id="tv-rep-field" hidden><label for="tv-rep">Network rep (if rate is ABOVE base)</label><select id="tv-rep" class="sub-team-select"></select></div>
+        <div class="sub-field" id="tv-rep-field" hidden><label for="tv-rep">Network rep (if rate differs from base, either direction)</label><select id="tv-rep" class="sub-team-select"></select></div>
       </div>
       <button class="sub-btn" id="tv-submit">Submit Local TV Rate</button>
       <p class="sub-msg" id="tv-msg"></p>

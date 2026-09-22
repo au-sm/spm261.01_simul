@@ -151,9 +151,12 @@ footer{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
         <div class="ask-chip"><b>Clause</b>A separate ask &mdash; push for a looser clause at Modest/Bold/Very Bold
         intensity, gated by the same leverage. This one CAN walk away if you overreach; the revenue side never does.</div>
       </div>
-      <p style="margin-top:12px;"><b>The commission:</b> if a negotiated deal lands ABOVE base, the overage is ALSO
-      credited as bonus revenue to whichever team's student played the sponsor rep &mdash; playing sponsor well pays off
-      for your own team too, upside-only (never a penalty for landing at or below base).</p>
+      <p style="margin-top:12px;"><b>The commission:</b> whenever a negotiated deal lands away from base &mdash; in
+      EITHER direction &mdash; that gap is ALSO credited as bonus revenue to whichever team's student played the sponsor
+      rep. Land above base (good for the signing team) and the overage goes to the rep's team; talk the team down below
+      base (good for the sponsor) and the savings goes to the rep's team instead. Landing exactly at base earns nobody a
+      commission, since nothing was actually negotiated. Never a deduction from the signing team's own booked revenue
+      either way.</p>
       <p style="margin-top:14px;"><b>The clause is real, not flavor text.</b> Once, at season end (Round
       17), each clause level's OWN rank threshold gets checked against your team's FINAL standing.
       Miss it, and that specific deal claws back a flat 20% &mdash; the clause sets how hard
@@ -469,7 +472,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
         <div class="sub-field"><label for="sp-clause">Final agreed clause</label>
           <select id="sp-clause"><option value="strict">Strict</option><option value="standard">Standard</option><option value="loose">Loose</option><option value="none">None</option></select>
         </div>
-        <div class="sub-field"><label for="sp-rep">Sponsor rep (if revenue is ABOVE base)</label><select id="sp-rep" class="sub-team-select"></select></div>
+        <div class="sub-field"><label for="sp-rep">Sponsor rep (if revenue differs from base, either direction)</label><select id="sp-rep" class="sub-team-select"></select></div>
       </div>
       <button class="sub-btn" id="sp-submit">Submit Sponsorship Deal</button>
       <p class="sub-msg" id="sp-msg"></p>

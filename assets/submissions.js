@@ -245,7 +245,7 @@ function initTvForm() {
       const revenue = parseInt(document.getElementById('tv-revenue').value, 10);
       if (!revenue) { msg.textContent = 'Enter the final agreed rate.'; msg.className = 'sub-msg'; return; }
       body.final_revenue = revenue;
-      if (revenue > (LOCAL_TV_BASE[teamSel.value]?.base_revenue || 0)) {
+      if (revenue !== (LOCAL_TV_BASE[teamSel.value]?.base_revenue || 0)) {
         body.rep_team_id = repSel.value;
       }
     }
@@ -330,7 +330,7 @@ function initSponsorshipForm() {
       if (!revenue) { msg.textContent = 'Enter the final agreed revenue.'; msg.className = 'sub-msg'; return; }
       body.final_revenue = revenue;
       body.final_clause = clause;
-      if (brand && revenue > brand.base_revenue) body.rep_team_id = repSel.value;
+      if (brand && revenue !== brand.base_revenue) body.rep_team_id = repSel.value;
     }
 
     btn.disabled = true;

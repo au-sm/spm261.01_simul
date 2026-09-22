@@ -36,9 +36,16 @@ LIVE MODE (the normal path for the in-class negotiation exercise):
   $770,000 rate credits a $70,000 commission to Team 17, whoever
   played the network rep in that negotiation -- booked immediately
   (the commission is a reward for negotiating skill, not TV money
-  itself, so it doesn't wait for the Round 3 split). At or below
-  base, no commission is credited to anyone -- upside-only, same as
-  sponsorship.
+  itself, so it doesn't wait for the Round 3 split).
+
+  The mirror case is rewarded too: if the rep instead talks the team
+  down BELOW base (a good deal for the network), the same size
+  commission -- the savings, base minus final_revenue -- is credited
+  to the rep's team instead, same immediate booking. Either direction
+  requires --network-rep-team (only an exact match to base needs no
+  rep). Never a deduction from the negotiating team's own rate --
+  always additive, on top of whatever they locked in, in both
+  directions.
 
 ALGORITHMIC MODE (practice / fallback if a team never got a live
 negotiation -- no human played network rep, so no commission applies):
@@ -92,7 +99,7 @@ def main():
 
     ap.add_argument("--live", action="store_true", help="record an already-negotiated live rate")
     ap.add_argument("--final-revenue", type=int, help="[live] the exact agreed season rate")
-    ap.add_argument("--network-rep-team", type=int, help="[live] team whose student played network rep (receives commission if rate > base)")
+    ap.add_argument("--network-rep-team", type=int, help="[live] team whose student played network rep (receives a commission whenever the rate differs from base, either direction)")
 
     ap.add_argument("--take-base", action="store_true", help="[algorithmic] take the market-tier base exactly, no negotiation")
     ap.add_argument("--negotiate", action="store_true", help="[algorithmic] resolve the rate via leverage formula")
@@ -132,14 +139,15 @@ def main():
 
         commission = 0
         rep_team_name = None
-        if args.final_revenue > base_revenue:
+        if args.final_revenue != base_revenue:
+            direction = "above" if args.final_revenue > base_revenue else "below"
             if args.network_rep_team is None:
-                print(f"ERROR: negotiated rate (${args.final_revenue:,}) is above base (${base_revenue:,}), "
-                      f"so --network-rep-team is required to credit the ${args.final_revenue - base_revenue:,} commission."); return
+                print(f"ERROR: negotiated rate (${args.final_revenue:,}) is {direction} base (${base_revenue:,}), "
+                      f"so --network-rep-team is required to credit the ${abs(args.final_revenue - base_revenue):,} commission."); return
             rep_team_name = next((t["name"] for t in config["teams"] if t["team_id"] == args.network_rep_team), None)
             if rep_team_name is None:
                 print(f"ERROR: no team with id {args.network_rep_team}"); return
-            commission = args.final_revenue - base_revenue
+            commission = abs(args.final_revenue - base_revenue)
 
         assignment["negotiated"] = True
         assignment["mode"] = "live"
@@ -151,16 +159,17 @@ def main():
               f"(base ${base_revenue:,}). Still paid out at the Round 3 split, plus Star Power bonus if earned then.")
 
         if commission > 0:
+            direction = "above" if args.final_revenue > base_revenue else "below"
             rep_key = str(args.network_rep_team)
             rep_fin = finances["teams"].setdefault(rep_key, {})
             rep_fin.setdefault("tv_commissions_earned", []).append({
-                "negotiating_team": team_name, "commission_amount": commission,
+                "negotiating_team": team_name, "commission_amount": commission, "direction": direction,
             })
             rep_fin["local_tv_revenue"] = rep_fin.get("local_tv_revenue", 0) + commission
             finances["teams"][rep_key] = rep_fin
             save_json("team_finances.json", finances)
             print(f"{rep_team_name} earns a ${commission:,} commission for playing the network rep "
-                  f"(rate closed ${commission:,} above base) -- booked now, not at the Round 3 split.")
+                  f"(rate closed ${commission:,} {direction} base) -- booked now, not at the Round 3 split.")
 
     # ---------------- ALGORITHMIC MODE ----------------
     else:

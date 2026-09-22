@@ -11,9 +11,17 @@ LIVE MODE (the normal path for the in-class negotiation exercise):
 
   This records $3.8M for Team 3 (Nike lists at $3.5M base, so the
   $300,000 overage is ALSO credited as commission revenue to Team 17,
-  whoever played the Nike rep in that negotiation). If the negotiated
-  revenue is at or below base, no commission is credited to anyone --
-  upside-only, never a penalty for playing sponsor.
+  whoever played the Nike rep in that negotiation) -- a good deal for
+  the TEAM, rewarded for the rep closing a bigger deal.
+
+  The mirror case is rewarded too: if the rep instead talks the team
+  down BELOW base (a good deal for the SPONSOR), the same size
+  commission -- the savings, base minus final_revenue -- is credited
+  to the rep's team instead. Either direction requires
+  --sponsor-rep-team (only an exact match to base needs no rep, since
+  nobody negotiated anything). The commission is never a deduction
+  from the signing team's own booked revenue -- always additive, on
+  top of whatever they recorded, in both directions.
 
 ALGORITHMIC MODE (practice / fallback for a category that never got a
 live negotiation -- no human played sponsor, so no commission applies):
@@ -94,7 +102,7 @@ def main():
     ap.add_argument("--live", action="store_true", help="record an already-negotiated live deal")
     ap.add_argument("--final-revenue", type=int, help="[live] the exact agreed revenue")
     ap.add_argument("--final-clause", choices=["strict", "standard", "loose", "none"], help="[live] the exact agreed clause")
-    ap.add_argument("--sponsor-rep-team", type=int, help="[live] team whose student played sponsor rep (receives commission if revenue > base)")
+    ap.add_argument("--sponsor-rep-team", type=int, help="[live] team whose student played sponsor rep (receives a commission whenever revenue differs from base, either direction)")
 
     ap.add_argument("--take-base", action="store_true", help="[algorithmic] take listed terms exactly, no negotiation")
     ap.add_argument("--negotiate", action="store_true", help="[algorithmic] resolve revenue via leverage formula")
@@ -136,14 +144,15 @@ def main():
 
         commission = 0
         rep_team_name = None
-        if args.final_revenue > brand["base_revenue"]:
+        if args.final_revenue != brand["base_revenue"]:
+            direction = "above" if args.final_revenue > brand["base_revenue"] else "below"
             if args.sponsor_rep_team is None:
-                print(f"ERROR: final revenue (${args.final_revenue:,}) is above base (${brand['base_revenue']:,}), "
-                      f"so --sponsor-rep-team is required to credit the ${args.final_revenue - brand['base_revenue']:,} commission."); return
+                print(f"ERROR: final revenue (${args.final_revenue:,}) is {direction} base (${brand['base_revenue']:,}), "
+                      f"so --sponsor-rep-team is required to credit the ${abs(args.final_revenue - brand['base_revenue']):,} commission."); return
             rep_team_name = next((t["name"] for t in config["teams"] if t["team_id"] == args.sponsor_rep_team), None)
             if rep_team_name is None:
                 print(f"ERROR: no team with id {args.sponsor_rep_team}"); return
-            commission = args.final_revenue - brand["base_revenue"]
+            commission = abs(args.final_revenue - brand["base_revenue"])
 
         owned.append({
             "category": category, "sponsor": brand["name"], "mode": "live",
@@ -156,14 +165,15 @@ def main():
         print(f"\n{team_name} signs {brand['name']} ({category}): ${args.final_revenue:,}/season, {args.final_clause} clause.")
 
         if commission > 0:
+            direction = "above" if args.final_revenue > brand["base_revenue"] else "below"
             rep_key = str(args.sponsor_rep_team)
             finances["teams"].setdefault(rep_key, {}).setdefault("sponsors_owned", [])
             finances["teams"][rep_key].setdefault("commissions_earned", []).append({
                 "as_sponsor_for": brand["name"], "negotiating_team": team_name,
-                "category": category, "commission_amount": commission,
+                "category": category, "commission_amount": commission, "direction": direction,
             })
             finances["teams"][rep_key]["sponsorship_revenue"] = finances["teams"][rep_key].get("sponsorship_revenue", 0) + commission
-            print(f"{rep_team_name} earns a ${commission:,} commission for playing {brand['name']}'s rep (deal closed ${commission:,} above base).")
+            print(f"{rep_team_name} earns a ${commission:,} commission for playing {brand['name']}'s rep (deal closed ${commission:,} {direction} base).")
 
         save_json("team_finances.json", finances)
 

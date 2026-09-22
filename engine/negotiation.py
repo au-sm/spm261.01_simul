@@ -22,16 +22,29 @@ choice:
                   land BELOW base -- negotiating is not risk-free the
                   way taking "base" is.
 
-THE COMMISSION (the reason playing sponsor rep isn't just charity):
-if a negotiated deal lands ABOVE base, the OVERAGE -- final_revenue
-minus base_revenue -- is ALSO credited as bonus revenue to whichever
-team's student played the sponsor rep in that negotiation. Landing
-AT or BELOW base earns the rep's team nothing, but never costs them
-anything either (upside-only, like a real sales commission: you're
-never paid a negative commission for a deal that undersells).
+THE COMMISSION (the reason playing sponsor rep isn't just charity),
+LIVE MODE ONLY -- this crediting happens in resolve_sponsorship_pick.py
+/ resolve_local_tv_pick.py's --live branch, not in resolve_revenue()
+below (which only ever returns an above-base commission, since it's
+ALGORITHMIC mode's function and algorithmic mode has no live rep to
+credit anything to anyway):
+
+Whenever a negotiated deal lands away from base -- in EITHER direction
+-- that gap is ALSO credited as bonus revenue to whichever team's
+student played the sponsor rep in that negotiation. Land ABOVE base
+(good for the signing team) and the OVERAGE goes to the rep's team.
+Land BELOW base (good for the sponsor) and the SAVINGS goes to the
+rep's team instead, same size commission, mirrored direction. Landing
+EXACTLY AT base earns nobody a commission, since nothing was actually
+negotiated. Never a deduction from the signing team's own booked
+revenue, either way -- always additive, like a real sales commission
+that never goes negative.
 Concretely: Nike lists at $3.5M; a deal closes at $3.8M; the signing
 team records $3.8M revenue, and the student who played the Nike rep
-records a $0.3M commission for THEIR OWN team.
+records a $0.3M commission for THEIR OWN team. Or: the rep talks the
+team down to $3.2M; the signing team records $3.2M (a worse deal for
+them), and the rep's team still records a $0.3M commission -- for
+having negotiated a good outcome for the sponsor.
 
 CLAUSE remains its own, separate negotiation -- unaffected by the above.
 Ask "looser_clause" at Modest/Bold/Very Bold intensity, gated by the
