@@ -21,6 +21,7 @@ GH_BASE = "https://au-sm.github.io/spm261.01_simul"
 PAGES = [
     ("home", "Home", f"{GH_BASE}/"),
     ("dashboard", "Dashboard", f"{GH_BASE}/dashboard/"),
+    ("draftboard", "Draft Board", f"{GH_BASE}/draftboard/"),
     ("budget", "Budget Dashboard", f"{GH_BASE}/budget/"),
     ("rulebook", "Rulebook", f"{GH_BASE}/rulebook/"),
     ("sponsorship", "Sponsorship Marketplace", f"{GH_BASE}/sponsorship/"),

@@ -33,6 +33,7 @@ def money(n):
 
 CARD_COPY = {
     "dashboard": ("Dashboard", "Standings, rosters, salary caps, and this week's Player Condition report — the live state of the league."),
+    "draftboard": ("Draft Board", "The full undrafted player pool — search, filter, and sort all 399 players before you rank your own board."),
     "budget": ("Budget Dashboard", "Draft money left, and cash on hand from ticket, sponsorship, and TV revenue — one team's whole financial picture."),
     "rulebook": ("Rulebook", "Every rule, every formula, every point your grade is built from — start here if you're new."),
     "sponsorship": ("Sponsorship Marketplace", "Open brand slots, live deal status, and a negotiation simulator to rehearse your ask before your live turn."),

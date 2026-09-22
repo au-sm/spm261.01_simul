@@ -512,40 +512,6 @@ footer{{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 60px;color
 
   <div class="layout">
     <main>
-      <section id="draft-board">
-        <div class="section-head">
-          <h2>Draft Board</h2>
-          <span class="section-note">{len(draft_pool_sorted)} available &middot; click a column to sort</span>
-        </div>
-        <div class="filter-row">
-          <button class="filter-btn active" data-pos="ALL">All</button>
-          <button class="filter-btn" data-pos="GK">GK</button>
-          <button class="filter-btn" data-pos="DF">DF</button>
-          <button class="filter-btn" data-pos="MF">MF</button>
-          <button class="filter-btn" data-pos="FW">FW</button>
-        </div>
-        <div class="table-scroll">
-          <table id="draft-table">
-            <thead>
-              <tr>
-                <th data-key="position">Pos</th>
-                <th data-key="player_id" class="num">ID</th>
-                <th data-key="name">Player</th>
-                <th data-key="age" class="num">Age</th>
-                <th data-key="att" class="num">ATT</th>
-                <th data-key="def" class="num">DEF</th>
-                <th data-key="pace" class="num">PAC</th>
-                <th data-key="phy" class="num">PHY</th>
-                <th data-key="ovr" class="num">OVR</th>
-                <th data-key="star_power" class="num">Star</th>
-                <th data-key="salary" class="num">Salary</th>
-              </tr>
-            </thead>
-            <tbody id="draft-body"></tbody>
-          </table>
-        </div>
-      </section>
-
       <section id="standings">
         <div class="section-head">
           <h2>Standings</h2>
@@ -1036,71 +1002,6 @@ function initBuilder() {{
 initBuilder();
 
 const PLAYERS = {players_json};
-let sortKey = "ovr", sortDir = -1, posFilter = "ALL";
-
-function fmtSalary(n) {{
-  if (n >= 1000000) {{
-    let v = (n/1000000).toFixed(1);
-    if (v.endsWith(".0")) v = v.slice(0,-2);
-    return "$"+v+"M";
-  }}
-  return "$"+Math.round(n/1000)+"K";
-}}
-
-function starBar(v) {{
-  return `${{v}}<span class="star-bar"><span class="star-bar-fill" style="width:${{v}}%"></span></span>`;
-}}
-
-function render() {{
-  let rows = PLAYERS.filter(p => posFilter === "ALL" || p.position === posFilter);
-  rows.sort((a,b) => {{
-    // player_id is a string (preserves exact CSV/players.csv identity), so
-    // a plain > / < comparison would sort it alphabetically ("1","10","100"
-    // before "2") -- coerce to a number for this one column only, every
-    // other sortable column is already numeric or a name string.
-    let av = a[sortKey], bv = b[sortKey];
-    if (sortKey === "player_id") {{ av = Number(av); bv = Number(bv); }}
-    return (av > bv ? 1 : av < bv ? -1 : 0) * sortDir;
-  }});
-  const body = document.getElementById("draft-body");
-  if (rows.length === 0) {{
-    body.innerHTML = '<tr class="empty-row"><td colspan="11">No players match this filter</td></tr>';
-    return;
-  }}
-  body.innerHTML = rows.map(p => `
-    <tr>
-      <td class="pos pos-${{p.position}}">${{p.position}}</td>
-      <td class="num mono">${{p.player_id}}</td>
-      <td>${{p.name}}</td>
-      <td class="num">${{p.age}}</td>
-      <td class="num">${{p.att}}</td>
-      <td class="num">${{p.def}}</td>
-      <td class="num">${{p.pace}}</td>
-      <td class="num">${{p.phy}}</td>
-      <td class="num">${{p.ovr}}</td>
-      <td class="num">${{starBar(p.star_power)}}</td>
-      <td class="num">${{fmtSalary(p.salary)}}</td>
-    </tr>`).join("");
-}}
-
-document.querySelectorAll(".filter-btn").forEach(btn => {{
-  btn.addEventListener("click", () => {{
-    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    posFilter = btn.dataset.pos;
-    render();
-  }});
-}});
-
-document.querySelectorAll("#draft-table thead th[data-key]").forEach(th => {{
-  th.addEventListener("click", () => {{
-    const key = th.dataset.key;
-    if (sortKey === key) {{ sortDir *= -1; }} else {{ sortKey = key; sortDir = -1; }}
-    render();
-  }});
-}});
-
-render();
 </script>
 </body>
 </html>'''
