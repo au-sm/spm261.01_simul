@@ -59,6 +59,10 @@ ul.board{margin-top:10px;}
 .results button,.board button{font-family:"IBM Plex Mono",monospace;font-size:10.5px;background:transparent;border:1px solid var(--line);border-radius:2px;padding:3px 7px;cursor:pointer;color:var(--ink);}
 .empty{color:var(--muted);font-size:13px;padding:14px;text-align:center;}
 #db-count{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);margin:8px 0;}
+.tier-note{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:8px 10px;margin:0 0 12px;}
+.lineup-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:10px;}
+.slot-group h4{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin:0 0 6px;text-transform:uppercase;}
+.slot-group select{margin-bottom:6px;}
 </style>
 </head>
 <body>
@@ -102,6 +106,88 @@ ul.board{margin-top:10px;}
     <ul class="board" id="db-board"></ul>
     <button class="btn" id="db-submit" style="margin-top:14px;">Submit Draft Board</button>
     <p class="msg" id="db-msg"></p>
+  </div>
+
+  <div class="card">
+    <h2>Local TV Rate</h2>
+    <p class="sub">One-time -- right after Draft Day, in class against a rotating network rep. Take Base exactly, or record what you actually negotiated.</p>
+    <div class="grid">
+      <div class="field"><label for="tv-team">Team</label><select id="tv-team" class="team-select"></select></div>
+      <div class="field"><label for="tv-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="tv-pin" placeholder="4-digit PIN"></div>
+    </div>
+    <p class="tier-note" id="tv-tier-note"></p>
+    <div class="grid">
+      <div class="field"><label for="tv-mode">Result</label>
+        <select id="tv-mode">
+          <option value="base">Take Base rate exactly</option>
+          <option value="negotiate">Negotiated a different rate</option>
+        </select>
+      </div>
+      <div class="field" id="tv-revenue-field" hidden><label for="tv-revenue">Final agreed rate ($/season)</label><input type="number" id="tv-revenue" placeholder="e.g. 1320000"></div>
+      <div class="field" id="tv-rep-field" hidden><label for="tv-rep">Network rep (if rate is ABOVE base)</label><select id="tv-rep" class="team-select"></select></div>
+    </div>
+    <button class="btn" id="tv-submit">Submit Local TV Rate</button>
+    <p class="msg" id="tv-msg"></p>
+  </div>
+
+  <div class="card">
+    <h2>Sponsorship Deal</h2>
+    <p class="sub">One brand per category, 6 categories required. Take Base exactly, or record what you actually negotiated.</p>
+    <div class="grid">
+      <div class="field"><label for="sp-team">Team</label><select id="sp-team" class="team-select"></select></div>
+      <div class="field"><label for="sp-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="sp-pin" placeholder="4-digit PIN"></div>
+    </div>
+    <p class="tier-note" id="sp-owned-note"></p>
+    <div class="grid">
+      <div class="field"><label for="sp-category">Category</label><select id="sp-category"></select></div>
+      <div class="field"><label for="sp-brand">Brand</label><select id="sp-brand"></select></div>
+      <div class="field"><label for="sp-mode">Result</label>
+        <select id="sp-mode">
+          <option value="base">Take Base terms exactly</option>
+          <option value="negotiate">Negotiated different terms</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid" id="sp-negotiate-fields" hidden>
+      <div class="field"><label for="sp-revenue">Final agreed revenue ($/season)</label><input type="number" id="sp-revenue" placeholder="e.g. 3800000"></div>
+      <div class="field"><label for="sp-clause">Final agreed clause</label>
+        <select id="sp-clause"><option value="strict">Strict</option><option value="standard">Standard</option><option value="loose">Loose</option><option value="none">None</option></select>
+      </div>
+      <div class="field"><label for="sp-rep">Sponsor rep (if revenue is ABOVE base)</label><select id="sp-rep" class="team-select"></select></div>
+    </div>
+    <button class="btn" id="sp-submit">Submit Sponsorship Deal</button>
+    <p class="msg" id="sp-msg"></p>
+  </div>
+
+  <div class="card">
+    <h2>Weekly Lineup</h2>
+    <p class="sub">Submit every round before the deadline -- resubmitting before the deadline replaces your earlier answer. Requires a drafted roster.</p>
+    <div class="grid">
+      <div class="field"><label for="lu-team">Team</label><select id="lu-team" class="team-select"></select></div>
+      <div class="field"><label for="lu-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="lu-pin" placeholder="4-digit PIN"></div>
+      <div class="field"><label for="lu-round">Round number</label><input type="number" id="lu-round" min="1" max="17" placeholder="e.g. 1"></div>
+    </div>
+    <div class="grid">
+      <div class="field"><label for="lu-formation">Formation</label>
+        <select id="lu-formation">
+          <option>4-4-2</option><option>4-3-3</option><option>3-5-2</option><option>5-3-2</option><option>4-5-1</option>
+        </select>
+      </div>
+      <div class="field"><label for="lu-strategy">Strategy</label>
+        <select id="lu-strategy"><option>Attacking</option><option selected>Balanced</option><option>Defensive</option></select>
+      </div>
+      <div class="field"><label for="lu-price">Ticket price (home matches only)</label>
+        <select id="lu-price"><option>Budget</option><option selected>Standard</option><option>Premium</option></select>
+      </div>
+    </div>
+    <p class="tier-note" id="lu-roster-note"></p>
+    <div id="lu-slots"></div>
+    <div class="field" style="margin-top:10px;">
+      <label for="lu-rationale">Decision rationale (2-4 sentences)</label>
+      <textarea id="lu-rationale" rows="3" placeholder="Why this formation, strategy, and lineup against this week's opponent?" style="width:100%;font-family:'Source Serif 4',serif;font-size:14px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:8px 10px;"></textarea>
+    </div>
+    <button class="btn" id="lu-submit" style="margin-top:12px;">Submit Weekly Lineup</button>
+    <p class="msg" id="lu-msg"></p>
   </div>
 </div>
 

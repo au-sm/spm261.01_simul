@@ -109,6 +109,30 @@ def write_lineup_csv(lineups, round_num, team_name_by_id, team_pin_by_id):
     return out_path, len(rows)
 
 
+def unapplied_sponsorship_deals(sheet_deals):
+    """Sheet rows not yet reflected in team_finances.json's sponsors_owned
+    -- safe to apply via resolve_sponsorship_pick.py. A team can only hold
+    one brand per category (the backend already enforces this at
+    submission time), so "already has this category" is enough to know
+    a given row was already applied."""
+    finances = load_json("team_finances.json")
+    out = []
+    for d in sheet_deals:
+        owned = finances["teams"].get(str(d["team_id"]), {}).get("sponsors_owned", [])
+        if not any(o["category"] == d["category"] for o in owned):
+            out.append(d)
+    return out
+
+
+def unapplied_local_tv_deals(sheet_deals):
+    """Sheet rows not yet reflected in data/local_tv_deals.json's
+    per-team 'negotiated' flag -- a Local TV rate is one-time, so this
+    is a clean not-yet-applied check."""
+    ltv = load_json("local_tv_deals.json")
+    negotiated_ids = {str(a["team_id"]) for a in ltv["assignments"] if a.get("negotiated")}
+    return [d for d in sheet_deals if str(d["team_id"]) not in negotiated_ids]
+
+
 if __name__ == "__main__":
     export = fetch_admin_export()
     sheet_teams = export["teams"]

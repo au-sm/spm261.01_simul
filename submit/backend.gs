@@ -18,6 +18,10 @@
  *   DraftBoards  -- team_id | player_ids_json | submitted_at
  *   Lineups      -- team_id | round | formation | strategy | gk | df | mf | fw
  *                    | ticket_price | rationale | submitted_at
+ *   SponsorshipDeals -- team_id | category | brand | final_revenue | final_clause
+ *                    | rep_team_id | submitted_at
+ *   LocalTVDeals -- team_id | final_revenue | rep_team_id | submitted_at
+ *                    (one row per team, ever -- a Local TV rate is negotiated once)
  *
  * ADMIN EXPORT (?admin_key=...): the scheduled GitHub Actions job (see
  * .github/workflows/auto-resolve.yml) pulls Teams/DraftBoards/Lineups
@@ -52,6 +56,53 @@ var SEED_TEAMS = [
   {id:17,name:"Team 18",owner:"Andre Yared",pin:"4936"},
 ];
 
+// Sponsorship catalog -- read-only reference data, matches
+// data/deals.json's sponsorship_categories exactly (kept in sync by
+// hand; if the catalog ever changes there, regenerate this array the
+// same way SEED_TEAMS was built). Used to validate slot availability
+// and compute commissions server-side, same as engine/resolve_sponsorship_pick.py.
+var SPONSOR_CATALOG = [
+  {category:"Kit / Apparel",name:"Nike",base_revenue:3500000,base_clause:"strict",qty:4},
+  {category:"Kit / Apparel",name:"Adidas",base_revenue:3000000,base_clause:"strict",qty:4},
+  {category:"Kit / Apparel",name:"Under Armour",base_revenue:2200000,base_clause:"standard",qty:5},
+  {category:"Kit / Apparel",name:"Puma",base_revenue:1800000,base_clause:"standard",qty:5},
+  {category:"Kit / Apparel",name:"New Balance",base_revenue:1500000,base_clause:"loose",qty:6},
+  {category:"Beverage",name:"Red Bull",base_revenue:2800000,base_clause:"strict",qty:3},
+  {category:"Beverage",name:"Gatorade",base_revenue:2000000,base_clause:"standard",qty:5},
+  {category:"Beverage",name:"Coca-Cola",base_revenue:1800000,base_clause:"standard",qty:5},
+  {category:"Beverage",name:"Pepsi",base_revenue:1600000,base_clause:"standard",qty:5},
+  {category:"Beverage",name:"Monster Energy",base_revenue:1200000,base_clause:"loose",qty:6},
+  {category:"Financial Services",name:"Visa",base_revenue:2500000,base_clause:"strict",qty:4},
+  {category:"Financial Services",name:"Mastercard",base_revenue:2200000,base_clause:"strict",qty:4},
+  {category:"Financial Services",name:"American Express",base_revenue:1800000,base_clause:"standard",qty:5},
+  {category:"Financial Services",name:"PayPal",base_revenue:1000000,base_clause:"loose",qty:7},
+  {category:"Airline",name:"Emirates",base_revenue:3000000,base_clause:"strict",qty:3},
+  {category:"Airline",name:"Qatar Airways",base_revenue:2400000,base_clause:"strict",qty:4},
+  {category:"Airline",name:"Delta",base_revenue:1600000,base_clause:"standard",qty:6},
+  {category:"Airline",name:"American Airlines",base_revenue:1300000,base_clause:"loose",qty:7},
+  {category:"Automotive",name:"BMW",base_revenue:2600000,base_clause:"strict",qty:3},
+  {category:"Automotive",name:"Toyota",base_revenue:2000000,base_clause:"standard",qty:5},
+  {category:"Automotive",name:"Ford",base_revenue:1400000,base_clause:"standard",qty:6},
+  {category:"Automotive",name:"Hyundai",base_revenue:1000000,base_clause:"loose",qty:6},
+  {category:"Technology",name:"Samsung",base_revenue:2400000,base_clause:"strict",qty:4},
+  {category:"Technology",name:"Sony",base_revenue:2000000,base_clause:"standard",qty:5},
+  {category:"Technology",name:"AT&T",base_revenue:1500000,base_clause:"standard",qty:5},
+  {category:"Technology",name:"Verizon",base_revenue:1100000,base_clause:"loose",qty:6},
+];
+
+// Local TV market-tier base rates per team, matches data/local_tv_deals.json.
+var LOCAL_TV_BASE = {
+  "0":{tier:"Major Market",base_revenue:1200000}, "1":{tier:"Major Market",base_revenue:1200000},
+  "2":{tier:"Mid Market",base_revenue:700000}, "3":{tier:"Small Market",base_revenue:500000},
+  "4":{tier:"Mid Market",base_revenue:700000}, "5":{tier:"Small Market",base_revenue:500000},
+  "6":{tier:"Small Market",base_revenue:500000}, "7":{tier:"Mid Market",base_revenue:700000},
+  "8":{tier:"Small Market",base_revenue:500000}, "9":{tier:"Major Market",base_revenue:1200000},
+  "10":{tier:"Major Market",base_revenue:1200000}, "11":{tier:"Small Market",base_revenue:500000},
+  "12":{tier:"Major Market",base_revenue:1200000}, "13":{tier:"Mid Market",base_revenue:700000},
+  "14":{tier:"Major Market",base_revenue:1200000}, "15":{tier:"Mid Market",base_revenue:700000},
+  "16":{tier:"Small Market",base_revenue:500000}, "17":{tier:"Mid Market",base_revenue:700000},
+};
+
 function ensureSheets_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -77,11 +128,24 @@ function ensureSheets_() {
                         "ticket_price", "rationale", "submitted_at"]);
   }
 
+  var sponsorships = ss.getSheetByName("SponsorshipDeals");
+  if (!sponsorships) {
+    sponsorships = ss.insertSheet("SponsorshipDeals");
+    sponsorships.appendRow(["team_id", "category", "brand", "final_revenue", "final_clause",
+                             "rep_team_id", "submitted_at"]);
+  }
+
+  var localTv = ss.getSheetByName("LocalTVDeals");
+  if (!localTv) {
+    localTv = ss.insertSheet("LocalTVDeals");
+    localTv.appendRow(["team_id", "final_revenue", "rep_team_id", "submitted_at"]);
+  }
+
   // remove the default blank "Sheet1" left by spreadsheet creation, if still present and empty
   var sheet1 = ss.getSheetByName("Sheet1");
   if (sheet1 && sheet1.getLastRow() === 0) ss.deleteSheet(sheet1);
 
-  return { teams: teams, boards: boards, lineups: lineups };
+  return { teams: teams, boards: boards, lineups: lineups, sponsorships: sponsorships, localTv: localTv };
 }
 
 function readTeams_(teamsSheet) {
@@ -142,6 +206,33 @@ function readLineups_(lineupsSheet) {
   return out;
 }
 
+function readSponsorshipDeals_(sheet) {
+  var rows = sheet.getDataRange().getValues();
+  var out = [];
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i][0] === "" || rows[i][0] == null) continue;
+    out.push({
+      team_id: rows[i][0], category: rows[i][1], brand: rows[i][2],
+      final_revenue: rows[i][3], final_clause: rows[i][4],
+      rep_team_id: rows[i][5], submitted_at: rows[i][6],
+    });
+  }
+  return out;
+}
+
+function readLocalTVDeals_(sheet) {
+  var rows = sheet.getDataRange().getValues();
+  var out = [];
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i][0] === "" || rows[i][0] == null) continue;
+    out.push({
+      team_id: rows[i][0], final_revenue: rows[i][1],
+      rep_team_id: rows[i][2], submitted_at: rows[i][3],
+    });
+  }
+  return out;
+}
+
 function doGet(e) {
   var sheets = ensureSheets_();
   var params = (e && e.parameter) || {};
@@ -152,6 +243,24 @@ function doGet(e) {
       teams: readTeams_(sheets.teams), // pins included -- admin-only export
       draft_boards: readDraftBoards_(sheets.boards),
       lineups: readLineups_(sheets.lineups),
+      sponsorship_deals: readSponsorshipDeals_(sheets.sponsorships),
+      local_tv_deals: readLocalTVDeals_(sheets.localTv),
+    });
+  }
+
+  // public, non-admin reads used by the Submit page to show live slot
+  // availability without needing the admin key
+  if (params.catalog === "1") {
+    return jsonOut_({
+      ok: true,
+      sponsor_catalog: SPONSOR_CATALOG,
+      local_tv_base: LOCAL_TV_BASE,
+      sponsorship_deals: readSponsorshipDeals_(sheets.sponsorships).map(function (d) {
+        return { team_id: d.team_id, category: d.category, brand: d.brand }; // no revenue/clause -- not other teams' business
+      }),
+      local_tv_deals: readLocalTVDeals_(sheets.localTv).map(function (d) {
+        return { team_id: d.team_id }; // just "has this team negotiated yet"
+      }),
     });
   }
 
@@ -229,6 +338,89 @@ function doPost(e) {
       sheets.lineups.appendRow(rowData2);
     }
     return jsonOut_({ ok: true, team_id: body.team_id, round: body.round });
+  }
+
+  if (body.type === "sponsorship_deal") {
+    var brand = null;
+    for (var bi = 0; bi < SPONSOR_CATALOG.length; bi++) {
+      if (SPONSOR_CATALOG[bi].name === body.brand) { brand = SPONSOR_CATALOG[bi]; break; }
+    }
+    if (!brand) return jsonOut_({ ok: false, error: "unknown brand: " + body.brand });
+
+    var existingDeals = readSponsorshipDeals_(sheets.sponsorships);
+    var alreadyInCategory = existingDeals.some(function (d) {
+      return String(d.team_id) === String(body.team_id) && d.category === brand.category;
+    });
+    if (alreadyInCategory) {
+      return jsonOut_({ ok: false, error: "This team already has a " + brand.category + " sponsor. One brand per category." });
+    }
+
+    var slotsTaken = existingDeals.filter(function (d) { return d.brand === brand.name; }).length;
+    if (slotsTaken >= brand.qty) {
+      return jsonOut_({ ok: false, error: brand.name + " is sold out (" + brand.qty + "/" + brand.qty + " slots taken league-wide). Pick a different " + brand.category + " brand." });
+    }
+
+    var finalRevenue, finalClause;
+    if (body.mode === "base") {
+      finalRevenue = brand.base_revenue;
+      finalClause = brand.base_clause;
+    } else if (body.mode === "negotiate") {
+      finalRevenue = Number(body.final_revenue);
+      finalClause = body.final_clause;
+      if (!finalRevenue || !finalClause) {
+        return jsonOut_({ ok: false, error: "Negotiated deals need both final_revenue and final_clause." });
+      }
+    } else {
+      return jsonOut_({ ok: false, error: "mode must be 'base' or 'negotiate'" });
+    }
+
+    var repTeamId = null;
+    if (finalRevenue > brand.base_revenue) {
+      if (body.rep_team_id === undefined || body.rep_team_id === null || body.rep_team_id === "") {
+        return jsonOut_({ ok: false, error: "Revenue above base ($" + brand.base_revenue + ") requires rep_team_id to credit the commission." });
+      }
+      repTeamId = body.rep_team_id;
+    }
+
+    sheets.sponsorships.appendRow([body.team_id, brand.category, brand.name, finalRevenue, finalClause, repTeamId, now]);
+    return jsonOut_({
+      ok: true, team_id: body.team_id, category: brand.category, brand: brand.name,
+      final_revenue: finalRevenue, final_clause: finalClause,
+      commission: repTeamId ? (finalRevenue - brand.base_revenue) : 0,
+    });
+  }
+
+  if (body.type === "local_tv_deal") {
+    var tvBase = LOCAL_TV_BASE[String(body.team_id)];
+    if (!tvBase) return jsonOut_({ ok: false, error: "no market tier on file for this team" });
+
+    var existingTv = readLocalTVDeals_(sheets.localTv);
+    var already = existingTv.some(function (d) { return String(d.team_id) === String(body.team_id); });
+    if (already) return jsonOut_({ ok: false, error: "This team's Local TV rate is already negotiated -- it's a one-time deal." });
+
+    var tvFinalRevenue;
+    if (body.mode === "base") {
+      tvFinalRevenue = tvBase.base_revenue;
+    } else if (body.mode === "negotiate") {
+      tvFinalRevenue = Number(body.final_revenue);
+      if (!tvFinalRevenue) return jsonOut_({ ok: false, error: "Negotiated deals need final_revenue." });
+    } else {
+      return jsonOut_({ ok: false, error: "mode must be 'base' or 'negotiate'" });
+    }
+
+    var tvRepTeamId = null;
+    if (tvFinalRevenue > tvBase.base_revenue) {
+      if (body.rep_team_id === undefined || body.rep_team_id === null || body.rep_team_id === "") {
+        return jsonOut_({ ok: false, error: "Rate above base ($" + tvBase.base_revenue + ") requires rep_team_id to credit the commission." });
+      }
+      tvRepTeamId = body.rep_team_id;
+    }
+
+    sheets.localTv.appendRow([body.team_id, tvFinalRevenue, tvRepTeamId, now]);
+    return jsonOut_({
+      ok: true, team_id: body.team_id, final_revenue: tvFinalRevenue,
+      commission: tvRepTeamId ? (tvFinalRevenue - tvBase.base_revenue) : 0,
+    });
   }
 
   return jsonOut_({ ok: false, error: "unknown submission type: " + body.type });

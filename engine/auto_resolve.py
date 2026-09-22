@@ -62,6 +62,8 @@ def regenerate_all_pages():
     run(["python3", "engine/render_tv_site.py"])
     run(["python3", "engine/render_attendance_site.py"])
     run(["python3", "engine/render_matchday_replay.py"])
+    run(["python3", "engine/render_draftboard_site.py"])
+    run(["python3", "engine/generate_players_json.py"])
     # dashboard has no __main__ CLI entry -- render inline exactly like every
     # manual regenerate this project has done all along
     script = '''
@@ -99,6 +101,7 @@ print("dashboard OK")
         "tv-site/index.html": "tv/index.html",
         "attendance-site/index.html": "attendance/index.html",
         "matchday-replay/index.html": "matchday-replay/index.html",
+        "draftboard-site/index.html": "draftboard/index.html",
     }
     for src, dst in mapping.items():
         src_path = os.path.join(BASE, src)
@@ -163,6 +166,50 @@ def resolve_round_now(round_num, team_name_by_id, team_pin_by_id, lineups):
     return f"resolved round {round_num}"
 
 
+def resolve_sponsorship_deals(sheet_sponsorship_deals):
+    """Applies every Sheet sponsorship_deal row not yet reflected in
+    team_finances.json's sponsors_owned. Sponsorship can be negotiated any
+    time after the draft (no match-day gate the way round resolution has),
+    so this runs unconditionally every cycle once a team has a roster.
+    The Sheet already resolved base-vs-negotiate into concrete final_revenue
+    / final_clause numbers at submission time, so this only ever needs
+    --live -- there is no separate base/negotiate branch here."""
+    actions = []
+    for d in pull_submissions.unapplied_sponsorship_deals(sheet_sponsorship_deals):
+        print(f"\n=== Applying sponsorship deal: team {d['team_id']} / {d['brand']} ===")
+        cmd = [
+            "python3", "engine/resolve_sponsorship_pick.py",
+            "--team", str(d["team_id"]), "--brand", d["brand"],
+            "--live", "--final-revenue", str(int(d["final_revenue"])),
+            "--final-clause", d["final_clause"],
+        ]
+        if d.get("rep_team_id") not in (None, "", "null"):
+            cmd += ["--sponsor-rep-team", str(d["rep_team_id"])]
+        run(cmd)
+        actions.append(f"sponsorship: team {d['team_id']} signed {d['brand']} ({d['category']})")
+    return actions
+
+
+def resolve_local_tv_deals(sheet_local_tv_deals):
+    """Applies every Sheet local_tv_deal row not yet reflected as
+    'negotiated' in data/local_tv_deals.json. Same no-gate reasoning as
+    resolve_sponsorship_deals -- runs unconditionally once a team has a
+    roster, since Local TV negotiation isn't tied to a round date either."""
+    actions = []
+    for d in pull_submissions.unapplied_local_tv_deals(sheet_local_tv_deals):
+        print(f"\n=== Applying local TV deal: team {d['team_id']} ===")
+        cmd = [
+            "python3", "engine/resolve_local_tv_pick.py",
+            "--team", str(d["team_id"]), "--live",
+            "--final-revenue", str(int(d["final_revenue"])),
+        ]
+        if d.get("rep_team_id") not in (None, "", "null"):
+            cmd += ["--network-rep-team", str(d["rep_team_id"])]
+        run(cmd)
+        actions.append(f"local TV: team {d['team_id']} negotiated a rate")
+    return actions
+
+
 def main():
     print(f"auto_resolve.py run at {datetime.datetime.utcnow().isoformat()}Z")
     export = pull_submissions.fetch_admin_export()
@@ -207,6 +254,14 @@ def main():
                     break
                 actions.append(resolve_round_now(next_round, team_name_by_id, team_pin_by_id, export["lineups"]))
                 config = load_json("league_config.json")
+
+        # Sponsorship and Local TV negotiation aren't tied to a round date --
+        # a team can submit either any time after it has a drafted roster --
+        # so these run unconditionally every cycle rather than being gated
+        # by today's date the way draft/round resolution are.
+        if config["phase"] != "pre-draft":
+            actions.extend(resolve_sponsorship_deals(export.get("sponsorship_deals", [])))
+            actions.extend(resolve_local_tv_deals(export.get("local_tv_deals", [])))
 
         if actions:
             regenerate_all_pages()
