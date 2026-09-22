@@ -3,14 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SPM261.01 Soccer League — Submit</title>
+<title>SPM261.01 Soccer League</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
 :root{
   --paper:#eef2ea; --ink:#16201a; --muted:#5b6b5e; --line:#d6decd;
   --accent:#b8811f; --accent-ink:#3a2a08; --pitch:#2f5233; --pitch-ink:#eef2ea;
   --navy:#223a5e; --navy-ink:#eef2ea; --surface:#f7f9f4;
-  --win:#2f7a4f; --loss:#b4472f;
   --shadow: 0 1px 2px rgba(22,32,26,.06), 0 4px 14px rgba(22,32,26,.05);
 }
 @media (prefers-color-scheme: dark){
@@ -18,94 +17,130 @@
     --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
     --accent:#d9a44a; --accent-ink:#1c1404; --pitch:#4c7a52; --pitch-ink:#0d130e;
     --navy:#4a6693; --navy-ink:#0d130e; --surface:#171d17;
-    --win:#4fae76; --loss:#e07a5c;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.35);
   }
 }
+:root[data-theme="dark"]{
+  --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
+  --accent:#d9a44a; --accent-ink:#1c1404; --pitch:#4c7a52; --pitch-ink:#0d130e;
+  --navy:#4a6693; --navy-ink:#0d130e; --surface:#171d17;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.35);
+}
 *{box-sizing:border-box;}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;line-height:1.5;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;line-height:1.6;}
 .mono{font-family:"IBM Plex Mono",ui-monospace,monospace;}
-h1,h2{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase;letter-spacing:.02em;margin:0;}
-.masthead{background:var(--pitch);color:var(--pitch-ink);padding:28px clamp(16px,4vw,48px);}
-.masthead h1{font-size:clamp(26px,4vw,36px);}
-.masthead p{font-family:"IBM Plex Mono",monospace;font-size:12.5px;opacity:.85;margin:6px 0 0;}
-.wrap{max-width:900px;margin:0 auto;padding:28px clamp(16px,4vw,48px) 70px;}
-.backend-warning{background:var(--loss);color:#fff;padding:12px 16px;border-radius:4px;margin-bottom:20px;font-size:14px;}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow);padding:22px clamp(16px,3vw,28px);margin-bottom:28px;}
-.card h2{font-size:20px;margin-bottom:4px;}
-.card .sub{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);margin-bottom:16px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:14px;}
-.field label{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
-.field select,.field input{width:100%;font-family:"Source Serif 4",serif;font-size:14px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:8px 10px;}
-#rn-pin,#db-pin{letter-spacing:.3em;font-family:"IBM Plex Mono",monospace;}
-.btn{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;letter-spacing:.04em;background:var(--accent);color:var(--accent-ink);border:none;border-radius:2px;padding:10px 18px;cursor:pointer;}
-.btn:hover{filter:brightness(1.08);}
-.btn:disabled{opacity:.5;cursor:not-allowed;}
-.msg{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--loss);margin-top:10px;min-height:1.2em;}
-.msg.ok{color:var(--win);}
 
-.db-search-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
-.db-search-row input{flex:2;min-width:200px;}
-.db-search-row select{flex:1;min-width:120px;}
-ul.results,ul.board{list-style:none;margin:0;padding:0;max-height:260px;overflow-y:auto;border:1px solid var(--line);border-radius:3px;background:var(--paper);}
-ul.results li,ul.board li{display:flex;align-items:center;gap:10px;padding:7px 10px;border-bottom:1px solid var(--line);font-size:13.5px;}
-ul.results li:last-child,ul.board li:last-child{border-bottom:none;}
-ul.board{margin-top:10px;}
-.rank{font-family:"IBM Plex Mono",monospace;color:var(--muted);width:22px;}
-.pos{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:11px;width:28px;}
-.pos-GK{color:var(--accent);} .pos-DF{color:var(--navy);} .pos-MF{color:var(--pitch);} .pos-FW{color:var(--loss);}
-.name{flex:1;}
-.ovr{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);}
-.results button,.board button{font-family:"IBM Plex Mono",monospace;font-size:10.5px;background:transparent;border:1px solid var(--line);border-radius:2px;padding:3px 7px;cursor:pointer;color:var(--ink);}
-.empty{color:var(--muted);font-size:13px;padding:14px;text-align:center;}
-#db-count{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);margin:8px 0;}
+.hero{background:var(--pitch);color:var(--pitch-ink);padding:clamp(48px,10vw,88px) clamp(16px,4vw,48px) clamp(40px,8vw,64px);}
+.hero-inner{max-width:900px;margin:0 auto;text-align:center;}
+.phase-pill{display:inline-block;background:var(--accent);color:var(--accent-ink);font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;letter-spacing:.08em;padding:5px 12px;border-radius:2px;margin-bottom:18px;}
+.hero h1{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase;letter-spacing:.02em;text-wrap:balance;font-size:clamp(36px,7vw,64px);font-weight:800;margin:0 0 10px;}
+.hero p.tagline{font-family:"IBM Plex Mono",monospace;font-size:14px;opacity:.85;letter-spacing:.02em;margin:0 0 30px;}
+
+.stat-row{display:flex;justify-content:center;gap:clamp(18px,4vw,44px);flex-wrap:wrap;}
+.stat{text-align:left;}
+.stat .num{display:block;font-family:"Big Shoulders Display",sans-serif;font-size:clamp(22px,3.4vw,30px);font-weight:800;font-variant-numeric:tabular-nums;}
+.stat .label{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;opacity:.75;}
+
+.wrap{max-width:1080px;margin:0 auto;padding:clamp(32px,6vw,56px) clamp(16px,4vw,48px) 40px;}
+.section-label{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 16px;}
+
+.page-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;}
+.page-card{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:4px;
+  box-shadow:var(--shadow);padding:22px clamp(18px,2.4vw,26px);text-decoration:none;color:var(--ink);
+  transition:transform .12s ease, border-color .12s ease;}
+.page-card:hover{transform:translateY(-2px);border-color:var(--accent);}
+.page-card h3{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase;letter-spacing:.01em;font-size:20px;margin:0;}
+.page-card p{margin:0;font-size:14.5px;color:var(--muted);flex:1;}
+.page-card-go{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.04em;color:var(--accent);font-weight:600;}
+
+footer{max-width:1080px;margin:0 auto;padding:20px clamp(16px,4vw,48px) 56px;color:var(--muted);font-size:12.5px;font-family:"IBM Plex Mono",monospace;}
+
+/* explicit overrides throughout -- some host pages already style bare
+   nav{} / nav a{} for their own in-page section nav, so .sm-nav can't
+   rely on defaults not leaking in from those lower-specificity rules */
+.sm-nav{position:sticky;top:0;z-index:100;background:var(--ink);display:flex;flex-direction:row;
+  align-items:center;flex-wrap:wrap;gap:clamp(10px,2vw,28px);padding:10px clamp(14px,4vw,32px);
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;
+  border:none;box-shadow:0 2px 8px rgba(0,0,0,.18);}
+.sm-nav .sm-brand{color:var(--paper);font-weight:600;letter-spacing:.04em;margin-right:auto;white-space:nowrap;}
+.sm-nav a{color:color-mix(in srgb, var(--paper) 65%, transparent);text-decoration:none;letter-spacing:.02em;
+  padding:3px 0;border-bottom:2px solid transparent;white-space:nowrap;font-size:12.5px;}
+.sm-nav a:hover{color:var(--paper);}
+.sm-nav a.active{color:var(--accent);border-bottom-color:var(--accent);}
+
 </style>
 </head>
 <body>
-<div class="masthead">
-  <h1>SPM261.01 Soccer League</h1>
-  <p>Submit &mdash; real submissions, saved live, no copy-paste into a form</p>
+<nav class="sm-nav">
+    <span class="sm-brand">SPM261.01 SOCCER LEAGUE</span>
+    <a href="https://au-sm.github.io/spm261.01_simul/" target="_blank" rel="noopener" class="active">Home</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/dashboard/" target="_blank" rel="noopener">Dashboard</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/budget/" target="_blank" rel="noopener">Budget Dashboard</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/rulebook/" target="_blank" rel="noopener">Rulebook</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/sponsorship/" target="_blank" rel="noopener">Sponsorship Marketplace</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/tv/" target="_blank" rel="noopener">TV Rights Marketplace</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/attendance/" target="_blank" rel="noopener">Attendance &amp; Ticket Sales</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/walkthrough/" target="_blank" rel="noopener">Match Engine Walkthrough</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/matchday-replay/" target="_blank" rel="noopener">Matchday Replay</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/submit/" target="_blank" rel="noopener">Submit</a>
+  </nav>
+<div class="hero">
+  <div class="hero-inner">
+    <span class="phase-pill">PRE-DRAFT</span>
+    <h1>SPM261.01 Soccer League</h1>
+    <p class="tagline">Fall 2026 &middot; Arcadia University &mdash; School of Global Business, Sport Management</p>
+    <div class="stat-row">
+      <div class="stat"><span class="num">18</span><span class="label">Teams</span></div>
+      <div class="stat"><span class="num">2026-10-06</span><span class="label">Draft Day</span></div>
+      <div class="stat"><span class="num">$18,000,000</span><span class="label">Salary Cap</span></div>
+      <div class="stat"><span class="num">2026-11-04</span><span class="label">Season Ends</span></div>
+    </div>
+  </div>
 </div>
 
 <div class="wrap">
-  <p class="backend-warning" hidden>Backend not configured yet &mdash; submissions are disabled until BACKEND_URL is set in config.js.</p>
-
-  <div class="card">
-    <h2>Rename Your Team</h2>
-    <p class="sub">One-time, before Draft Day if possible</p>
-    <div class="grid">
-      <div class="field"><label for="rn-team">Team</label><select id="rn-team" class="team-select"></select></div>
-      <div class="field"><label for="rn-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="rn-pin" placeholder="4-digit PIN"></div>
-      <div class="field"><label for="rn-name">New team name</label><input type="text" id="rn-name" placeholder="Your real club name"></div>
-    </div>
-    <button class="btn" id="rn-submit">Submit</button>
-    <p class="msg" id="rn-msg"></p>
-  </div>
-
-  <div class="card">
-    <h2>Draft Board</h2>
-    <p class="sub">Rank at least 25 players, most-wanted first &mdash; submit any time before Draft Day, resubmitting replaces your board</p>
-    <div class="grid">
-      <div class="field"><label for="db-team">Team</label><select id="db-team" class="team-select"></select></div>
-      <div class="field"><label for="db-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="db-pin" placeholder="4-digit PIN"></div>
-    </div>
-    <div class="db-search-row">
-      <input type="text" id="db-search" placeholder="Search players by name...">
-      <select id="db-pos-filter">
-        <option value="ALL">All positions</option>
-        <option value="GK">GK</option><option value="DF">DF</option>
-        <option value="MF">MF</option><option value="FW">FW</option>
-      </select>
-    </div>
-    <ul class="results" id="db-results"></ul>
-    <p id="db-count"></p>
-    <ul class="board" id="db-board"></ul>
-    <button class="btn" id="db-submit" style="margin-top:14px;">Submit Draft Board</button>
-    <p class="msg" id="db-msg"></p>
+  <p class="section-label">The Site</p>
+  <div class="page-grid">
+    <a class="page-card" href="https://au-sm.github.io/spm261.01_simul/dashboard/" target="_blank" rel="noopener">
+      <h3>Dashboard</h3>
+      <p>Standings, rosters, salary caps, and this week's Player Condition report — the live state of the league.</p>
+      <span class="page-card-go">Open &rarr;</span>
+    </a><a class="page-card" href="https://au-sm.github.io/spm261.01_simul/budget/" target="_blank" rel="noopener">
+      <h3>Budget Dashboard</h3>
+      <p>Draft money left, and cash on hand from ticket, sponsorship, and TV revenue — one team's whole financial picture.</p>
+      <span class="page-card-go">Open &rarr;</span>
+    </a><a class="page-card" href="https://au-sm.github.io/spm261.01_simul/rulebook/" target="_blank" rel="noopener">
+      <h3>Rulebook</h3>
+      <p>Every rule, every formula, every point your grade is built from — start here if you're new.</p>
+      <span class="page-card-go">Open &rarr;</span>
+    </a><a class="page-card" href="https://au-sm.github.io/spm261.01_simul/sponsorship/" target="_blank" rel="noopener">
+      <h3>Sponsorship Marketplace</h3>
+      <p>Open brand slots, live deal status, and a negotiation simulator to rehearse your ask before your live turn.</p>
+      <span class="page-card-go">Open &rarr;</span>
+    </a><a class="page-card" href="https://au-sm.github.io/spm261.01_simul/tv/" target="_blank" rel="noopener">
+      <h3>TV Rights Marketplace</h3>
+      <p>Your market tier, your Local TV base rate, and a negotiation simulator for the rate you'll lock in right after Draft Day.</p>
+      <span class="page-card-go">Open &rarr;</span>
+    </a><a class="page-card" href="https://au-sm.github.io/spm261.01_simul/attendance/" target="_blank" rel="noopener">
+      <h3>Attendance &amp; Ticket Sales</h3>
+      <p>Ticket revenue by team, the attendance formula explained, and a pricing simulator for your next home match.</p>
+      <span class="page-card-go">Open &rarr;</span>
+    </a><a class="page-card" href="https://au-sm.github.io/spm261.01_simul/walkthrough/" target="_blank" rel="noopener">
+      <h3>Match Engine Walkthrough</h3>
+      <p>Drag the sliders, hit Kickoff — see exactly how a lineup, formation, and strategy turn into a final score.</p>
+      <span class="page-card-go">Open &rarr;</span>
+    </a><a class="page-card" href="https://au-sm.github.io/spm261.01_simul/matchday-replay/" target="_blank" rel="noopener">
+      <h3>Matchday Replay</h3>
+      <p>A 90-minute match compressed into a 30-second animated replay — real formation shape, real goal minutes, real final score.</p>
+      <span class="page-card-go">Open &rarr;</span>
+    </a><a class="page-card" href="https://au-sm.github.io/spm261.01_simul/submit/" target="_blank" rel="noopener">
+      <h3>Submit</h3>
+      <p>Rename your team and submit your Draft Board — real submissions, saved live, PIN-protected.</p>
+      <span class="page-card-go">Open &rarr;</span>
+    </a>
   </div>
 </div>
 
-<script src="config.js"></script>
-<script src="app.js"></script>
+<footer>You are not a player &mdash; you are the owner and general manager of a professional soccer club. Every number on this site traces back to a decision you made, in writing.</footer>
 </body>
 </html>

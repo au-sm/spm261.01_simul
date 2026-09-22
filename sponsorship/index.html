@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sponsorship Marketplace</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#eef2ea; --ink:#16201a; --muted:#5b6b5e; --line:#d6decd;
+  --accent:#b8811f; --accent-ink:#3a2a08; --pitch:#2f5233; --pitch-ink:#eef2ea;
+  --navy:#223a5e; --navy-ink:#eef2ea; --surface:#f7f9f4;
+  --win:#2f7a4f; --loss:#b4472f; --draw:#a5791f;
+  --shadow: 0 1px 2px rgba(22,32,26,.06), 0 4px 14px rgba(22,32,26,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
+    --accent:#d9a44a; --accent-ink:#1c1404; --pitch:#4c7a52; --pitch-ink:#0d130e;
+    --navy:#4a6693; --navy-ink:#0d130e; --surface:#171d17;
+    --win:#4fae76; --loss:#e07a5c; --draw:#d1a13e;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+    --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
+    --accent:#d9a44a; --accent-ink:#1c1404; --pitch:#4c7a52; --pitch-ink:#0d130e;
+    --navy:#4a6693; --navy-ink:#0d130e; --surface:#171d17;
+    --win:#4fae76; --loss:#e07a5c; --draw:#d1a13e;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;line-height:1.5;}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;}
+h1,h2,h3{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase;letter-spacing:.02em;text-wrap:balance;margin:0;}
+.num{font-variant-numeric:tabular-nums;text-align:right;}
+
+.masthead{background:var(--pitch);color:var(--pitch-ink);padding:28px clamp(16px,4vw,48px);}
+.masthead-inner{max-width:1180px;margin:0 auto;}
+.masthead h1{font-size:clamp(26px,4vw,38px);font-weight:800;}
+.masthead p{font-family:"IBM Plex Mono",monospace;font-size:12.5px;opacity:.85;margin:6px 0 0;letter-spacing:.03em;}
+
+.wrap{max-width:1180px;margin:0 auto;padding:28px clamp(16px,4vw,48px) 70px;}
+section{margin-bottom:36px;}
+.section-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:16px;}
+.section-head h2{font-size:21px;}
+.section-note{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);}
+
+.how-it-works{background:var(--surface);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow);padding:18px 22px;}
+.how-it-works ul{margin:8px 0 0;padding-left:20px;}
+.how-it-works li{margin-bottom:6px;}
+.asks-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:14px;}
+.ask-chip{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:8px 12px;font-size:13px;}
+.ask-chip b{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;}
+
+.category-block{margin-bottom:26px;}
+.category-title{font-size:15px;letter-spacing:.06em;color:var(--navy);border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:12px;}
+.sponsor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+.sponsor-card{background:var(--surface);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow);padding:14px 16px;border-top:4px solid var(--accent);}
+.sponsor-card.sold-out{border-top-color:var(--loss);opacity:.75;}
+.sponsor-card header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.sponsor-card h3{font-size:15px;}
+.slots{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);white-space:nowrap;}
+.sold-out .slots{color:var(--loss);}
+.flavor{font-size:12.5px;color:var(--muted);margin:0 0 8px;font-style:italic;}
+.terms{display:flex;flex-direction:column;gap:2px;font-family:"IBM Plex Mono",monospace;font-size:12px;margin-bottom:8px;}
+.terms b{color:var(--muted);font-weight:600;margin-right:4px;}
+.owners{font-size:12px;margin:0;}
+.owners .none{color:var(--muted);font-style:italic;}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--surface);border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow);}
+thead th{background:var(--navy);color:var(--navy-ink);text-align:left;padding:9px 10px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;}
+thead th.num{text-align:right;}
+tbody td{padding:7px 10px;border-top:1px solid var(--line);}
+.status-complete{color:var(--win);font-weight:600;}
+.status-pending{color:var(--draw);font-weight:600;}
+
+.sim{background:var(--surface);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow);padding:20px 22px;}
+.sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media (max-width:640px){.sim-grid{grid-template-columns:1fr;}}
+.field label{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.field select, .field input[type=range]{width:100%;}
+select{font-family:"Source Serif 4",serif;font-size:14px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:6px 8px;}
+input[type=range]{accent-color:var(--accent);}
+.sim-readout{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:14px;font-family:"IBM Plex Mono",monospace;font-size:13px;}
+.sim-readout .stat{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:8px 14px;}
+.sim-readout .stat b{display:block;font-size:20px;font-family:"Big Shoulders Display",sans-serif;}
+.btn{font-family:"Big Shoulders Display",sans-serif;font-weight:800;font-size:16px;letter-spacing:.03em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);border:none;border-radius:4px;padding:12px 28px;cursor:pointer;}
+.btn:hover{filter:brightness(1.08);}
+.sim-result{margin-top:16px;padding:14px 16px;border-radius:3px;background:var(--paper);border:1px solid var(--line);font-family:"IBM Plex Mono",monospace;font-size:13px;min-height:1.4em;}
+.sim-result.accepted{border-color:var(--win);}
+.sim-result.partial{border-color:var(--draw);}
+.sim-result.walk_away{border-color:var(--loss);}
+
+footer{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:var(--muted);font-size:12px;font-family:"IBM Plex Mono",monospace;}
+
+/* explicit overrides throughout -- some host pages already style bare
+   nav{} / nav a{} for their own in-page section nav, so .sm-nav can't
+   rely on defaults not leaking in from those lower-specificity rules */
+.sm-nav{position:sticky;top:0;z-index:100;background:var(--ink);display:flex;flex-direction:row;
+  align-items:center;flex-wrap:wrap;gap:clamp(10px,2vw,28px);padding:10px clamp(14px,4vw,32px);
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;
+  border:none;box-shadow:0 2px 8px rgba(0,0,0,.18);}
+.sm-nav .sm-brand{color:var(--paper);font-weight:600;letter-spacing:.04em;margin-right:auto;white-space:nowrap;}
+.sm-nav a{color:color-mix(in srgb, var(--paper) 65%, transparent);text-decoration:none;letter-spacing:.02em;
+  padding:3px 0;border-bottom:2px solid transparent;white-space:nowrap;font-size:12.5px;}
+.sm-nav a:hover{color:var(--paper);}
+.sm-nav a.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+</style>
+</head>
+<body>
+<nav class="sm-nav">
+    <span class="sm-brand">SPM261.01 SOCCER LEAGUE</span>
+    <a href="https://au-sm.github.io/spm261.01_simul/" target="_blank" rel="noopener">Home</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/dashboard/" target="_blank" rel="noopener">Dashboard</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/budget/" target="_blank" rel="noopener">Budget Dashboard</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/rulebook/" target="_blank" rel="noopener">Rulebook</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/sponsorship/" target="_blank" rel="noopener" class="active">Sponsorship Marketplace</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/tv/" target="_blank" rel="noopener">TV Rights Marketplace</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/attendance/" target="_blank" rel="noopener">Attendance &amp; Ticket Sales</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/walkthrough/" target="_blank" rel="noopener">Match Engine Walkthrough</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/matchday-replay/" target="_blank" rel="noopener">Matchday Replay</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/submit/" target="_blank" rel="noopener">Submit</a>
+  </nav>
+<div class="masthead">
+  <div class="masthead-inner">
+    <h1>Sponsorship Marketplace</h1>
+    <p>SPM261.01 Soccer League &middot; every team must sign one sponsor in each of 6 categories &mdash; sponsors pay YOU</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section>
+    <div class="section-head"><h2>How It Works</h2></div>
+    <div class="how-it-works">
+      <p>Real clubs carry exactly one jersey sponsor, one kit manufacturer, one official airline &mdash; not an unlimited
+      pile of deals. Sponsorship here works the same way: brands are grouped into 6 categories, and every team
+      must sign <b>exactly one brand per category</b> before the draft ends. Multiple teams CAN sign the same brand
+      (Nike sponsors dozens of real clubs at once) &mdash; the number on each card is a league-wide cap, not exclusivity.</p>
+      <p style="margin-top:10px;"><b>Sponsors pay you.</b> There is no cost to sign anything &mdash; season revenue flows
+      straight into your team, same as a real sponsorship deal.</p>
+      <p style="margin-top:10px;">On your turn, target an open brand in whichever category you're filling. Two separate
+      things are on the table:</p>
+      <div class="asks-grid">
+        <div class="ask-chip"><b>Revenue</b>Take the listed Base amount (guaranteed), or Negotiate &mdash; lands anywhere
+        from &minus;10% to +10% of base, set by your <b>Negotiating Leverage</b> (roster avg. Star Power + a standings
+        bonus once the season starts). Negotiating is not risk-free: a weak hand can land below base.</div>
+        <div class="ask-chip"><b>Clause</b>A separate ask &mdash; push for a looser clause at Modest/Bold/Very Bold
+        intensity, gated by the same leverage. This one CAN walk away if you overreach; the revenue side never does.</div>
+      </div>
+      <p style="margin-top:12px;"><b>The commission:</b> if a negotiated deal lands ABOVE base, the overage is ALSO
+      credited as bonus revenue to whichever team's student played the sponsor rep &mdash; playing sponsor well pays off
+      for your own team too, upside-only (never a penalty for landing at or below base).</p>
+      <p style="margin-top:14px;"><b>The clause is real, not flavor text.</b> Once, at season end (Round
+      17), each clause level's OWN rank threshold gets checked against your team's FINAL standing.
+      Miss it, and that specific deal claws back a flat 20% &mdash; the clause sets how hard
+      the bar is, not how much you lose:</p>
+      <div class="asks-grid">
+        <div class="ask-chip"><b>Strict</b>needs top 5 &mdash; 20% if missed</div>
+        <div class="ask-chip"><b>Standard</b>needs top 9 &mdash; 20% if missed</div>
+        <div class="ask-chip"><b>Loose</b>needs top 14 &mdash; 20% if missed</div>
+        <div class="ask-chip"><b>None</b>no requirement &mdash; fully protected</div>
+      </div>
+      <p style="margin-top:10px;">Checked per sponsor, off your one final rank &mdash; you can clear a loose-clause
+      deal's easy bar while missing a strict-clause deal's demanding one in the same season. A strict clause pays more
+      up front for a real bet you'll contend; loose is the safer, lower-upside insurance policy.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Sponsor Categories</h2>
+      <span class="section-note">live: slots and signings update as picks are made</span>
+    </div>
+    
+        <div class="category-block">
+          <h3 class="category-title">Kit / Apparel</h3>
+          <div class="sponsor-grid">
+            <article class="sponsor-card">
+              <header><h3>Nike</h3><span class="slots">4/4 open</span></header>
+              <p class="flavor">The biggest name in the market -- everyone wants this jersey.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $3,500,000/season</span>
+                <span><b>Clause</b> strict</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Adidas</h3><span class="slots">4/4 open</span></header>
+              <p class="flavor">Nike's closest rival -- nearly as prestigious.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $3,000,000/season</span>
+                <span><b>Clause</b> strict</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Under Armour</h3><span class="slots">5/5 open</span></header>
+              <p class="flavor">Aggressive challenger brand, hungry for exposure.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $2,200,000/season</span>
+                <span><b>Clause</b> standard</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Puma</h3><span class="slots">5/5 open</span></header>
+              <p class="flavor">Solid mid-market kit deal.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $1,800,000/season</span>
+                <span><b>Clause</b> standard</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>New Balance</h3><span class="slots">6/6 open</span></header>
+              <p class="flavor">Reliable, unglamorous, always available.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $1,500,000/season</span>
+                <span><b>Clause</b> loose</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article></div>
+        </div>
+        <div class="category-block">
+          <h3 class="category-title">Beverage</h3>
+          <div class="sponsor-grid">
+            <article class="sponsor-card">
+              <header><h3>Red Bull</h3><span class="slots">3/3 open</span></header>
+              <p class="flavor">Wants an exciting, attacking team on the pitch -- flash sells cans.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $2,800,000/season</span>
+                <span><b>Clause</b> strict</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Gatorade</h3><span class="slots">5/5 open</span></header>
+              <p class="flavor">The default performance-drink partner for a serious club.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $2,000,000/season</span>
+                <span><b>Clause</b> standard</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Coca-Cola</h3><span class="slots">5/5 open</span></header>
+              <p class="flavor">Massive, safe, universally recognized.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $1,800,000/season</span>
+                <span><b>Clause</b> standard</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Pepsi</h3><span class="slots">5/5 open</span></header>
+              <p class="flavor">Coca-Cola's rival -- comparable deal, slightly less reach.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $1,600,000/season</span>
+                <span><b>Clause</b> standard</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Monster Energy</h3><span class="slots">6/6 open</span></header>
+              <p class="flavor">Loud, cheap, easy to get.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $1,200,000/season</span>
+                <span><b>Clause</b> loose</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article></div>
+        </div>
+        <div class="category-block">
+          <h3 class="category-title">Financial Services</h3>
+          <div class="sponsor-grid">
+            <article class="sponsor-card">
+              <header><h3>Visa</h3><span class="slots">4/4 open</span></header>
+              <p class="flavor">The prestige payments partner.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $2,500,000/season</span>
+                <span><b>Clause</b> strict</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Mastercard</h3><span class="slots">4/4 open</span></header>
+              <p class="flavor">Visa's closest competitor for the same prestige.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $2,200,000/season</span>
+                <span><b>Clause</b> strict</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>American Express</h3><span class="slots">5/5 open</span></header>
+              <p class="flavor">Wants a winning, upscale image attached to its card.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $1,800,000/season</span>
+                <span><b>Clause</b> standard</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>PayPal</h3><span class="slots">7/7 open</span></header>
+              <p class="flavor">Easy, low-friction, always has room.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $1,000,000/season</span>
+                <span><b>Clause</b> loose</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article></div>
+        </div>
+        <div class="category-block">
+          <h3 class="category-title">Airline</h3>
+          <div class="sponsor-grid">
+            <article class="sponsor-card">
+              <header><h3>Emirates</h3><span class="slots">3/3 open</span></header>
+              <p class="flavor">The gold standard of sports sponsorship -- wants a true marquee club.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $3,000,000/season</span>
+                <span><b>Clause</b> strict</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Qatar Airways</h3><span class="slots">4/4 open</span></header>
+              <p class="flavor">Right behind Emirates in prestige and price.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $2,400,000/season</span>
+                <span><b>Clause</b> strict</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Delta</h3><span class="slots">6/6 open</span></header>
+              <p class="flavor">Solid national carrier, dependable terms.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $1,600,000/season</span>
+                <span><b>Clause</b> standard</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>American Airlines</h3><span class="slots">7/7 open</span></header>
+              <p class="flavor">Widely available, modest terms.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $1,300,000/season</span>
+                <span><b>Clause</b> loose</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article></div>
+        </div>
+        <div class="category-block">
+          <h3 class="category-title">Automotive</h3>
+          <div class="sponsor-grid">
+            <article class="sponsor-card">
+              <header><h3>BMW</h3><span class="slots">3/3 open</span></header>
+              <p class="flavor">Premium marque, wants a premium club to match.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $2,600,000/season</span>
+                <span><b>Clause</b> strict</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Toyota</h3><span class="slots">5/5 open</span></header>
+              <p class="flavor">Dependable, high-volume, broad reach.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $2,000,000/season</span>
+                <span><b>Clause</b> standard</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Ford</h3><span class="slots">6/6 open</span></header>
+              <p class="flavor">Solid mainstream automotive deal.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $1,400,000/season</span>
+                <span><b>Clause</b> standard</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Hyundai</h3><span class="slots">6/6 open</span></header>
+              <p class="flavor">Value-focused, easy to sign.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $1,000,000/season</span>
+                <span><b>Clause</b> loose</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article></div>
+        </div>
+        <div class="category-block">
+          <h3 class="category-title">Technology</h3>
+          <div class="sponsor-grid">
+            <article class="sponsor-card">
+              <header><h3>Samsung</h3><span class="slots">4/4 open</span></header>
+              <p class="flavor">Wants marketability and star wattage over wins.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $2,400,000/season</span>
+                <span><b>Clause</b> strict</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Sony</h3><span class="slots">5/5 open</span></header>
+              <p class="flavor">Comparable tech-sector prestige deal.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $2,000,000/season</span>
+                <span><b>Clause</b> standard</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>AT&T</h3><span class="slots">5/5 open</span></header>
+              <p class="flavor">Telecom partner, steady terms.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $1,500,000/season</span>
+                <span><b>Clause</b> standard</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article>
+            <article class="sponsor-card">
+              <header><h3>Verizon</h3><span class="slots">6/6 open</span></header>
+              <p class="flavor">AT&T's rival, comparable deal.</p>
+              <div class="terms">
+                <span><b>Revenue</b> $1,100,000/season</span>
+                <span><b>Clause</b> loose</span>
+              </div>
+              <p class="owners"><b>Signed by:</b> <span class="none">no signings yet</span></p>
+            </article></div>
+        </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Team Progress</h2></div>
+    <table>
+      <thead><tr><th>Team</th><th class="num">Categories Filled</th><th>Sponsors</th></tr></thead>
+      <tbody><tr><td>Team 1</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 2</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 3</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 4</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 5</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 6</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 7</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 8</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 9</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 10</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 11</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 12</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 13</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 14</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 15</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 16</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 17</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr><tr><td>Team 18</td><td class="num status-pending">0/6</td><td>&mdash;</td></tr></tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Try a Negotiation</h2>
+      <span class="section-note">a rehearsal &mdash; the real pick still happens live, on your draft turn</span>
+    </div>
+    <div class="sim">
+      <div class="sim-grid">
+        <div class="field">
+          <label for="sim-sponsor">Brand</label>
+          <select id="sim-sponsor"></select>
+        </div>
+        <div class="field">
+          <label for="sim-star">Your Roster Avg. Star Power: <span id="sim-star-v">65</span></label>
+          <input type="range" min="30" max="99" value="65" id="sim-star">
+        </div>
+        <div class="field">
+          <label for="sim-revenue-ask">Revenue</label>
+          <select id="sim-revenue-ask">
+            <option value="base">Take Base (guaranteed)</option>
+            <option value="negotiate">Negotiate (&minus;10% to +10%, by leverage)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="sim-clause-ask">Clause</label>
+          <select id="sim-clause-ask">
+            <option value="none">Don't push it (keep base clause)</option>
+            <option value="modest">Ask Modest</option>
+            <option value="bold">Ask Bold</option>
+            <option value="very_bold">Ask Very Bold</option>
+          </select>
+        </div>
+      </div>
+      <div class="sim-readout">
+        <div class="stat">Leverage<br><b id="sim-leverage">0</b></div>
+        <div class="stat">Revenue Adjustment<br><b id="sim-adjustment">&ndash;</b></div>
+      </div>
+      <button class="btn" id="sim-go">Make This Ask</button>
+      <div class="sim-result" id="sim-result">Pick a brand and your asks, then hit the button.</div>
+    </div>
+  </section>
+</div>
+
+<footer>SPM261.01 Soccer League &middot; sponsorship marketplace &mdash; math matches engine/negotiation.py exactly</footer>
+
+<script>
+const SPONSORS = [{"name": "Nike", "flavor": "The biggest name in the market -- everyone wants this jersey.", "base_revenue": 3500000, "base_clause": "strict", "qty": 4, "category": "Kit / Apparel"}, {"name": "Adidas", "flavor": "Nike's closest rival -- nearly as prestigious.", "base_revenue": 3000000, "base_clause": "strict", "qty": 4, "category": "Kit / Apparel"}, {"name": "Under Armour", "flavor": "Aggressive challenger brand, hungry for exposure.", "base_revenue": 2200000, "base_clause": "standard", "qty": 5, "category": "Kit / Apparel"}, {"name": "Puma", "flavor": "Solid mid-market kit deal.", "base_revenue": 1800000, "base_clause": "standard", "qty": 5, "category": "Kit / Apparel"}, {"name": "New Balance", "flavor": "Reliable, unglamorous, always available.", "base_revenue": 1500000, "base_clause": "loose", "qty": 6, "category": "Kit / Apparel"}, {"name": "Red Bull", "flavor": "Wants an exciting, attacking team on the pitch -- flash sells cans.", "base_revenue": 2800000, "base_clause": "strict", "qty": 3, "category": "Beverage"}, {"name": "Gatorade", "flavor": "The default performance-drink partner for a serious club.", "base_revenue": 2000000, "base_clause": "standard", "qty": 5, "category": "Beverage"}, {"name": "Coca-Cola", "flavor": "Massive, safe, universally recognized.", "base_revenue": 1800000, "base_clause": "standard", "qty": 5, "category": "Beverage"}, {"name": "Pepsi", "flavor": "Coca-Cola's rival -- comparable deal, slightly less reach.", "base_revenue": 1600000, "base_clause": "standard", "qty": 5, "category": "Beverage"}, {"name": "Monster Energy", "flavor": "Loud, cheap, easy to get.", "base_revenue": 1200000, "base_clause": "loose", "qty": 6, "category": "Beverage"}, {"name": "Visa", "flavor": "The prestige payments partner.", "base_revenue": 2500000, "base_clause": "strict", "qty": 4, "category": "Financial Services"}, {"name": "Mastercard", "flavor": "Visa's closest competitor for the same prestige.", "base_revenue": 2200000, "base_clause": "strict", "qty": 4, "category": "Financial Services"}, {"name": "American Express", "flavor": "Wants a winning, upscale image attached to its card.", "base_revenue": 1800000, "base_clause": "standard", "qty": 5, "category": "Financial Services"}, {"name": "PayPal", "flavor": "Easy, low-friction, always has room.", "base_revenue": 1000000, "base_clause": "loose", "qty": 7, "category": "Financial Services"}, {"name": "Emirates", "flavor": "The gold standard of sports sponsorship -- wants a true marquee club.", "base_revenue": 3000000, "base_clause": "strict", "qty": 3, "category": "Airline"}, {"name": "Qatar Airways", "flavor": "Right behind Emirates in prestige and price.", "base_revenue": 2400000, "base_clause": "strict", "qty": 4, "category": "Airline"}, {"name": "Delta", "flavor": "Solid national carrier, dependable terms.", "base_revenue": 1600000, "base_clause": "standard", "qty": 6, "category": "Airline"}, {"name": "American Airlines", "flavor": "Widely available, modest terms.", "base_revenue": 1300000, "base_clause": "loose", "qty": 7, "category": "Airline"}, {"name": "BMW", "flavor": "Premium marque, wants a premium club to match.", "base_revenue": 2600000, "base_clause": "strict", "qty": 3, "category": "Automotive"}, {"name": "Toyota", "flavor": "Dependable, high-volume, broad reach.", "base_revenue": 2000000, "base_clause": "standard", "qty": 5, "category": "Automotive"}, {"name": "Ford", "flavor": "Solid mainstream automotive deal.", "base_revenue": 1400000, "base_clause": "standard", "qty": 6, "category": "Automotive"}, {"name": "Hyundai", "flavor": "Value-focused, easy to sign.", "base_revenue": 1000000, "base_clause": "loose", "qty": 6, "category": "Automotive"}, {"name": "Samsung", "flavor": "Wants marketability and star wattage over wins.", "base_revenue": 2400000, "base_clause": "strict", "qty": 4, "category": "Technology"}, {"name": "Sony", "flavor": "Comparable tech-sector prestige deal.", "base_revenue": 2000000, "base_clause": "standard", "qty": 5, "category": "Technology"}, {"name": "AT&T", "flavor": "Telecom partner, steady terms.", "base_revenue": 1500000, "base_clause": "standard", "qty": 5, "category": "Technology"}, {"name": "Verizon", "flavor": "AT&T's rival, comparable deal.", "base_revenue": 1100000, "base_clause": "loose", "qty": 6, "category": "Technology"}];
+const REQUIRED_THRESHOLD = {modest: 20, bold: 50, very_bold: 80};
+const CLAUSE_UPSIDE = {modest: 0.10, bold: 0.20, very_bold: 0.30};
+const CLAUSE_LEVELS = ["strict", "standard", "loose", "none"];
+const REVENUE_RANGE = 0.10;
+
+const sponsorSel = document.getElementById('sim-sponsor');
+sponsorSel.innerHTML = SPONSORS.map(s => `<option value="${s.name}">${s.category}: ${s.name} &mdash; $${s.base_revenue.toLocaleString()}</option>`).join('');
+
+function computeLeverage(avgStar) {
+  return Math.max(0, Math.min(100, (avgStar - 50) * 2));
+}
+
+function updateReadout() {
+  const star = parseFloat(document.getElementById('sim-star').value);
+  document.getElementById('sim-star-v').textContent = star;
+  const leverage = computeLeverage(star);
+  document.getElementById('sim-leverage').textContent = leverage.toFixed(0);
+  const revenueAsk = document.getElementById('sim-revenue-ask').value;
+  if (revenueAsk === 'base') {
+    document.getElementById('sim-adjustment').textContent = '0% (guaranteed)';
+  } else {
+    const adj = -REVENUE_RANGE + (leverage / 100) * (2 * REVENUE_RANGE);
+    document.getElementById('sim-adjustment').textContent = (adj >= 0 ? '+' : '') + (adj * 100).toFixed(1) + '%';
+  }
+}
+
+document.querySelectorAll('#sim-star, #sim-revenue-ask, #sim-clause-ask').forEach(el => el.addEventListener('input', updateReadout));
+updateReadout();
+
+document.getElementById('sim-go').addEventListener('click', () => {
+  const star = parseFloat(document.getElementById('sim-star').value);
+  const leverage = computeLeverage(star);
+  const revenueAsk = document.getElementById('sim-revenue-ask').value;
+  const clauseAsk = document.getElementById('sim-clause-ask').value;
+  const sponsor = SPONSORS.find(s => s.name === sponsorSel.value);
+  const resultEl = document.getElementById('sim-result');
+
+  // --- revenue axis ---
+  let revenue = sponsor.base_revenue, commission = 0;
+  if (revenueAsk === 'negotiate') {
+    const adj = -REVENUE_RANGE + (leverage / 100) * (2 * REVENUE_RANGE);
+    revenue = Math.round(sponsor.base_revenue * (1 + adj));
+    commission = Math.max(0, revenue - sponsor.base_revenue);
+  }
+
+  // --- clause axis (independent) ---
+  let clause = sponsor.base_clause;
+  let clauseNote = '';
+  if (clauseAsk !== 'none') {
+    const threshold = REQUIRED_THRESHOLD[clauseAsk];
+    const gap = leverage - threshold;
+    let outcome, fraction;
+    if (gap >= 15) { outcome = 'accepted'; fraction = 1.0; }
+    else if (gap <= -15) { outcome = 'walk_away'; fraction = 0.0; }
+    else {
+      const acceptProb = 0.5 + gap / 30.0;
+      if (Math.random() < acceptProb) { outcome = 'accepted'; fraction = 1.0; }
+      else { outcome = 'partial'; fraction = 0.5; }
+    }
+    if (outcome === 'walk_away') {
+      clauseNote = ` Clause ask WALKED AWAY (leverage ${leverage.toFixed(0)} too far below the ${threshold} needed) -- clause stays ${sponsor.base_clause}.`;
+    } else {
+      const upside = CLAUSE_UPSIDE[clauseAsk] * fraction;
+      if (upside > 0) {
+        const idx = CLAUSE_LEVELS.indexOf(sponsor.base_clause);
+        const steps = (clauseAsk === 'very_bold' && fraction === 1.0) ? 2 : 1;
+        clause = CLAUSE_LEVELS[Math.min(CLAUSE_LEVELS.length - 1, idx + steps)];
+        clauseNote = outcome === 'accepted' ? ' Clause ask ACCEPTED.' : ' Clause ask PARTIAL (met halfway).';
+      }
+    }
+  }
+
+  resultEl.className = 'sim-result ' + (revenueAsk === 'negotiate' && revenue < sponsor.base_revenue ? 'walk_away' : 'accepted');
+  let text = `Final terms: revenue $${revenue.toLocaleString()}/season, clause ${clause}.${clauseNote}`;
+  if (commission > 0) {
+    text += ` A live sponsor rep playing ${sponsor.name} here would earn a $${commission.toLocaleString()} commission for their own team.`;
+  }
+  resultEl.textContent = text;
+});
+</script>
+</body>
+</html>
