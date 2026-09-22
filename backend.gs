@@ -376,10 +376,15 @@ function doPost(e) {
       return jsonOut_({ ok: false, error: "mode must be 'base' or 'negotiate'" });
     }
 
+    // A rep is required whenever revenue differs from base, in EITHER
+    // direction -- the rep's team earns a commission either for closing a
+    // bigger deal (above base) or for talking the team down (below base,
+    // a good deal for the sponsor). Only an exact match to base needs no
+    // rep, since nobody negotiated anything.
     var repTeamId = null;
-    if (finalRevenue > brand.base_revenue) {
+    if (finalRevenue !== brand.base_revenue) {
       if (body.rep_team_id === undefined || body.rep_team_id === null || body.rep_team_id === "") {
-        return jsonOut_({ ok: false, error: "Revenue above base ($" + brand.base_revenue + ") requires rep_team_id to credit the commission." });
+        return jsonOut_({ ok: false, error: "Revenue different from base ($" + brand.base_revenue + ") requires rep_team_id to credit the commission." });
       }
       repTeamId = body.rep_team_id;
     }
@@ -388,7 +393,7 @@ function doPost(e) {
     return jsonOut_({
       ok: true, team_id: body.team_id, category: brand.category, brand: brand.name,
       final_revenue: finalRevenue, final_clause: finalClause,
-      commission: repTeamId ? (finalRevenue - brand.base_revenue) : 0,
+      commission: repTeamId ? Math.abs(finalRevenue - brand.base_revenue) : 0,
     });
   }
 
@@ -410,10 +415,11 @@ function doPost(e) {
       return jsonOut_({ ok: false, error: "mode must be 'base' or 'negotiate'" });
     }
 
+    // Same either-direction rule as Sponsorship Deal above.
     var tvRepTeamId = null;
-    if (tvFinalRevenue > tvBase.base_revenue) {
+    if (tvFinalRevenue !== tvBase.base_revenue) {
       if (body.rep_team_id === undefined || body.rep_team_id === null || body.rep_team_id === "") {
-        return jsonOut_({ ok: false, error: "Rate above base ($" + tvBase.base_revenue + ") requires rep_team_id to credit the commission." });
+        return jsonOut_({ ok: false, error: "Rate different from base ($" + tvBase.base_revenue + ") requires rep_team_id to credit the commission." });
       }
       tvRepTeamId = body.rep_team_id;
     }
@@ -421,7 +427,7 @@ function doPost(e) {
     sheets.localTv.appendRow([body.team_id, tvFinalRevenue, tvRepTeamId, now]);
     return jsonOut_({
       ok: true, team_id: body.team_id, final_revenue: tvFinalRevenue,
-      commission: tvRepTeamId ? (tvFinalRevenue - tvBase.base_revenue) : 0,
+      commission: tvRepTeamId ? Math.abs(tvFinalRevenue - tvBase.base_revenue) : 0,
     });
   }
 
