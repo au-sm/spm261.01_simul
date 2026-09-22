@@ -1,71 +1,71 @@
 {
-  "_notes": "Rebuilt 2026-09-20 for the real 18-student Section 1 roster (was a 20-team placeholder); Draft Day confirmed 2026-09-20 as Tue Oct 6, 2026 (was a Mon Oct 5 placeholder -- match days below deliberately left unmoved, still 1-2 days after Draft Day same as before). 18 teams -> 17-round round-robin, one fewer doubleheader match day than the old 20-team version. Same Mon/Wed match-day cadence: doubleheaders (2 rounds per match day) after an easing-in single-round Round 1, so the full 17-round round-robin completes with no partial schedule. TV Revenue Day moved 2026-09-22 to the Round 3 split (was Round 9) per instructor direction -- lands on the 2026-10-12 match day; Trade Day is set for the Tue react-day right after it (2026-10-13). Trade deadline moved to Round 6 (was Round 13) -- see deals.json -> trade_rules. Section 2 (21 teams, 21 rounds via bye) gets its own copy of this file with extra match days once that section folder is created.",
+  "_notes": "Rebuilt 2026-09-25 -- match days moved from Mon/Wed to Tue/Thu (instructor confirmed that's the ACTUAL class meeting schedule, not Mon/Wed). Draft Day stays Tue Oct 6, 2026 (already fell on a class day). Round 1 is the first class after Draft Day (Thu Oct 8, easing-in single round), then straight Tue/Thu doubleheaders (2 rounds per match day) for the rest of the 17-round round-robin -- same structure as before, just shifted onto the real class days. Since match day and class day are now the SAME day (no separate 'react day' gap the way Mon-match/Tue-class used to work), Trade Day is simply the next class session after the Round 3 match day resolves (Tue Oct 13 -> Thu Oct 15). TV Revenue Day is still the Round 3 split (now lands on the 2026-10-13 match day). Trade deadline stays Round 6 (round-based, unaffected by the day-of-week shift) -- see deals.json -> trade_rules.",
   "draft_day": "2026-10-06",
-  "match_days": "Monday and Wednesday -- doubleheaders (2 rounds resolved per match day) except Round 1, class meets Tuesday/Thursday to react to results",
-  "trade_day": "2026-10-13",
+  "match_days": "Tuesday and Thursday -- the actual class meeting days. Doubleheaders (2 rounds resolved per match day) except Round 1, which is a single easing-in round the first class after Draft Day.",
+  "trade_day": "2026-10-15",
   "match_day_schedule": [
     {
-      "date": "2026-10-07",
+      "date": "2026-10-08",
       "rounds": [
         1
       ]
     },
     {
-      "date": "2026-10-12",
+      "date": "2026-10-13",
       "rounds": [
         2,
         3
       ]
     },
     {
-      "date": "2026-10-14",
+      "date": "2026-10-15",
       "rounds": [
         4,
         5
       ]
     },
     {
-      "date": "2026-10-19",
+      "date": "2026-10-20",
       "rounds": [
         6,
         7
       ]
     },
     {
-      "date": "2026-10-21",
+      "date": "2026-10-22",
       "rounds": [
         8,
         9
       ]
     },
     {
-      "date": "2026-10-26",
+      "date": "2026-10-27",
       "rounds": [
         10,
         11
       ]
     },
     {
-      "date": "2026-10-28",
+      "date": "2026-10-29",
       "rounds": [
         12,
         13
       ]
     },
     {
-      "date": "2026-11-02",
+      "date": "2026-11-03",
       "rounds": [
         14,
         15
       ]
     },
     {
-      "date": "2026-11-04",
+      "date": "2026-11-05",
       "rounds": [
         16,
         17
       ]
     }
   ],
-  "season_end": "2026-11-04"
+  "season_end": "2026-11-05"
 }
