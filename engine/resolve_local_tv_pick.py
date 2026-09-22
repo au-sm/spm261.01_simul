@@ -20,10 +20,10 @@ only ever moves that ONE number, and only once per team (re-running
 this for a team that already negotiated is refused).
 
 IMPORTANT -- this does NOT pay anyone yet. Local TV money is still
-paid out at the Round 10 split, same as before, with the Star Power
+paid out at the Round 3 split, same as before, with the Star Power
 modifier (+15% for a top-3 starting-XI at that time) still applied on
 top. All this script does is replace the flat market-tier base with
-the NEGOTIATED number that the Round 10 payout step will use instead
+the NEGOTIATED number that the Round 3 payout step will use instead
 -- exactly like a real regional broadcast contract is negotiated once,
 long before the checks it generates ever get cut. Writes to
 data/local_tv_deals.json, not data/team_finances.json.
@@ -36,7 +36,7 @@ LIVE MODE (the normal path for the in-class negotiation exercise):
   $770,000 rate credits a $70,000 commission to Team 17, whoever
   played the network rep in that negotiation -- booked immediately
   (the commission is a reward for negotiating skill, not TV money
-  itself, so it doesn't wait for the Round 10 split). At or below
+  itself, so it doesn't wait for the Round 3 split). At or below
   base, no commission is credited to anyone -- upside-only, same as
   sponsorship.
 
@@ -148,7 +148,7 @@ def main():
         save_json("local_tv_deals.json", ltv)
 
         print(f"\n{team_name} ({assignment['market_tier']}): Local TV Deal rate negotiated at ${args.final_revenue:,}/season "
-              f"(base ${base_revenue:,}). Still paid out at the Round 10 split, plus Star Power bonus if earned then.")
+              f"(base ${base_revenue:,}). Still paid out at the Round 3 split, plus Star Power bonus if earned then.")
 
         if commission > 0:
             rep_key = str(args.network_rep_team)
@@ -160,7 +160,7 @@ def main():
             finances["teams"][rep_key] = rep_fin
             save_json("team_finances.json", finances)
             print(f"{rep_team_name} earns a ${commission:,} commission for playing the network rep "
-                  f"(rate closed ${commission:,} above base) -- booked now, not at the Round 10 split.")
+                  f"(rate closed ${commission:,} above base) -- booked now, not at the Round 3 split.")
 
     # ---------------- ALGORITHMIC MODE ----------------
     else:
@@ -176,7 +176,7 @@ def main():
         print(f"\n{team_name} ({assignment['market_tier']})  (avg Star Power {avg_star:.0f}, leverage {leverage:.0f})")
         print(f"  Negotiated rate: ${final_revenue:,}/season (base ${base_revenue:,}). "
               f"{'(no live network rep, so no commission credited)' if commission else ''}")
-        print("  Still paid out at the Round 10 split, plus Star Power bonus if earned then.")
+        print("  Still paid out at the Round 3 split, plus Star Power bonus if earned then.")
 
         assignment["negotiated"] = True
         assignment["mode"] = "algorithmic"

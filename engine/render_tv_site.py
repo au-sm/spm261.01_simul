@@ -173,11 +173,11 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
         anywhere from &minus;10% to +10% of base, set by your <b>Negotiating Leverage</b> (roster avg. Star Power + a
         standings bonus once the season starts). A weak hand can genuinely land below base.</div>
         <div class="ask-chip"><b>The commission</b>Land ABOVE base, and the overage is credited &mdash; immediately, not
-        at the Round 9 split &mdash; as bonus revenue to whichever team played the network rep. Landing at or below base
+        at the Round 3 split &mdash; as bonus revenue to whichever team played the network rep. Landing at or below base
         costs the rep's team nothing, but earns them nothing either.</div>
       </div>
       <p style="margin-top:12px;"><b>This negotiation sets the RATE only.</b> The money itself is still paid at the
-      league's Round 9 TV Revenue Day, with the Star Power modifier (+15% if your starting XI is top-3 league-wide then)
+      league's Round 3 TV Revenue Day, with the Star Power modifier (+15% if your starting XI is top-3 league-wide then)
       still applied on top of whatever rate you locked in here.</p>
       <p style="margin-top:10px;"><b>The League-Wide (National) TV Deal is separate and fully automatic</b> &mdash; a
       shared formula-only split (base + standings/Star Power bonus) with no live negotiation, since there's no natural
@@ -274,7 +274,7 @@ document.getElementById('sim-go').addEventListener('click', () => {{
   }}
 
   resultEl.className = 'sim-result ' + (revenueAsk === 'negotiate' && rate < team.base_revenue ? 'walk_away' : 'accepted');
-  let text = `Negotiated rate: $${{rate.toLocaleString()}}/season (base $${{team.base_revenue.toLocaleString()}}). Still paid at the Round 9 split, plus Star Power bonus if earned then.`;
+  let text = `Negotiated rate: $${{rate.toLocaleString()}}/season (base $${{team.base_revenue.toLocaleString()}}). Still paid at the Round 3 split, plus Star Power bonus if earned then.`;
   if (commission > 0) {{
     text += ` A live network rep here would earn a $${{commission.toLocaleString()}} commission for their own team, credited now.`;
   }}

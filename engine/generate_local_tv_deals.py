@@ -14,7 +14,7 @@ Every team gets exactly one of three market tiers, split as evenly as
 possible across the league and drawn reproducibly from season_seed (same
 principle as match simulation: any assignment can be independently
 re-verified after the fact). The dollar amount is paid out at the same
-midseason split point as the national TV deal (after Round 10 of a
+midseason split point as the national TV deal (after Round 3 of a
 19-round season -- see tv_deal_formula.midseason_split_timing) with a
 Star Power modifier: local broadcasters pay more for star wattage in
 their own market, same logic as the national deal's star bonus, scaled
