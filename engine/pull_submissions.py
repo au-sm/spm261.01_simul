@@ -8,7 +8,7 @@ engine still reads local files".
 
 Requires the ADMIN_KEY env var (a GitHub Actions repo secret -- NEVER
 hardcode it here, this repo is public). BACKEND_URL is not secret, it's
-already public in submit/config.js.
+already public in assets/config.js.
 
 Usage:
     ADMIN_KEY=... python3 engine/pull_submissions.py

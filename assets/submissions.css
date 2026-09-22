@@ -1,0 +1,44 @@
+/* Shared styling for the real, backend-connected submission forms
+   (Rename Team / Draft Board / Weekly Lineup on Dashboard, Sponsorship
+   Deal on the Sponsorship Marketplace, Local TV Deal on the TV Rights
+   Marketplace). Every class here is "sub-" prefixed on purpose -- these
+   pages already define their own .field/.btn/.grid for other widgets
+   (the negotiation simulators), and a bare-name collision would bleed
+   unrelated padding/border rules onto range sliders and other existing
+   controls. Only uses each host page's own --ink/--paper/--accent/etc.
+   custom properties, already identical across every page on the site. */
+
+.sub-card{background:var(--surface);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow);padding:22px clamp(16px,3vw,28px);margin-bottom:28px;}
+.sub-card h2{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase;letter-spacing:.02em;font-size:20px;margin:0;}
+.sub-card .sub-sub{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);margin:4px 0 16px;}
+.sub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:14px;}
+.sub-field label{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.sub-field select,.sub-field input,.sub-field textarea{width:100%;font-family:"Source Serif 4",Georgia,serif;font-size:14px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:8px 10px;box-sizing:border-box;}
+.sub-field select:focus,.sub-field input:focus,.sub-field textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+.sub-pin{letter-spacing:.3em;font-family:"IBM Plex Mono",monospace;}
+.sub-btn{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;letter-spacing:.04em;background:var(--accent);color:var(--accent-ink);border:none;border-radius:2px;padding:10px 18px;cursor:pointer;}
+.sub-btn:hover{filter:brightness(1.08);}
+.sub-btn:disabled{opacity:.5;cursor:not-allowed;}
+.sub-msg{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--loss);margin-top:10px;min-height:1.2em;}
+.sub-msg.ok{color:var(--win);}
+
+.sub-search-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.sub-search-row input{flex:2;min-width:200px;font-family:"Source Serif 4",Georgia,serif;font-size:14px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:8px 10px;box-sizing:border-box;}
+.sub-search-row select{flex:1;min-width:120px;font-family:"Source Serif 4",Georgia,serif;font-size:14px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:8px 10px;box-sizing:border-box;}
+ul.sub-results,ul.sub-board{list-style:none;margin:0;padding:0;max-height:260px;overflow-y:auto;border:1px solid var(--line);border-radius:3px;background:var(--paper);}
+ul.sub-results li,ul.sub-board li{display:flex;align-items:center;gap:10px;padding:7px 10px;border-bottom:1px solid var(--line);font-size:13.5px;}
+ul.sub-results li:last-child,ul.sub-board li:last-child{border-bottom:none;}
+ul.sub-board{margin-top:10px;}
+.sub-rank{font-family:"IBM Plex Mono",monospace;color:var(--muted);width:22px;}
+.sub-pos{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:11px;width:28px;}
+.sub-pos-GK{color:var(--accent);} .sub-pos-DF{color:var(--navy,var(--pitch));} .sub-pos-MF{color:var(--pitch);} .sub-pos-FW{color:var(--loss);}
+.sub-name{flex:1;}
+.sub-ovr{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);}
+.sub-results button,.sub-board button{font-family:"IBM Plex Mono",monospace;font-size:10.5px;background:transparent;border:1px solid var(--line);border-radius:2px;padding:3px 7px;cursor:pointer;color:var(--ink);}
+.sub-empty{color:var(--muted);font-size:13px;padding:14px;text-align:center;}
+.sub-count-note{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);margin:8px 0;}
+.sub-tier-note{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:8px 10px;margin:0 0 12px;}
+.sub-lineup-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:10px;}
+.sub-slot-group h4{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin:0 0 6px;text-transform:uppercase;}
+.sub-slot-group select{margin-bottom:6px;}
+.sub-backend-warning{background:var(--loss);color:#fff;padding:12px 16px;border-radius:4px;margin-bottom:20px;font-size:14px;font-family:"IBM Plex Mono",monospace;}

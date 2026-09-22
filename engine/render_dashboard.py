@@ -50,31 +50,14 @@ def money(n):
     return f"${n/1000:.0f}K"
 
 
-def hash_pin(pin):
-    """Simple djb2-style hash so a team's PIN isn't sitting in plaintext in
-    the page's view-source -- NOT cryptographic security (this is a static
-    public page, there's no real backend to guard), just enough that a
-    student can't just read every team's PIN off the screen. The actual
-    enforcement that matters is server-side, in resolve_round.py, which
-    checks the real PIN value directly. Must match the JS hashPin() below
-    exactly, bit for bit."""
-    h = 5381
-    for c in pin:
-        h = ((h << 5) + h + ord(c)) & 0xFFFFFFFF
-    return h
-
-
 def render(players, config, deals, matches, schedule=None, calendar=None, injuries=None):
     team_map = {t["team_id"]: t for t in config["teams"]}
     team_ids = list(team_map.keys())
 
     rosters = {tid: [] for tid in team_ids}
-    free_agents = []
     for p in players:
         if p["team_id"] not in ("", None):
             rosters[int(p["team_id"])].append(p)
-        else:
-            free_agents.append(p)
 
     standings_rows = build_standings(matches, team_ids) if matches else [
         (tid, {"P": 0, "W": 0, "D": 0, "L": 0, "GF": 0, "GA": 0, "PTS": 0}) for tid in team_ids
@@ -88,13 +71,6 @@ def render(players, config, deals, matches, schedule=None, calendar=None, injuri
         "offseason": "OFF-SEASON",
     }.get(phase, phase.upper())
 
-    draft_pool = free_agents if phase in ("pre-draft", "draft") else free_agents
-    draft_pool_sorted = sorted(draft_pool, key=lambda p: -p["ovr"])
-
-    players_json = json.dumps(draft_pool_sorted)
-
-    # --- data for the in-page lineup builder (JS reads this; actual submission
-    #     still lands in the Google Form -- see forms/google_form_specs.md) ---
     # A match day can carry MORE THAN ONE round (a doubleheader -- see
     # data/season_calendar.json -> match_day_schedule), each against a
     # DIFFERENT opponent, so the builder must be able to show more than one
@@ -105,15 +81,6 @@ def render(players, config, deals, matches, schedule=None, calendar=None, injuri
         (d["rounds"] for d in calendar.get("match_day_schedule", []) if min(d["rounds"]) > completed),
         [completed + 1],
     ) if calendar else [completed + 1]
-
-    fixtures_by_team = {tid: [] for tid in team_ids}
-    for rnd in upcoming_rounds:
-        round_fixtures = next((r["fixtures"] for r in schedule if r["round"] == rnd), [])
-        for fx in round_fixtures:
-            fixtures_by_team[fx["home_id"]].append(
-                {"round": rnd, "is_home": True, "opponent": team_map[fx["away_id"]]["name"]})
-            fixtures_by_team[fx["away_id"]].append(
-                {"round": rnd, "is_home": False, "opponent": team_map[fx["home_id"]]["name"]})
 
     round_label = f"Round {upcoming_rounds[0]}" if len(upcoming_rounds) == 1 \
         else f"Rounds {upcoming_rounds[0]}-{upcoming_rounds[-1]} (doubleheader)"
@@ -132,24 +99,6 @@ def render(players, config, deals, matches, schedule=None, calendar=None, injuri
         "Excellent": "cond-excellent", "Good": "cond-good", "Average": "cond-average",
         "Below Average": "cond-below", "Poor": "cond-poor", INJURED_LABEL: "cond-injured",
     }
-
-    builder_teams = [
-        {
-            "team_id": tid,
-            "name": team_map[tid]["name"],
-            "owner": team_map[tid].get("owner", ""),
-            "pin_hash": hash_pin(team_map[tid]["pin"]) if team_map[tid].get("pin") else None,
-            "roster": [
-                {"player_id": p["player_id"], "name": p["name"], "position": p["position"],
-                 "ovr": p["ovr"], "salary": p["salary"]}
-                for p in sorted(rosters[tid], key=lambda p: (p["position"], -p["ovr"]))
-            ],
-            "fixtures": fixtures_by_team.get(tid, []),
-        }
-        for tid in team_ids
-    ]
-    builder_teams_json = json.dumps(builder_teams)
-    formations_json = json.dumps(FORMATIONS)
 
     # --- team roster cards ---
     team_cards = []
@@ -234,6 +183,7 @@ def render(players, config, deals, matches, schedule=None, calendar=None, injuri
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{config["league_name"]}</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/submissions.css">
 <style>
 :root{{
   --paper:#eef2ea; --ink:#16201a; --muted:#5b6b5e; --line:#d6decd;
@@ -314,27 +264,8 @@ tbody tr:hover{{background:color-mix(in srgb, var(--accent) 10%, transparent);}}
 .tier-qual,.tier-clause{{font-size:12.5px;margin:3px 0;color:var(--muted);}}
 .tier-qual strong,.tier-clause strong{{color:var(--ink);}}
 
-/* lineup builder */
-.builder{{background:var(--surface);border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow);padding:22px clamp(16px,3vw,30px);margin-bottom:40px;}}
-.builder-head{{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:16px;}}
-.builder-head h2{{font-size:20px;}}
-.builder-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px;}}
-.field label{{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}}
-.field select, .field textarea{{width:100%;font-family:"Source Serif 4",serif;font-size:14px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:7px 9px;}}
-.field select:focus, .field textarea:focus{{outline:2px solid var(--accent);outline-offset:1px;}}
-.lineup-slots{{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px;}}
-.slot-group h4{{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin:0 0 6px;}}
-.slot-group select{{margin-bottom:6px;}}
-.fixture-note{{font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:8px 12px;margin-bottom:16px;}}
-.builder-output textarea{{width:100%;min-height:170px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:10px;white-space:pre;}}
-.btn{{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;letter-spacing:.04em;background:var(--accent);color:var(--accent-ink);border:none;border-radius:2px;padding:9px 16px;cursor:pointer;}}
-.btn:hover{{filter:brightness(1.08);}}
-.btn.secondary{{background:transparent;border:1px solid var(--ink);color:var(--ink);}}
-.builder-actions{{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;}}
-.builder-msg{{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--loss);}}
-.builder-msg.ok{{color:var(--win);}}
-.gated-locked{{opacity:.4;pointer-events:none;filter:grayscale(.4);transition:opacity .2s ease,filter .2s ease;}}
-#b-pin{{letter-spacing:.3em;font-family:"IBM Plex Mono",monospace;}}
+/* real submission forms (Rename Team / Draft Board / Weekly Lineup) --
+   shared styling lives in assets/submissions.css, linked in <head> */
 
 /* teams grid */
 .teams-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}}
@@ -384,130 +315,71 @@ footer{{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 60px;color
 </div>
 
 <div class="wrap">
-  <div class="builder" id="rename-builder">
-    <div class="builder-head">
-      <h2>Rename Your Team</h2>
-      <span class="section-note">one-time, before Draft Day if possible &mdash; builds your submission, doesn't send it</span>
+  <p class="sub-backend-warning" hidden>Backend not configured yet &mdash; submissions are disabled until BACKEND_URL is set in assets/config.js.</p>
+
+  <div class="sub-card">
+    <h2>Rename Your Team</h2>
+    <p class="sub-sub">One-time, before Draft Day if possible &mdash; saved live, no copy-paste</p>
+    <div class="sub-grid">
+      <div class="sub-field"><label for="rn-team">Team</label><select id="rn-team" class="sub-team-select"></select></div>
+      <div class="sub-field"><label for="rn-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="rn-pin" class="sub-pin" placeholder="4-digit PIN"></div>
+      <div class="sub-field"><label for="rn-name">New team name</label><input type="text" id="rn-name" placeholder="Your real club name"></div>
     </div>
-    <div class="builder-grid">
-      <div class="field">
-        <label for="n-team">Team</label>
-        <select id="n-team"></select>
-      </div>
-      <div class="field">
-        <label for="n-pin">Team PIN</label>
-        <input type="password" inputmode="numeric" maxlength="4" id="n-pin" placeholder="4-digit PIN">
-      </div>
-    </div>
-    <p class="builder-msg" id="n-pin-status">Enter your team's PIN above to unlock renaming.</p>
-    <div id="n-gated" class="gated-locked">
-      <div class="field">
-        <label for="n-name">New team name</label>
-        <input type="text" id="n-name" placeholder="Your real club name" disabled>
-      </div>
-      <div class="builder-actions">
-        <button class="btn" id="n-generate" disabled>Generate Submission Block</button>
-        <button class="btn secondary" id="n-copy">Copy</button>
-        <span class="builder-msg" id="n-msg"></span>
-      </div>
-      <div class="builder-output" style="margin-top:12px;">
-        <textarea id="n-output" readonly placeholder="Your formatted submission will appear here -- paste it into the Team Name Submission form's fields of the same name."></textarea>
-      </div>
-    </div>
+    <button class="sub-btn" id="rn-submit">Submit</button>
+    <p class="sub-msg" id="rn-msg"></p>
   </div>
 
-  <div class="builder" id="roster-viewer">
-    <div class="builder-head">
-      <h2>Your Drafted Roster</h2>
-      <span class="section-note">every player you drafted &mdash; not just this week's starters. Pick your team to see it.</span>
+  <div class="sub-card">
+    <h2>Draft Board</h2>
+    <p class="sub-sub">Rank at least 25 players, most-wanted first &mdash; submit any time before Draft Day, resubmitting replaces your board. Browse the full 399-player pool on the <a href="../draftboard/">Draft Board page</a>.</p>
+    <div class="sub-grid">
+      <div class="sub-field"><label for="db-team">Team</label><select id="db-team" class="sub-team-select"></select></div>
+      <div class="sub-field"><label for="db-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="db-pin" class="sub-pin" placeholder="4-digit PIN"></div>
     </div>
-    <div class="builder-grid" style="grid-template-columns:1fr 1fr;max-width:480px;">
-      <div class="field">
-        <label for="r-team">Team</label>
-        <select id="r-team"></select>
-      </div>
-      <div class="field">
-        <label for="r-pin">Team PIN (to add a player)</label>
-        <input type="password" inputmode="numeric" maxlength="4" id="r-pin" placeholder="4-digit PIN">
-      </div>
+    <div class="sub-search-row">
+      <input type="text" id="db-search" placeholder="Search players by name...">
+      <select id="db-pos-filter">
+        <option value="ALL">All positions</option>
+        <option value="GK">GK</option><option value="DF">DF</option>
+        <option value="MF">MF</option><option value="FW">FW</option>
+      </select>
     </div>
-    <p class="cap-label" id="r-summary"></p>
-    <table class="roster-table" style="width:100%;">
-      <thead><tr><th class="num">ID</th><th>Pos</th><th>Player</th><th class="num">OVR</th><th class="num">Salary</th><th></th></tr></thead>
-      <tbody id="r-rows"></tbody>
-    </table>
-    <p class="builder-msg" id="r-pin-status">Enter this team's PIN above to unlock adding a player.</p>
-    <div id="r-gated" class="gated-locked">
-      <div class="builder-grid" style="grid-template-columns:2fr 1fr;margin-top:10px;">
-        <div class="field">
-          <label for="r-add-name">Add a player to this roster</label>
-          <input type="text" id="r-add-name" placeholder="Player ID (1-399) or exact name" disabled>
-        </div>
-        <div class="field" style="justify-content:flex-end;display:flex;">
-          <button class="btn secondary" id="r-add-btn" style="width:100%;" disabled>Add Player</button>
-        </div>
-      </div>
-      <span class="builder-msg" id="r-add-msg"></span>
-    </div>
-    <p class="section-note" style="margin-top:10px;">Adding a player only changes THIS BROWSER's view, for recording picks live on Draft Day &mdash; it does not touch data/players.csv and resets if the page reloads. To make it official, still run the real Draft Board / resolve_draft.py pipeline (or a manual roster-entry CSV) so it's saved for every student, not just this screen.</p>
+    <ul class="sub-results" id="db-results"></ul>
+    <p class="sub-count-note" id="db-count"></p>
+    <ul class="sub-board" id="db-board"></ul>
+    <button class="sub-btn" id="db-submit" style="margin-top:14px;">Submit Draft Board</button>
+    <p class="sub-msg" id="db-msg"></p>
   </div>
 
-  <div class="builder" id="lineup-builder">
-    <div class="builder-head">
-      <h2>Submit Your Lineup</h2>
-      <span class="section-note">{round_label} &middot; builds your submission, doesn't send it &mdash; copy the block below into the Weekly Lineup &amp; Strategy form</span>
+  <div class="sub-card">
+    <h2>Weekly Lineup</h2>
+    <p class="sub-sub">{round_label} &middot; submit every round before the deadline -- resubmitting before the deadline replaces your earlier answer. Requires a drafted roster.</p>
+    <div class="sub-grid">
+      <div class="sub-field"><label for="lu-team">Team</label><select id="lu-team" class="sub-team-select"></select></div>
+      <div class="sub-field"><label for="lu-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="lu-pin" class="sub-pin" placeholder="4-digit PIN"></div>
+      <div class="sub-field"><label for="lu-round">Round number</label><input type="number" id="lu-round" min="1" max="17" placeholder="e.g. 1"></div>
     </div>
-    <div class="builder-grid">
-      <div class="field">
-        <label for="b-team">Team</label>
-        <select id="b-team"></select>
-      </div>
-      <div class="field">
-        <label for="b-pin">Team PIN</label>
-        <input type="password" inputmode="numeric" maxlength="4" id="b-pin" placeholder="4-digit PIN">
-      </div>
-      <div class="field" id="b-match-field" hidden>
-        <label for="b-match">Which match (doubleheader)</label>
-        <select id="b-match"></select>
-      </div>
-      <div class="field">
-        <label for="b-formation">Formation</label>
-        <select id="b-formation" disabled></select>
-      </div>
-      <div class="field">
-        <label for="b-strategy">Strategy</label>
-        <select id="b-strategy" disabled>
-          <option>Attacking</option>
-          <option selected>Balanced</option>
-          <option>Defensive</option>
+    <div class="sub-grid">
+      <div class="sub-field"><label for="lu-formation">Formation</label>
+        <select id="lu-formation">
+          <option>4-4-2</option><option>4-3-3</option><option>3-5-2</option><option>5-3-2</option><option>4-5-1</option>
         </select>
       </div>
-      <div class="field" id="b-price-field">
-        <label for="b-price">Ticket Price (home only)</label>
-        <select id="b-price" disabled>
-          <option>Budget</option>
-          <option selected>Standard</option>
-          <option>Premium</option>
-        </select>
+      <div class="sub-field"><label for="lu-strategy">Strategy</label>
+        <select id="lu-strategy"><option>Attacking</option><option selected>Balanced</option><option>Defensive</option></select>
+      </div>
+      <div class="sub-field"><label for="lu-price">Ticket price (home matches only)</label>
+        <select id="lu-price"><option>Budget</option><option selected>Standard</option><option>Premium</option></select>
       </div>
     </div>
-    <p class="builder-msg" id="b-pin-status">Enter your team's PIN above to unlock lineup entry.</p>
-    <div id="b-gated" class="gated-locked">
-      <div class="fixture-note" id="b-fixture-note"></div>
-      <div class="lineup-slots" id="b-slots"></div>
-      <div class="field">
-        <label for="b-rationale">Decision rationale (2-4 sentences)</label>
-        <textarea id="b-rationale" rows="3" placeholder="Why this formation, strategy, and lineup against this opponent?" disabled></textarea>
-      </div>
-      <div class="builder-actions">
-        <button class="btn" id="b-generate" disabled>Generate Submission Block</button>
-        <button class="btn secondary" id="b-copy">Copy</button>
-        <span class="builder-msg" id="b-msg"></span>
-      </div>
-      <div class="builder-output" style="margin-top:12px;">
-        <textarea id="b-output" readonly placeholder="Your formatted submission will appear here -- paste it into the Google Form fields of the same name."></textarea>
-      </div>
+    <p class="sub-tier-note" id="lu-roster-note"></p>
+    <div id="lu-slots" class="sub-lineup-slots"></div>
+    <div class="sub-field" style="margin-top:10px;">
+      <label for="lu-rationale">Decision rationale (2-4 sentences)</label>
+      <textarea id="lu-rationale" rows="3" placeholder="Why this formation, strategy, and lineup against this week's opponent?"></textarea>
     </div>
+    <button class="sub-btn" id="lu-submit" style="margin-top:12px;">Submit Weekly Lineup</button>
+    <p class="sub-msg" id="lu-msg"></p>
   </div>
 
   <div class="layout">
@@ -598,410 +470,16 @@ footer{{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 60px;color
 
 <footer>{config["league_name"]} &middot; front office terminal &middot; data current as of last instructor update</footer>
 
+<script src="../assets/config.js"></script>
+<script src="../assets/submissions.js"></script>
 <script>
-const BUILDER_TEAMS = {builder_teams_json};
-const FORMATIONS = {formations_json};
-
-// must match engine/render_dashboard.py's hash_pin() exactly, bit for bit --
-// this is NOT real security (static public page, no backend), just enough
-// that a team's PIN isn't sitting in plaintext in view-source. The
-// enforcement that actually matters is server-side, in resolve_round.py.
-function hashPin(pin) {{
-  let h = 5381;
-  for (let i = 0; i < pin.length; i++) h = ((h << 5) + h + pin.charCodeAt(i)) >>> 0;
-  return h;
-}}
-
-function initBuilder() {{
-  const teamSel = document.getElementById('b-team');
-  const matchField = document.getElementById('b-match-field');
-  const matchSel = document.getElementById('b-match');
-  const formationSel = document.getElementById('b-formation');
-  const priceField = document.getElementById('b-price-field');
-  const fixtureNote = document.getElementById('b-fixture-note');
-  const slotsEl = document.getElementById('b-slots');
-
-  teamSel.innerHTML = BUILDER_TEAMS.map(t => `<option value="${{t.team_id}}">${{t.name}}</option>`).join('');
-  formationSel.innerHTML = Object.keys(FORMATIONS).map(f => `<option>${{f}}</option>`).join('');
-
-  // ---- Team PIN gate -- locks formation/strategy/price/lineup slots/
-  // rationale/generate button until the PIN for the SELECTED team is
-  // entered correctly. Prevents one student from (accidentally or on
-  // purpose) building and submitting a lineup for a team that isn't
-  // theirs. Client-side only -- see hashPin()'s comment above for the
-  // honest limits of that, and resolve_round.py for the real enforcement.
-  const pinInput = document.getElementById('b-pin');
-  const pinStatus = document.getElementById('b-pin-status');
-  const gatedEl = document.getElementById('b-gated');
-  const strategySel = document.getElementById('b-strategy');
-  const priceSel = document.getElementById('b-price');
-  const rationaleEl = document.getElementById('b-rationale');
-  const generateBtn = document.getElementById('b-generate');
-
-  function checkPin() {{
-    const team = teamSel.value ? BUILDER_TEAMS.find(t => String(t.team_id) === teamSel.value) : null;
-    const typed = pinInput.value.trim();
-    const unlocked = !!(team && team.pin_hash != null && typed.length === 4 && hashPin(typed) === team.pin_hash);
-
-    [formationSel, strategySel, priceSel, rationaleEl, generateBtn].forEach(el => {{ el.disabled = !unlocked; }});
-    gatedEl.classList.toggle('gated-locked', !unlocked);
-
-    if (!team) {{
-      pinStatus.textContent = "Pick your team, then enter your team's PIN to unlock lineup entry.";
-      pinStatus.className = 'builder-msg';
-    }} else if (team.pin_hash == null) {{
-      // no PIN assigned in league_config.json yet -- don't lock students out
-      pinStatus.textContent = 'No PIN required for this team yet.';
-      pinStatus.className = 'builder-msg ok';
-      [formationSel, strategySel, priceSel, rationaleEl, generateBtn].forEach(el => {{ el.disabled = false; }});
-      gatedEl.classList.remove('gated-locked');
-    }} else if (unlocked) {{
-      pinStatus.textContent = `Unlocked for ${{team.name}}.`;
-      pinStatus.className = 'builder-msg ok';
-    }} else if (typed.length === 0) {{
-      pinStatus.textContent = `Enter ${{team.name}}'s 4-digit PIN to unlock lineup entry.`;
-      pinStatus.className = 'builder-msg';
-    }} else {{
-      pinStatus.textContent = 'Incorrect PIN.';
-      pinStatus.className = 'builder-msg';
-    }}
-  }}
-  pinInput.addEventListener('input', checkPin);
-  teamSel.addEventListener('change', () => {{ pinInput.value = ''; checkPin(); }});
-  checkPin();
-
-  // ---- Rename Your Team -- same PIN system as the lineup builder above,
-  // its own team-select/PIN pair so unlocking one doesn't unlock the other.
-  const nTeamSel = document.getElementById('n-team');
-  const nPinInput = document.getElementById('n-pin');
-  const nPinStatus = document.getElementById('n-pin-status');
-  const nGatedEl = document.getElementById('n-gated');
-  const nNameInput = document.getElementById('n-name');
-  const nGenerateBtn = document.getElementById('n-generate');
-
-  nTeamSel.innerHTML = BUILDER_TEAMS.map(t => `<option value="${{t.team_id}}">${{t.name}}</option>`).join('');
-
-  function checkRenamePin() {{
-    const team = nTeamSel.value ? BUILDER_TEAMS.find(t => String(t.team_id) === nTeamSel.value) : null;
-    const typed = nPinInput.value.trim();
-    const unlocked = !!(team && team.pin_hash != null && typed.length === 4 && hashPin(typed) === team.pin_hash);
-
-    [nNameInput, nGenerateBtn].forEach(el => {{ el.disabled = !unlocked; }});
-    nGatedEl.classList.toggle('gated-locked', !unlocked);
-
-    if (!team) {{
-      nPinStatus.textContent = "Pick your team, then enter your team's PIN to unlock renaming.";
-      nPinStatus.className = 'builder-msg';
-    }} else if (team.pin_hash == null) {{
-      nPinStatus.textContent = 'No PIN required for this team yet.';
-      nPinStatus.className = 'builder-msg ok';
-      [nNameInput, nGenerateBtn].forEach(el => {{ el.disabled = false; }});
-      nGatedEl.classList.remove('gated-locked');
-    }} else if (unlocked) {{
-      nPinStatus.textContent = `Unlocked for ${{team.name}}.`;
-      nPinStatus.className = 'builder-msg ok';
-    }} else if (typed.length === 0) {{
-      nPinStatus.textContent = `Enter ${{team.name}}'s 4-digit PIN to unlock renaming.`;
-      nPinStatus.className = 'builder-msg';
-    }} else {{
-      nPinStatus.textContent = 'Incorrect PIN.';
-      nPinStatus.className = 'builder-msg';
-    }}
-  }}
-  nPinInput.addEventListener('input', checkRenamePin);
-  nTeamSel.addEventListener('change', () => {{ nPinInput.value = ''; checkRenamePin(); }});
-  checkRenamePin();
-
-  nGenerateBtn.addEventListener('click', () => {{
-    const msg = document.getElementById('n-msg');
-    const team = nTeamSel.value ? BUILDER_TEAMS.find(t => String(t.team_id) === nTeamSel.value) : null;
-    const newName = nNameInput.value.trim();
-    if (!team) {{ msg.textContent = 'Pick a team first.'; msg.className = 'builder-msg'; return; }}
-    if (!newName) {{ msg.textContent = 'Type your new team name first.'; msg.className = 'builder-msg'; return; }}
-    if (!team.owner) {{
-      msg.textContent = 'No owner is on file for this team yet -- ask the instructor to check league_config.json.';
-      msg.className = 'builder-msg';
-      return;
-    }}
-    const block = [
-      `Owner Name: ${{team.owner}}`,
-      `Team Name: ${{newName}}`,
-    ].join('\\n\\n');
-    document.getElementById('n-output').value = block;
-    msg.textContent = 'Block generated -- copy it into the real Team Name Submission form fields of the same name.';
-    msg.className = 'builder-msg ok';
-  }});
-
-  document.getElementById('n-copy').addEventListener('click', async () => {{
-    const out = document.getElementById('n-output');
-    const msg = document.getElementById('n-msg');
-    out.select();
-    let copied = false;
-    try {{ await navigator.clipboard.writeText(out.value); copied = true; }} catch (e) {{}}
-    if (!copied) {{ try {{ document.execCommand('copy'); copied = true; }} catch (e) {{}} }}
-    msg.textContent = copied ? 'Copied.' : 'Select the text above and copy manually.';
-    msg.className = copied ? 'builder-msg ok' : 'builder-msg';
-  }});
-
-  // ---- Your Drafted Roster -- standalone, no formation/round involved ----
-  const rTeamSel = document.getElementById('r-team');
-  rTeamSel.innerHTML = BUILDER_TEAMS.map(t => `<option value="${{t.team_id}}">${{t.name}}</option>`).join('');
-
-  // this-browser-only scratchpad for Draft Day live entry -- NOT saved to
-  // data/players.csv, resets on reload. Real persistence still runs through
-  // the Draft Board / resolve_draft.py pipeline (or a manual roster-entry
-  // CSV) -- see the note under the Add Player button.
-  const manualAdds = {{}}; // team_id (string) -> [player, ...]
-  const manualAddedIds = new Set(); // player_ids already manually placed on ANY team this session
-
-  function renderRoster() {{
-    const team = BUILDER_TEAMS.find(t => String(t.team_id) === rTeamSel.value);
-    const rows = document.getElementById('r-rows');
-    const summary = document.getElementById('r-summary');
-    if (!team) {{ rows.innerHTML = ''; summary.textContent = ''; return; }}
-
-    const extra = manualAdds[team.team_id] || [];
-    const all = team.roster.concat(extra.map(p => Object.assign({{manual: true}}, p)));
-
-    if (all.length === 0) {{
-      rows.innerHTML = '<tr><td colspan="6" style="color:var(--muted);">No players drafted yet.</td></tr>';
-      summary.textContent = '';
-      return;
-    }}
-    rows.innerHTML = all.map((p, i) => `<tr${{p.manual ? ' style="opacity:.8;"' : ''}}>
-      <td class="num mono">${{p.player_id != null ? p.player_id : '&ndash;'}}</td>
-      <td class="pos pos-${{p.position || '?'}}">${{p.position || '?'}}</td>
-      <td>${{p.name}}${{p.manual ? ' <span class="mono" style="font-size:10px;color:var(--accent);">MANUAL</span>' : ''}}</td>
-      <td class="num">${{p.ovr != null ? p.ovr : '&ndash;'}}</td>
-      <td class="num">${{p.salary != null ? '$' + p.salary.toLocaleString() : '&ndash;'}}</td>
-      <td>${{p.manual ? `<button type="button" class="btn secondary r-remove" data-idx="${{extra.indexOf(p)}}" style="padding:2px 8px;font-size:10px;">remove</button>` : ''}}</td>
-    </tr>`).join('');
-    const totalSalary = all.reduce((sum, p) => sum + (p.salary || 0), 0);
-    summary.innerHTML = `<span class="mono">${{all.length}}</span> players &middot; total salary <span class="mono">$${{totalSalary.toLocaleString()}}</span>${{extra.length ? ` (<span class="mono">${{extra.length}}</span> manually added, not yet official)` : ''}}`;
-
-    rows.querySelectorAll('.r-remove').forEach(btn => {{
-      btn.addEventListener('click', () => {{
-        const idx = parseInt(btn.dataset.idx, 10);
-        const removed = extra.splice(idx, 1)[0];
-        if (removed) manualAddedIds.delete(removed.player_id);
-        renderRoster();
-      }});
-    }});
-  }}
-  rTeamSel.addEventListener('change', renderRoster);
-  renderRoster();
-
-  // ---- PIN gate for Add Player -- same PIN as the lineup builder/rename
-  // tool, same hashPin() comparison. Viewing a roster stays open (every
-  // team's roster is already visible on the Front Offices cards below),
-  // only the mutating "Add Player" action is gated.
-  const rPinInput = document.getElementById('r-pin');
-  const rPinStatus = document.getElementById('r-pin-status');
-  const rGatedEl = document.getElementById('r-gated');
-  const rAddNameInput = document.getElementById('r-add-name');
-  const rAddBtn = document.getElementById('r-add-btn');
-
-  function checkRosterPin() {{
-    const team = rTeamSel.value ? BUILDER_TEAMS.find(t => String(t.team_id) === rTeamSel.value) : null;
-    const typed = rPinInput.value.trim();
-    const unlocked = !!(team && team.pin_hash != null && typed.length === 4 && hashPin(typed) === team.pin_hash);
-
-    [rAddNameInput, rAddBtn].forEach(el => {{ el.disabled = !unlocked; }});
-    rGatedEl.classList.toggle('gated-locked', !unlocked);
-
-    if (!team) {{
-      rPinStatus.textContent = "Pick a team, then enter its PIN to unlock adding a player.";
-      rPinStatus.className = 'builder-msg';
-    }} else if (team.pin_hash == null) {{
-      rPinStatus.textContent = 'No PIN required for this team yet.';
-      rPinStatus.className = 'builder-msg ok';
-      [rAddNameInput, rAddBtn].forEach(el => {{ el.disabled = false; }});
-      rGatedEl.classList.remove('gated-locked');
-    }} else if (unlocked) {{
-      rPinStatus.textContent = `Unlocked for ${{team.name}}.`;
-      rPinStatus.className = 'builder-msg ok';
-    }} else if (typed.length === 0) {{
-      rPinStatus.textContent = `Enter ${{team.name}}'s 4-digit PIN to unlock adding a player.`;
-      rPinStatus.className = 'builder-msg';
-    }} else {{
-      rPinStatus.textContent = 'Incorrect PIN.';
-      rPinStatus.className = 'builder-msg';
-    }}
-  }}
-  rPinInput.addEventListener('input', checkRosterPin);
-  rTeamSel.addEventListener('change', () => {{ rPinInput.value = ''; checkRosterPin(); }});
-  checkRosterPin();
-
-  document.getElementById('r-add-btn').addEventListener('click', () => {{
-    const input = document.getElementById('r-add-name');
-    const msg = document.getElementById('r-add-msg');
-    const typed = input.value.trim();
-    const team = BUILDER_TEAMS.find(t => String(t.team_id) === rTeamSel.value);
-    if (!typed) {{ msg.textContent = 'Type a player ID (1-399) or name first.'; msg.className = 'builder-msg'; return; }}
-    if (!team) {{ msg.textContent = 'Pick a team first.'; msg.className = 'builder-msg'; return; }}
-
-    // ID takes priority when the input is a plain number -- no typo risk,
-    // exact match only, no confusion with a name that happens to look numeric.
-    const asId = /^\\d+$/.test(typed) ? typed : null;
-    const byId = p => asId !== null && String(p.player_id) === asId;
-    const byName = p => p.name.toLowerCase() === typed.toLowerCase();
-    const matchFn = asId !== null ? byId : byName;
-
-    const alreadyOnTeam = team.roster.some(matchFn) || (manualAdds[team.team_id] || []).some(matchFn);
-    if (alreadyOnTeam) {{
-      const who = asId !== null
-        ? (team.roster.find(matchFn) || (manualAdds[team.team_id]||[]).find(matchFn)).name
-        : typed;
-      msg.textContent = `${{who}} is already on this roster.`; msg.className = 'builder-msg'; return;
-    }}
-
-    const match = PLAYERS.find(matchFn);
-    if (!match) {{
-      msg.textContent = asId !== null
-        ? `No available player has ID ${{asId}} -- check the ID column on the Draft Board below, or they may already be drafted onto another team.`
-        : `"${{typed}}" doesn't match any available player -- check the exact spelling on the Draft Board list below, or they may already be drafted onto another team.`;
-      msg.className = 'builder-msg';
-      return;
-    }}
-    if (manualAddedIds.has(match.player_id)) {{
-      msg.textContent = `${{match.name}} was already manually added to another team this session.`;
-      msg.className = 'builder-msg';
-      return;
-    }}
-
-    manualAdds[team.team_id] = manualAdds[team.team_id] || [];
-    manualAdds[team.team_id].push(match);
-    manualAddedIds.add(match.player_id);
-    input.value = '';
-    msg.textContent = `Added ${{match.name}} -- remember, this is a live scratchpad only, not saved to players.csv.`;
-    msg.className = 'builder-msg ok';
-    renderRoster();
-  }});
-  document.getElementById('r-add-name').addEventListener('keydown', (e) => {{
-    if (e.key === 'Enter') document.getElementById('r-add-btn').click();
-  }});
-
-  function currentTeam() {{
-    return BUILDER_TEAMS.find(t => String(t.team_id) === teamSel.value);
-  }}
-
-  function currentFixture() {{
-    const team = currentTeam();
-    if (!team || !team.fixtures || team.fixtures.length === 0) return null;
-    return team.fixtures[matchSel.value] || team.fixtures[0];
-  }}
-
-  function playerOptions(team, position) {{
-    const opts = team.roster.filter(p => p.position === position)
-      .map(p => `<option value="${{p.name}}">#${{p.player_id}} &mdash; ${{p.name}} (OVR ${{p.ovr}})</option>`).join('');
-    return opts || '<option value="" disabled selected>No players drafted at this position yet</option>';
-  }}
-
-  function rebuildMatchOptions() {{
-    const team = currentTeam();
-    const fixtures = (team && team.fixtures) || [];
-    matchField.hidden = fixtures.length < 2;
-    matchSel.innerHTML = fixtures.map((fx, i) =>
-      `<option value="${{i}}">Round ${{fx.round}} -- ${{fx.is_home ? 'HOME vs' : 'AWAY at'}} ${{fx.opponent}}</option>`
-    ).join('');
-  }}
-
-  function rebuildSlots() {{
-    const team = currentTeam();
-    const counts = FORMATIONS[formationSel.value];
-    if (!team || !counts) return;
-    let html = '';
-    for (const pos of ['GK','DF','MF','FW']) {{
-      for (let i = 0; i < counts[pos]; i++) {{
-        html += `<div class="slot-group"><h4>${{pos}} ${{counts[pos] > 1 ? (i+1) : ''}}</h4>
-          <select class="b-slot" data-pos="${{pos}}">${{playerOptions(team, pos)}}</select></div>`;
-      }}
-    }}
-    slotsEl.innerHTML = html;
-    document.getElementById('b-rationale').value = '';
-    document.getElementById('b-output').value = '';
-
-    const fx = currentFixture();
-    if (!fx) {{
-      fixtureNote.textContent = 'No fixture scheduled for your team this match day (bye).';
-      priceField.hidden = true;
-    }} else if (fx.is_home) {{
-      fixtureNote.textContent = `Round ${{fx.round}}: HOME vs ${{fx.opponent}} -- set a ticket price below.`;
-      priceField.hidden = false;
-    }} else {{
-      fixtureNote.textContent = `Round ${{fx.round}}: AWAY at ${{fx.opponent}} -- no ticket price needed.`;
-      priceField.hidden = true;
-    }}
-  }}
-
-  teamSel.addEventListener('change', () => {{ rebuildMatchOptions(); rebuildSlots(); }});
-  matchSel.addEventListener('change', rebuildSlots);
-  formationSel.addEventListener('change', rebuildSlots);
-  rebuildMatchOptions();
-  rebuildSlots();
-
-  document.getElementById('b-generate').addEventListener('click', () => {{
-    const msg = document.getElementById('b-msg');
-    const team = currentTeam();
-    const selects = Array.from(document.querySelectorAll('.b-slot'));
-    const chosen = selects.map(s => ({{pos: s.dataset.pos, name: s.value}}));
-
-    if (chosen.some(c => !c.name)) {{
-      msg.textContent = 'Fill every starting slot before generating.';
-      msg.className = 'builder-msg';
-      return;
-    }}
-    const names = chosen.map(c => c.name);
-    if (new Set(names).size !== names.length) {{
-      msg.textContent = 'The same player is selected in two slots -- fix that first.';
-      msg.className = 'builder-msg';
-      return;
-    }}
-
-    const byPos = pos => chosen.filter(c => c.pos === pos).map(c => c.name);
-    const rationale = document.getElementById('b-rationale').value.trim();
-    const fx = currentFixture();
-    const price = (fx && fx.is_home) ? document.getElementById('b-price').value : '(away -- leave blank)';
-
-    const block = [
-      `Team name: ${{team.name}}`,
-      `Round number: ${{fx ? fx.round : '(bye this match day)'}}`,
-      `Formation: ${{formationSel.value}}`,
-      `Strategy: ${{document.getElementById('b-strategy').value}}`,
-      `Starting Goalkeeper: ${{byPos('GK')[0] || ''}}`,
-      `Starting Defenders:\\n${{byPos('DF').join('\\n')}}`,
-      `Starting Midfielders:\\n${{byPos('MF').join('\\n')}}`,
-      `Starting Forwards:\\n${{byPos('FW').join('\\n')}}`,
-      `Ticket Price: ${{price}}`,
-      `Decision rationale (2-4 sentences): ${{rationale || '(fill this in before submitting)'}}`,
-    ].join('\\n\\n');
-
-    document.getElementById('b-output').value = block;
-    msg.textContent = 'Block generated -- copy it into the real Google Form fields of the same name.';
-    msg.className = 'builder-msg ok';
-  }});
-
-  document.getElementById('b-copy').addEventListener('click', async () => {{
-    const out = document.getElementById('b-output');
-    const msg = document.getElementById('b-msg');
-    out.select();
-    let copied = false;
-    try {{
-      if (navigator.clipboard && navigator.clipboard.writeText) {{
-        await navigator.clipboard.writeText(out.value);
-        copied = true;
-      }}
-    }} catch (e) {{ copied = false; }}
-    if (!copied) {{
-      try {{ copied = document.execCommand('copy'); }} catch (e) {{ copied = false; }}
-    }}
-    msg.textContent = copied ? 'Copied to clipboard.' : 'Could not auto-copy -- text is selected, use Cmd/Ctrl+C.';
-    msg.className = copied ? 'builder-msg ok' : 'builder-msg';
-  }});
-}}
-initBuilder();
-
-const PLAYERS = {players_json};
+(async function initDashboardForms() {{
+  await Promise.all([loadPlayers(), loadTeams(), loadCatalog()]);
+  populateTeamSelects();
+  initRenameForm();
+  initDraftBoardForm();
+  initLineupForm();
+}})();
 </script>
 </body>
 </html>'''

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SPM261.01 Soccer League</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/submissions.css">
 <style>
 :root{
   --paper:#eef2ea; --ink:#16201a; --muted:#5b6b5e; --line:#d6decd;
@@ -85,27 +86,8 @@ tbody tr:hover{background:color-mix(in srgb, var(--accent) 10%, transparent);}
 .tier-qual,.tier-clause{font-size:12.5px;margin:3px 0;color:var(--muted);}
 .tier-qual strong,.tier-clause strong{color:var(--ink);}
 
-/* lineup builder */
-.builder{background:var(--surface);border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow);padding:22px clamp(16px,3vw,30px);margin-bottom:40px;}
-.builder-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
-.builder-head h2{font-size:20px;}
-.builder-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px;}
-.field label{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
-.field select, .field textarea{width:100%;font-family:"Source Serif 4",serif;font-size:14px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:7px 9px;}
-.field select:focus, .field textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
-.lineup-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px;}
-.slot-group h4{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin:0 0 6px;}
-.slot-group select{margin-bottom:6px;}
-.fixture-note{font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:8px 12px;margin-bottom:16px;}
-.builder-output textarea{width:100%;min-height:170px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:10px;white-space:pre;}
-.btn{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;letter-spacing:.04em;background:var(--accent);color:var(--accent-ink);border:none;border-radius:2px;padding:9px 16px;cursor:pointer;}
-.btn:hover{filter:brightness(1.08);}
-.btn.secondary{background:transparent;border:1px solid var(--ink);color:var(--ink);}
-.builder-actions{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;}
-.builder-msg{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--loss);}
-.builder-msg.ok{color:var(--win);}
-.gated-locked{opacity:.4;pointer-events:none;filter:grayscale(.4);transition:opacity .2s ease,filter .2s ease;}
-#b-pin{letter-spacing:.3em;font-family:"IBM Plex Mono",monospace;}
+/* real submission forms (Rename Team / Draft Board / Weekly Lineup) --
+   shared styling lives in assets/submissions.css, linked in <head> */
 
 /* teams grid */
 .teams-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
@@ -168,7 +150,6 @@ footer{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 60px;color:
     <a href="https://au-sm.github.io/spm261.01_simul/attendance/" target="_blank" rel="noopener">Attendance &amp; Ticket Sales</a>
     <a href="https://au-sm.github.io/spm261.01_simul/walkthrough/" target="_blank" rel="noopener">Match Engine Walkthrough</a>
     <a href="https://au-sm.github.io/spm261.01_simul/matchday-replay/" target="_blank" rel="noopener">Matchday Replay</a>
-    <a href="https://au-sm.github.io/spm261.01_simul/submit/" target="_blank" rel="noopener">Submit</a>
   </nav>
 <div class="masthead">
   <div class="masthead-inner">
@@ -181,130 +162,71 @@ footer{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 60px;color:
 </div>
 
 <div class="wrap">
-  <div class="builder" id="rename-builder">
-    <div class="builder-head">
-      <h2>Rename Your Team</h2>
-      <span class="section-note">one-time, before Draft Day if possible &mdash; builds your submission, doesn't send it</span>
+  <p class="sub-backend-warning" hidden>Backend not configured yet &mdash; submissions are disabled until BACKEND_URL is set in assets/config.js.</p>
+
+  <div class="sub-card">
+    <h2>Rename Your Team</h2>
+    <p class="sub-sub">One-time, before Draft Day if possible &mdash; saved live, no copy-paste</p>
+    <div class="sub-grid">
+      <div class="sub-field"><label for="rn-team">Team</label><select id="rn-team" class="sub-team-select"></select></div>
+      <div class="sub-field"><label for="rn-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="rn-pin" class="sub-pin" placeholder="4-digit PIN"></div>
+      <div class="sub-field"><label for="rn-name">New team name</label><input type="text" id="rn-name" placeholder="Your real club name"></div>
     </div>
-    <div class="builder-grid">
-      <div class="field">
-        <label for="n-team">Team</label>
-        <select id="n-team"></select>
-      </div>
-      <div class="field">
-        <label for="n-pin">Team PIN</label>
-        <input type="password" inputmode="numeric" maxlength="4" id="n-pin" placeholder="4-digit PIN">
-      </div>
-    </div>
-    <p class="builder-msg" id="n-pin-status">Enter your team's PIN above to unlock renaming.</p>
-    <div id="n-gated" class="gated-locked">
-      <div class="field">
-        <label for="n-name">New team name</label>
-        <input type="text" id="n-name" placeholder="Your real club name" disabled>
-      </div>
-      <div class="builder-actions">
-        <button class="btn" id="n-generate" disabled>Generate Submission Block</button>
-        <button class="btn secondary" id="n-copy">Copy</button>
-        <span class="builder-msg" id="n-msg"></span>
-      </div>
-      <div class="builder-output" style="margin-top:12px;">
-        <textarea id="n-output" readonly placeholder="Your formatted submission will appear here -- paste it into the Team Name Submission form's fields of the same name."></textarea>
-      </div>
-    </div>
+    <button class="sub-btn" id="rn-submit">Submit</button>
+    <p class="sub-msg" id="rn-msg"></p>
   </div>
 
-  <div class="builder" id="roster-viewer">
-    <div class="builder-head">
-      <h2>Your Drafted Roster</h2>
-      <span class="section-note">every player you drafted &mdash; not just this week's starters. Pick your team to see it.</span>
+  <div class="sub-card">
+    <h2>Draft Board</h2>
+    <p class="sub-sub">Rank at least 25 players, most-wanted first &mdash; submit any time before Draft Day, resubmitting replaces your board. Browse the full 399-player pool on the <a href="../draftboard/">Draft Board page</a>.</p>
+    <div class="sub-grid">
+      <div class="sub-field"><label for="db-team">Team</label><select id="db-team" class="sub-team-select"></select></div>
+      <div class="sub-field"><label for="db-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="db-pin" class="sub-pin" placeholder="4-digit PIN"></div>
     </div>
-    <div class="builder-grid" style="grid-template-columns:1fr 1fr;max-width:480px;">
-      <div class="field">
-        <label for="r-team">Team</label>
-        <select id="r-team"></select>
-      </div>
-      <div class="field">
-        <label for="r-pin">Team PIN (to add a player)</label>
-        <input type="password" inputmode="numeric" maxlength="4" id="r-pin" placeholder="4-digit PIN">
-      </div>
+    <div class="sub-search-row">
+      <input type="text" id="db-search" placeholder="Search players by name...">
+      <select id="db-pos-filter">
+        <option value="ALL">All positions</option>
+        <option value="GK">GK</option><option value="DF">DF</option>
+        <option value="MF">MF</option><option value="FW">FW</option>
+      </select>
     </div>
-    <p class="cap-label" id="r-summary"></p>
-    <table class="roster-table" style="width:100%;">
-      <thead><tr><th class="num">ID</th><th>Pos</th><th>Player</th><th class="num">OVR</th><th class="num">Salary</th><th></th></tr></thead>
-      <tbody id="r-rows"></tbody>
-    </table>
-    <p class="builder-msg" id="r-pin-status">Enter this team's PIN above to unlock adding a player.</p>
-    <div id="r-gated" class="gated-locked">
-      <div class="builder-grid" style="grid-template-columns:2fr 1fr;margin-top:10px;">
-        <div class="field">
-          <label for="r-add-name">Add a player to this roster</label>
-          <input type="text" id="r-add-name" placeholder="Player ID (1-399) or exact name" disabled>
-        </div>
-        <div class="field" style="justify-content:flex-end;display:flex;">
-          <button class="btn secondary" id="r-add-btn" style="width:100%;" disabled>Add Player</button>
-        </div>
-      </div>
-      <span class="builder-msg" id="r-add-msg"></span>
-    </div>
-    <p class="section-note" style="margin-top:10px;">Adding a player only changes THIS BROWSER's view, for recording picks live on Draft Day &mdash; it does not touch data/players.csv and resets if the page reloads. To make it official, still run the real Draft Board / resolve_draft.py pipeline (or a manual roster-entry CSV) so it's saved for every student, not just this screen.</p>
+    <ul class="sub-results" id="db-results"></ul>
+    <p class="sub-count-note" id="db-count"></p>
+    <ul class="sub-board" id="db-board"></ul>
+    <button class="sub-btn" id="db-submit" style="margin-top:14px;">Submit Draft Board</button>
+    <p class="sub-msg" id="db-msg"></p>
   </div>
 
-  <div class="builder" id="lineup-builder">
-    <div class="builder-head">
-      <h2>Submit Your Lineup</h2>
-      <span class="section-note">Round 1 &middot; builds your submission, doesn't send it &mdash; copy the block below into the Weekly Lineup &amp; Strategy form</span>
+  <div class="sub-card">
+    <h2>Weekly Lineup</h2>
+    <p class="sub-sub">Round 1 &middot; submit every round before the deadline -- resubmitting before the deadline replaces your earlier answer. Requires a drafted roster.</p>
+    <div class="sub-grid">
+      <div class="sub-field"><label for="lu-team">Team</label><select id="lu-team" class="sub-team-select"></select></div>
+      <div class="sub-field"><label for="lu-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="lu-pin" class="sub-pin" placeholder="4-digit PIN"></div>
+      <div class="sub-field"><label for="lu-round">Round number</label><input type="number" id="lu-round" min="1" max="17" placeholder="e.g. 1"></div>
     </div>
-    <div class="builder-grid">
-      <div class="field">
-        <label for="b-team">Team</label>
-        <select id="b-team"></select>
-      </div>
-      <div class="field">
-        <label for="b-pin">Team PIN</label>
-        <input type="password" inputmode="numeric" maxlength="4" id="b-pin" placeholder="4-digit PIN">
-      </div>
-      <div class="field" id="b-match-field" hidden>
-        <label for="b-match">Which match (doubleheader)</label>
-        <select id="b-match"></select>
-      </div>
-      <div class="field">
-        <label for="b-formation">Formation</label>
-        <select id="b-formation" disabled></select>
-      </div>
-      <div class="field">
-        <label for="b-strategy">Strategy</label>
-        <select id="b-strategy" disabled>
-          <option>Attacking</option>
-          <option selected>Balanced</option>
-          <option>Defensive</option>
+    <div class="sub-grid">
+      <div class="sub-field"><label for="lu-formation">Formation</label>
+        <select id="lu-formation">
+          <option>4-4-2</option><option>4-3-3</option><option>3-5-2</option><option>5-3-2</option><option>4-5-1</option>
         </select>
       </div>
-      <div class="field" id="b-price-field">
-        <label for="b-price">Ticket Price (home only)</label>
-        <select id="b-price" disabled>
-          <option>Budget</option>
-          <option selected>Standard</option>
-          <option>Premium</option>
-        </select>
+      <div class="sub-field"><label for="lu-strategy">Strategy</label>
+        <select id="lu-strategy"><option>Attacking</option><option selected>Balanced</option><option>Defensive</option></select>
+      </div>
+      <div class="sub-field"><label for="lu-price">Ticket price (home matches only)</label>
+        <select id="lu-price"><option>Budget</option><option selected>Standard</option><option>Premium</option></select>
       </div>
     </div>
-    <p class="builder-msg" id="b-pin-status">Enter your team's PIN above to unlock lineup entry.</p>
-    <div id="b-gated" class="gated-locked">
-      <div class="fixture-note" id="b-fixture-note"></div>
-      <div class="lineup-slots" id="b-slots"></div>
-      <div class="field">
-        <label for="b-rationale">Decision rationale (2-4 sentences)</label>
-        <textarea id="b-rationale" rows="3" placeholder="Why this formation, strategy, and lineup against this opponent?" disabled></textarea>
-      </div>
-      <div class="builder-actions">
-        <button class="btn" id="b-generate" disabled>Generate Submission Block</button>
-        <button class="btn secondary" id="b-copy">Copy</button>
-        <span class="builder-msg" id="b-msg"></span>
-      </div>
-      <div class="builder-output" style="margin-top:12px;">
-        <textarea id="b-output" readonly placeholder="Your formatted submission will appear here -- paste it into the Google Form fields of the same name."></textarea>
-      </div>
+    <p class="sub-tier-note" id="lu-roster-note"></p>
+    <div id="lu-slots" class="sub-lineup-slots"></div>
+    <div class="sub-field" style="margin-top:10px;">
+      <label for="lu-rationale">Decision rationale (2-4 sentences)</label>
+      <textarea id="lu-rationale" rows="3" placeholder="Why this formation, strategy, and lineup against this week's opponent?"></textarea>
     </div>
+    <button class="sub-btn" id="lu-submit" style="margin-top:12px;">Submit Weekly Lineup</button>
+    <p class="sub-msg" id="lu-msg"></p>
   </div>
 
   <div class="layout">
@@ -700,410 +622,16 @@ footer{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 60px;color:
 
 <footer>SPM261.01 Soccer League &middot; front office terminal &middot; data current as of last instructor update</footer>
 
+<script src="../assets/config.js"></script>
+<script src="../assets/submissions.js"></script>
 <script>
-const BUILDER_TEAMS = [{"team_id": 0, "name": "Team 1", "owner": "Bianca Biagini", "pin_hash": 2088360496, "roster": [], "fixtures": [{"round": 1, "is_home": true, "opponent": "Team 18"}]}, {"team_id": 1, "name": "Team 2", "owner": "Carlos Brito-Mezon", "pin_hash": 2088399502, "roster": [], "fixtures": [{"round": 1, "is_home": true, "opponent": "Team 17"}]}, {"team_id": 2, "name": "Team 3", "owner": "Allison Dieckmann", "pin_hash": 2088435609, "roster": [], "fixtures": [{"round": 1, "is_home": false, "opponent": "Team 16"}]}, {"team_id": 3, "name": "Team 4", "owner": "Jake Dunphy", "pin_hash": 2088297209, "roster": [], "fixtures": [{"round": 1, "is_home": true, "opponent": "Team 15"}]}, {"team_id": 4, "name": "Team 5", "owner": "Jayden Geerders", "pin_hash": 2088366934, "roster": [], "fixtures": [{"round": 1, "is_home": false, "opponent": "Team 14"}]}, {"team_id": 5, "name": "Team 6", "owner": "Yonelisa Hamusten", "pin_hash": 2088362480, "roster": [], "fixtures": [{"round": 1, "is_home": true, "opponent": "Team 13"}]}, {"team_id": 6, "name": "Team 7", "owner": "Denim Horsford", "pin_hash": 2088253775, "roster": [], "fixtures": [{"round": 1, "is_home": false, "opponent": "Team 12"}]}, {"team_id": 7, "name": "Team 8", "owner": "Max Lebisky", "pin_hash": 2088468149, "roster": [], "fixtures": [{"round": 1, "is_home": true, "opponent": "Team 11"}]}, {"team_id": 8, "name": "Team 9", "owner": "Jordan Long", "pin_hash": 2088254828, "roster": [], "fixtures": [{"round": 1, "is_home": false, "opponent": "Team 10"}]}, {"team_id": 9, "name": "Team 10", "owner": "Parker Miles", "pin_hash": 2088513846, "roster": [], "fixtures": [{"round": 1, "is_home": true, "opponent": "Team 9"}]}, {"team_id": 10, "name": "Team 11", "owner": "Kyle Miller", "pin_hash": 2088436560, "roster": [], "fixtures": [{"round": 1, "is_home": false, "opponent": "Team 8"}]}, {"team_id": 11, "name": "Team 12", "owner": "Maggie O'Shea", "pin_hash": 2088332282, "roster": [], "fixtures": [{"round": 1, "is_home": true, "opponent": "Team 7"}]}, {"team_id": 12, "name": "Team 13", "owner": "Sawyer Ostroff", "pin_hash": 2088289652, "roster": [], "fixtures": [{"round": 1, "is_home": false, "opponent": "Team 6"}]}, {"team_id": 13, "name": "Team 14", "owner": "Anthony Pope", "pin_hash": 2088262319, "roster": [], "fixtures": [{"round": 1, "is_home": true, "opponent": "Team 5"}]}, {"team_id": 14, "name": "Team 15", "owner": "Jovanni Romeo", "pin_hash": 2088513847, "roster": [], "fixtures": [{"round": 1, "is_home": false, "opponent": "Team 4"}]}, {"team_id": 15, "name": "Team 16", "owner": "Mason Walls", "pin_hash": 2088432311, "roster": [], "fixtures": [{"round": 1, "is_home": true, "opponent": "Team 3"}]}, {"team_id": 16, "name": "Team 17", "owner": "Sydney Weathers", "pin_hash": 2088509754, "roster": [], "fixtures": [{"round": 1, "is_home": false, "opponent": "Team 2"}]}, {"team_id": 17, "name": "Team 18", "owner": "Andre Yared", "pin_hash": 2088406139, "roster": [], "fixtures": [{"round": 1, "is_home": false, "opponent": "Team 1"}]}];
-const FORMATIONS = {"4-4-2": {"GK": 1, "DF": 4, "MF": 4, "FW": 2}, "4-3-3": {"GK": 1, "DF": 4, "MF": 3, "FW": 3}, "3-5-2": {"GK": 1, "DF": 3, "MF": 5, "FW": 2}, "5-3-2": {"GK": 1, "DF": 5, "MF": 3, "FW": 2}, "4-5-1": {"GK": 1, "DF": 4, "MF": 5, "FW": 1}};
-
-// must match engine/render_dashboard.py's hash_pin() exactly, bit for bit --
-// this is NOT real security (static public page, no backend), just enough
-// that a team's PIN isn't sitting in plaintext in view-source. The
-// enforcement that actually matters is server-side, in resolve_round.py.
-function hashPin(pin) {
-  let h = 5381;
-  for (let i = 0; i < pin.length; i++) h = ((h << 5) + h + pin.charCodeAt(i)) >>> 0;
-  return h;
-}
-
-function initBuilder() {
-  const teamSel = document.getElementById('b-team');
-  const matchField = document.getElementById('b-match-field');
-  const matchSel = document.getElementById('b-match');
-  const formationSel = document.getElementById('b-formation');
-  const priceField = document.getElementById('b-price-field');
-  const fixtureNote = document.getElementById('b-fixture-note');
-  const slotsEl = document.getElementById('b-slots');
-
-  teamSel.innerHTML = BUILDER_TEAMS.map(t => `<option value="${t.team_id}">${t.name}</option>`).join('');
-  formationSel.innerHTML = Object.keys(FORMATIONS).map(f => `<option>${f}</option>`).join('');
-
-  // ---- Team PIN gate -- locks formation/strategy/price/lineup slots/
-  // rationale/generate button until the PIN for the SELECTED team is
-  // entered correctly. Prevents one student from (accidentally or on
-  // purpose) building and submitting a lineup for a team that isn't
-  // theirs. Client-side only -- see hashPin()'s comment above for the
-  // honest limits of that, and resolve_round.py for the real enforcement.
-  const pinInput = document.getElementById('b-pin');
-  const pinStatus = document.getElementById('b-pin-status');
-  const gatedEl = document.getElementById('b-gated');
-  const strategySel = document.getElementById('b-strategy');
-  const priceSel = document.getElementById('b-price');
-  const rationaleEl = document.getElementById('b-rationale');
-  const generateBtn = document.getElementById('b-generate');
-
-  function checkPin() {
-    const team = teamSel.value ? BUILDER_TEAMS.find(t => String(t.team_id) === teamSel.value) : null;
-    const typed = pinInput.value.trim();
-    const unlocked = !!(team && team.pin_hash != null && typed.length === 4 && hashPin(typed) === team.pin_hash);
-
-    [formationSel, strategySel, priceSel, rationaleEl, generateBtn].forEach(el => { el.disabled = !unlocked; });
-    gatedEl.classList.toggle('gated-locked', !unlocked);
-
-    if (!team) {
-      pinStatus.textContent = "Pick your team, then enter your team's PIN to unlock lineup entry.";
-      pinStatus.className = 'builder-msg';
-    } else if (team.pin_hash == null) {
-      // no PIN assigned in league_config.json yet -- don't lock students out
-      pinStatus.textContent = 'No PIN required for this team yet.';
-      pinStatus.className = 'builder-msg ok';
-      [formationSel, strategySel, priceSel, rationaleEl, generateBtn].forEach(el => { el.disabled = false; });
-      gatedEl.classList.remove('gated-locked');
-    } else if (unlocked) {
-      pinStatus.textContent = `Unlocked for ${team.name}.`;
-      pinStatus.className = 'builder-msg ok';
-    } else if (typed.length === 0) {
-      pinStatus.textContent = `Enter ${team.name}'s 4-digit PIN to unlock lineup entry.`;
-      pinStatus.className = 'builder-msg';
-    } else {
-      pinStatus.textContent = 'Incorrect PIN.';
-      pinStatus.className = 'builder-msg';
-    }
-  }
-  pinInput.addEventListener('input', checkPin);
-  teamSel.addEventListener('change', () => { pinInput.value = ''; checkPin(); });
-  checkPin();
-
-  // ---- Rename Your Team -- same PIN system as the lineup builder above,
-  // its own team-select/PIN pair so unlocking one doesn't unlock the other.
-  const nTeamSel = document.getElementById('n-team');
-  const nPinInput = document.getElementById('n-pin');
-  const nPinStatus = document.getElementById('n-pin-status');
-  const nGatedEl = document.getElementById('n-gated');
-  const nNameInput = document.getElementById('n-name');
-  const nGenerateBtn = document.getElementById('n-generate');
-
-  nTeamSel.innerHTML = BUILDER_TEAMS.map(t => `<option value="${t.team_id}">${t.name}</option>`).join('');
-
-  function checkRenamePin() {
-    const team = nTeamSel.value ? BUILDER_TEAMS.find(t => String(t.team_id) === nTeamSel.value) : null;
-    const typed = nPinInput.value.trim();
-    const unlocked = !!(team && team.pin_hash != null && typed.length === 4 && hashPin(typed) === team.pin_hash);
-
-    [nNameInput, nGenerateBtn].forEach(el => { el.disabled = !unlocked; });
-    nGatedEl.classList.toggle('gated-locked', !unlocked);
-
-    if (!team) {
-      nPinStatus.textContent = "Pick your team, then enter your team's PIN to unlock renaming.";
-      nPinStatus.className = 'builder-msg';
-    } else if (team.pin_hash == null) {
-      nPinStatus.textContent = 'No PIN required for this team yet.';
-      nPinStatus.className = 'builder-msg ok';
-      [nNameInput, nGenerateBtn].forEach(el => { el.disabled = false; });
-      nGatedEl.classList.remove('gated-locked');
-    } else if (unlocked) {
-      nPinStatus.textContent = `Unlocked for ${team.name}.`;
-      nPinStatus.className = 'builder-msg ok';
-    } else if (typed.length === 0) {
-      nPinStatus.textContent = `Enter ${team.name}'s 4-digit PIN to unlock renaming.`;
-      nPinStatus.className = 'builder-msg';
-    } else {
-      nPinStatus.textContent = 'Incorrect PIN.';
-      nPinStatus.className = 'builder-msg';
-    }
-  }
-  nPinInput.addEventListener('input', checkRenamePin);
-  nTeamSel.addEventListener('change', () => { nPinInput.value = ''; checkRenamePin(); });
-  checkRenamePin();
-
-  nGenerateBtn.addEventListener('click', () => {
-    const msg = document.getElementById('n-msg');
-    const team = nTeamSel.value ? BUILDER_TEAMS.find(t => String(t.team_id) === nTeamSel.value) : null;
-    const newName = nNameInput.value.trim();
-    if (!team) { msg.textContent = 'Pick a team first.'; msg.className = 'builder-msg'; return; }
-    if (!newName) { msg.textContent = 'Type your new team name first.'; msg.className = 'builder-msg'; return; }
-    if (!team.owner) {
-      msg.textContent = 'No owner is on file for this team yet -- ask the instructor to check league_config.json.';
-      msg.className = 'builder-msg';
-      return;
-    }
-    const block = [
-      `Owner Name: ${team.owner}`,
-      `Team Name: ${newName}`,
-    ].join('\n\n');
-    document.getElementById('n-output').value = block;
-    msg.textContent = 'Block generated -- copy it into the real Team Name Submission form fields of the same name.';
-    msg.className = 'builder-msg ok';
-  });
-
-  document.getElementById('n-copy').addEventListener('click', async () => {
-    const out = document.getElementById('n-output');
-    const msg = document.getElementById('n-msg');
-    out.select();
-    let copied = false;
-    try { await navigator.clipboard.writeText(out.value); copied = true; } catch (e) {}
-    if (!copied) { try { document.execCommand('copy'); copied = true; } catch (e) {} }
-    msg.textContent = copied ? 'Copied.' : 'Select the text above and copy manually.';
-    msg.className = copied ? 'builder-msg ok' : 'builder-msg';
-  });
-
-  // ---- Your Drafted Roster -- standalone, no formation/round involved ----
-  const rTeamSel = document.getElementById('r-team');
-  rTeamSel.innerHTML = BUILDER_TEAMS.map(t => `<option value="${t.team_id}">${t.name}</option>`).join('');
-
-  // this-browser-only scratchpad for Draft Day live entry -- NOT saved to
-  // data/players.csv, resets on reload. Real persistence still runs through
-  // the Draft Board / resolve_draft.py pipeline (or a manual roster-entry
-  // CSV) -- see the note under the Add Player button.
-  const manualAdds = {}; // team_id (string) -> [player, ...]
-  const manualAddedIds = new Set(); // player_ids already manually placed on ANY team this session
-
-  function renderRoster() {
-    const team = BUILDER_TEAMS.find(t => String(t.team_id) === rTeamSel.value);
-    const rows = document.getElementById('r-rows');
-    const summary = document.getElementById('r-summary');
-    if (!team) { rows.innerHTML = ''; summary.textContent = ''; return; }
-
-    const extra = manualAdds[team.team_id] || [];
-    const all = team.roster.concat(extra.map(p => Object.assign({manual: true}, p)));
-
-    if (all.length === 0) {
-      rows.innerHTML = '<tr><td colspan="6" style="color:var(--muted);">No players drafted yet.</td></tr>';
-      summary.textContent = '';
-      return;
-    }
-    rows.innerHTML = all.map((p, i) => `<tr${p.manual ? ' style="opacity:.8;"' : ''}>
-      <td class="num mono">${p.player_id != null ? p.player_id : '&ndash;'}</td>
-      <td class="pos pos-${p.position || '?'}">${p.position || '?'}</td>
-      <td>${p.name}${p.manual ? ' <span class="mono" style="font-size:10px;color:var(--accent);">MANUAL</span>' : ''}</td>
-      <td class="num">${p.ovr != null ? p.ovr : '&ndash;'}</td>
-      <td class="num">${p.salary != null ? '$' + p.salary.toLocaleString() : '&ndash;'}</td>
-      <td>${p.manual ? `<button type="button" class="btn secondary r-remove" data-idx="${extra.indexOf(p)}" style="padding:2px 8px;font-size:10px;">remove</button>` : ''}</td>
-    </tr>`).join('');
-    const totalSalary = all.reduce((sum, p) => sum + (p.salary || 0), 0);
-    summary.innerHTML = `<span class="mono">${all.length}</span> players &middot; total salary <span class="mono">$${totalSalary.toLocaleString()}</span>${extra.length ? ` (<span class="mono">${extra.length}</span> manually added, not yet official)` : ''}`;
-
-    rows.querySelectorAll('.r-remove').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = parseInt(btn.dataset.idx, 10);
-        const removed = extra.splice(idx, 1)[0];
-        if (removed) manualAddedIds.delete(removed.player_id);
-        renderRoster();
-      });
-    });
-  }
-  rTeamSel.addEventListener('change', renderRoster);
-  renderRoster();
-
-  // ---- PIN gate for Add Player -- same PIN as the lineup builder/rename
-  // tool, same hashPin() comparison. Viewing a roster stays open (every
-  // team's roster is already visible on the Front Offices cards below),
-  // only the mutating "Add Player" action is gated.
-  const rPinInput = document.getElementById('r-pin');
-  const rPinStatus = document.getElementById('r-pin-status');
-  const rGatedEl = document.getElementById('r-gated');
-  const rAddNameInput = document.getElementById('r-add-name');
-  const rAddBtn = document.getElementById('r-add-btn');
-
-  function checkRosterPin() {
-    const team = rTeamSel.value ? BUILDER_TEAMS.find(t => String(t.team_id) === rTeamSel.value) : null;
-    const typed = rPinInput.value.trim();
-    const unlocked = !!(team && team.pin_hash != null && typed.length === 4 && hashPin(typed) === team.pin_hash);
-
-    [rAddNameInput, rAddBtn].forEach(el => { el.disabled = !unlocked; });
-    rGatedEl.classList.toggle('gated-locked', !unlocked);
-
-    if (!team) {
-      rPinStatus.textContent = "Pick a team, then enter its PIN to unlock adding a player.";
-      rPinStatus.className = 'builder-msg';
-    } else if (team.pin_hash == null) {
-      rPinStatus.textContent = 'No PIN required for this team yet.';
-      rPinStatus.className = 'builder-msg ok';
-      [rAddNameInput, rAddBtn].forEach(el => { el.disabled = false; });
-      rGatedEl.classList.remove('gated-locked');
-    } else if (unlocked) {
-      rPinStatus.textContent = `Unlocked for ${team.name}.`;
-      rPinStatus.className = 'builder-msg ok';
-    } else if (typed.length === 0) {
-      rPinStatus.textContent = `Enter ${team.name}'s 4-digit PIN to unlock adding a player.`;
-      rPinStatus.className = 'builder-msg';
-    } else {
-      rPinStatus.textContent = 'Incorrect PIN.';
-      rPinStatus.className = 'builder-msg';
-    }
-  }
-  rPinInput.addEventListener('input', checkRosterPin);
-  rTeamSel.addEventListener('change', () => { rPinInput.value = ''; checkRosterPin(); });
-  checkRosterPin();
-
-  document.getElementById('r-add-btn').addEventListener('click', () => {
-    const input = document.getElementById('r-add-name');
-    const msg = document.getElementById('r-add-msg');
-    const typed = input.value.trim();
-    const team = BUILDER_TEAMS.find(t => String(t.team_id) === rTeamSel.value);
-    if (!typed) { msg.textContent = 'Type a player ID (1-399) or name first.'; msg.className = 'builder-msg'; return; }
-    if (!team) { msg.textContent = 'Pick a team first.'; msg.className = 'builder-msg'; return; }
-
-    // ID takes priority when the input is a plain number -- no typo risk,
-    // exact match only, no confusion with a name that happens to look numeric.
-    const asId = /^\d+$/.test(typed) ? typed : null;
-    const byId = p => asId !== null && String(p.player_id) === asId;
-    const byName = p => p.name.toLowerCase() === typed.toLowerCase();
-    const matchFn = asId !== null ? byId : byName;
-
-    const alreadyOnTeam = team.roster.some(matchFn) || (manualAdds[team.team_id] || []).some(matchFn);
-    if (alreadyOnTeam) {
-      const who = asId !== null
-        ? (team.roster.find(matchFn) || (manualAdds[team.team_id]||[]).find(matchFn)).name
-        : typed;
-      msg.textContent = `${who} is already on this roster.`; msg.className = 'builder-msg'; return;
-    }
-
-    const match = PLAYERS.find(matchFn);
-    if (!match) {
-      msg.textContent = asId !== null
-        ? `No available player has ID ${asId} -- check the ID column on the Draft Board below, or they may already be drafted onto another team.`
-        : `"${typed}" doesn't match any available player -- check the exact spelling on the Draft Board list below, or they may already be drafted onto another team.`;
-      msg.className = 'builder-msg';
-      return;
-    }
-    if (manualAddedIds.has(match.player_id)) {
-      msg.textContent = `${match.name} was already manually added to another team this session.`;
-      msg.className = 'builder-msg';
-      return;
-    }
-
-    manualAdds[team.team_id] = manualAdds[team.team_id] || [];
-    manualAdds[team.team_id].push(match);
-    manualAddedIds.add(match.player_id);
-    input.value = '';
-    msg.textContent = `Added ${match.name} -- remember, this is a live scratchpad only, not saved to players.csv.`;
-    msg.className = 'builder-msg ok';
-    renderRoster();
-  });
-  document.getElementById('r-add-name').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('r-add-btn').click();
-  });
-
-  function currentTeam() {
-    return BUILDER_TEAMS.find(t => String(t.team_id) === teamSel.value);
-  }
-
-  function currentFixture() {
-    const team = currentTeam();
-    if (!team || !team.fixtures || team.fixtures.length === 0) return null;
-    return team.fixtures[matchSel.value] || team.fixtures[0];
-  }
-
-  function playerOptions(team, position) {
-    const opts = team.roster.filter(p => p.position === position)
-      .map(p => `<option value="${p.name}">#${p.player_id} &mdash; ${p.name} (OVR ${p.ovr})</option>`).join('');
-    return opts || '<option value="" disabled selected>No players drafted at this position yet</option>';
-  }
-
-  function rebuildMatchOptions() {
-    const team = currentTeam();
-    const fixtures = (team && team.fixtures) || [];
-    matchField.hidden = fixtures.length < 2;
-    matchSel.innerHTML = fixtures.map((fx, i) =>
-      `<option value="${i}">Round ${fx.round} -- ${fx.is_home ? 'HOME vs' : 'AWAY at'} ${fx.opponent}</option>`
-    ).join('');
-  }
-
-  function rebuildSlots() {
-    const team = currentTeam();
-    const counts = FORMATIONS[formationSel.value];
-    if (!team || !counts) return;
-    let html = '';
-    for (const pos of ['GK','DF','MF','FW']) {
-      for (let i = 0; i < counts[pos]; i++) {
-        html += `<div class="slot-group"><h4>${pos} ${counts[pos] > 1 ? (i+1) : ''}</h4>
-          <select class="b-slot" data-pos="${pos}">${playerOptions(team, pos)}</select></div>`;
-      }
-    }
-    slotsEl.innerHTML = html;
-    document.getElementById('b-rationale').value = '';
-    document.getElementById('b-output').value = '';
-
-    const fx = currentFixture();
-    if (!fx) {
-      fixtureNote.textContent = 'No fixture scheduled for your team this match day (bye).';
-      priceField.hidden = true;
-    } else if (fx.is_home) {
-      fixtureNote.textContent = `Round ${fx.round}: HOME vs ${fx.opponent} -- set a ticket price below.`;
-      priceField.hidden = false;
-    } else {
-      fixtureNote.textContent = `Round ${fx.round}: AWAY at ${fx.opponent} -- no ticket price needed.`;
-      priceField.hidden = true;
-    }
-  }
-
-  teamSel.addEventListener('change', () => { rebuildMatchOptions(); rebuildSlots(); });
-  matchSel.addEventListener('change', rebuildSlots);
-  formationSel.addEventListener('change', rebuildSlots);
-  rebuildMatchOptions();
-  rebuildSlots();
-
-  document.getElementById('b-generate').addEventListener('click', () => {
-    const msg = document.getElementById('b-msg');
-    const team = currentTeam();
-    const selects = Array.from(document.querySelectorAll('.b-slot'));
-    const chosen = selects.map(s => ({pos: s.dataset.pos, name: s.value}));
-
-    if (chosen.some(c => !c.name)) {
-      msg.textContent = 'Fill every starting slot before generating.';
-      msg.className = 'builder-msg';
-      return;
-    }
-    const names = chosen.map(c => c.name);
-    if (new Set(names).size !== names.length) {
-      msg.textContent = 'The same player is selected in two slots -- fix that first.';
-      msg.className = 'builder-msg';
-      return;
-    }
-
-    const byPos = pos => chosen.filter(c => c.pos === pos).map(c => c.name);
-    const rationale = document.getElementById('b-rationale').value.trim();
-    const fx = currentFixture();
-    const price = (fx && fx.is_home) ? document.getElementById('b-price').value : '(away -- leave blank)';
-
-    const block = [
-      `Team name: ${team.name}`,
-      `Round number: ${fx ? fx.round : '(bye this match day)'}`,
-      `Formation: ${formationSel.value}`,
-      `Strategy: ${document.getElementById('b-strategy').value}`,
-      `Starting Goalkeeper: ${byPos('GK')[0] || ''}`,
-      `Starting Defenders:\n${byPos('DF').join('\n')}`,
-      `Starting Midfielders:\n${byPos('MF').join('\n')}`,
-      `Starting Forwards:\n${byPos('FW').join('\n')}`,
-      `Ticket Price: ${price}`,
-      `Decision rationale (2-4 sentences): ${rationale || '(fill this in before submitting)'}`,
-    ].join('\n\n');
-
-    document.getElementById('b-output').value = block;
-    msg.textContent = 'Block generated -- copy it into the real Google Form fields of the same name.';
-    msg.className = 'builder-msg ok';
-  });
-
-  document.getElementById('b-copy').addEventListener('click', async () => {
-    const out = document.getElementById('b-output');
-    const msg = document.getElementById('b-msg');
-    out.select();
-    let copied = false;
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(out.value);
-        copied = true;
-      }
-    } catch (e) { copied = false; }
-    if (!copied) {
-      try { copied = document.execCommand('copy'); } catch (e) { copied = false; }
-    }
-    msg.textContent = copied ? 'Copied to clipboard.' : 'Could not auto-copy -- text is selected, use Cmd/Ctrl+C.';
-    msg.className = copied ? 'builder-msg ok' : 'builder-msg';
-  });
-}
-initBuilder();
-
-const PLAYERS = [{"player_id": "387", "name": "Radek Bauer", "position": "MF", "age": 19, "att": 75, "def": 73, "pace": 91, "phy": 89, "ovr": 80, "star_power": 73, "salary": 1064000, "team_id": ""}, {"player_id": "195", "name": "Nico Moreno", "position": "DF", "age": 21, "att": 50, "def": 85, "pace": 95, "phy": 92, "ovr": 77, "star_power": 51, "salary": 827000, "team_id": ""}, {"player_id": "94", "name": "Youssef Fischer", "position": "MF", "age": 29, "att": 68, "def": 64, "pace": 94, "phy": 88, "ovr": 75, "star_power": 80, "salary": 933000, "team_id": ""}, {"player_id": "153", "name": "Stefan Horvat", "position": "MF", "age": 29, "att": 74, "def": 63, "pace": 93, "phy": 82, "ovr": 75, "star_power": 63, "salary": 1055000, "team_id": ""}, {"player_id": "324", "name": "Nico Toure", "position": "DF", "age": 33, "att": 60, "def": 78, "pace": 83, "phy": 86, "ovr": 75, "star_power": 58, "salary": 894000, "team_id": ""}, {"player_id": "343", "name": "Kwame Almeida", "position": "MF", "age": 32, "att": 67, "def": 74, "pace": 82, "phy": 82, "ovr": 75, "star_power": 76, "salary": 934000, "team_id": ""}, {"player_id": "394", "name": "Kenji Silva", "position": "DF", "age": 25, "att": 55, "def": 80, "pace": 94, "phy": 80, "ovr": 75, "star_power": 76, "salary": 981000, "team_id": ""}, {"player_id": "44", "name": "Emil Duarte", "position": "DF", "age": 28, "att": 56, "def": 84, "pace": 72, "phy": 91, "ovr": 74, "star_power": 45, "salary": 866000, "team_id": ""}, {"player_id": "179", "name": "Tariq Sato", "position": "MF", "age": 20, "att": 66, "def": 69, "pace": 79, "phy": 92, "ovr": 74, "star_power": 82, "salary": 1084000, "team_id": ""}, {"player_id": "190", "name": "Cesar Barros", "position": "MF", "age": 34, "att": 69, "def": 65, "pace": 87, "phy": 84, "ovr": 74, "star_power": 84, "salary": 1094000, "team_id": ""}, {"player_id": "223", "name": "Dario Reyes", "position": "DF", "age": 25, "att": 51, "def": 85, "pace": 79, "phy": 88, "ovr": 74, "star_power": 75, "salary": 945000, "team_id": ""}, {"player_id": "281", "name": "Kofi Wallin", "position": "DF", "age": 33, "att": 58, "def": 88, "pace": 77, "phy": 72, "ovr": 74, "star_power": 80, "salary": 1155000, "team_id": ""}, {"player_id": "310", "name": "Yusuf Bauer", "position": "FW", "age": 22, "att": 81, "def": 48, "pace": 87, "phy": 92, "ovr": 74, "star_power": 51, "salary": 724000, "team_id": ""}, {"player_id": "319", "name": "Sami Fischer", "position": "MF", "age": 30, "att": 77, "def": 67, "pace": 65, "phy": 91, "ovr": 74, "star_power": 82, "salary": 1194000, "team_id": ""}, {"player_id": "347", "name": "Rui Krause", "position": "DF", "age": 26, "att": 52, "def": 83, "pace": 92, "phy": 79, "ovr": 74, "star_power": 79, "salary": 1008000, "team_id": ""}, {"player_id": "353", "name": "Idris Ferreira", "position": "MF", "age": 26, "att": 60, "def": 75, "pace": 94, "phy": 76, "ovr": 74, "star_power": 52, "salary": 1022000, "team_id": ""}, {"player_id": "378", "name": "Omar Rossi", "position": "DF", "age": 34, "att": 47, "def": 81, "pace": 95, "phy": 86, "ovr": 74, "star_power": 50, "salary": 1000000, "team_id": ""}, {"player_id": "131", "name": "Idris Nowak", "position": "MF", "age": 28, "att": 76, "def": 57, "pace": 95, "phy": 76, "ovr": 73, "star_power": 51, "salary": 971000, "team_id": ""}, {"player_id": "332", "name": "Enzo Wallin", "position": "DF", "age": 27, "att": 54, "def": 81, "pace": 86, "phy": 80, "ovr": 73, "star_power": 44, "salary": 692000, "team_id": ""}, {"player_id": "336", "name": "Bruno Wallin", "position": "DF", "age": 23, "att": 43, "def": 81, "pace": 93, "phy": 91, "ovr": 73, "star_power": 77, "salary": 1037000, "team_id": ""}, {"player_id": "183", "name": "Andre Malik", "position": "DF", "age": 28, "att": 56, "def": 81, "pace": 82, "phy": 76, "ovr": 72, "star_power": 66, "salary": 785000, "team_id": ""}, {"player_id": "185", "name": "Leon Malik", "position": "MF", "age": 29, "att": 72, "def": 51, "pace": 89, "phy": 90, "ovr": 72, "star_power": 64, "salary": 912000, "team_id": ""}, {"player_id": "230", "name": "Hassan Novak", "position": "DF", "age": 29, "att": 45, "def": 87, "pace": 88, "phy": 79, "ovr": 72, "star_power": 59, "salary": 931000, "team_id": ""}, {"player_id": "245", "name": "Kwame Bauer", "position": "MF", "age": 31, "att": 64, "def": 66, "pace": 91, "phy": 79, "ovr": 72, "star_power": 62, "salary": 1008000, "team_id": ""}, {"player_id": "272", "name": "Stefan Malik", "position": "DF", "age": 30, "att": 59, "def": 85, "pace": 59, "phy": 83, "ovr": 72, "star_power": 78, "salary": 895000, "team_id": ""}, {"player_id": "345", "name": "Tariq Adeyemi", "position": "MF", "age": 33, "att": 72, "def": 71, "pace": 53, "phy": 90, "ovr": 72, "star_power": 64, "salary": 955000, "team_id": ""}, {"player_id": "59", "name": "Amara Braga", "position": "FW", "age": 19, "att": 79, "def": 44, "pace": 91, "phy": 83, "ovr": 71, "star_power": 55, "salary": 967000, "team_id": ""}, {"player_id": "111", "name": "Leon Santos", "position": "DF", "age": 20, "att": 60, "def": 63, "pace": 95, "phy": 81, "ovr": 71, "star_power": 77, "salary": 926000, "team_id": ""}, {"player_id": "187", "name": "Youssef Costa", "position": "DF", "age": 26, "att": 57, "def": 82, "pace": 69, "phy": 76, "ovr": 71, "star_power": 60, "salary": 783000, "team_id": ""}, {"player_id": "212", "name": "Kwame Fischer", "position": "MF", "age": 23, "att": 53, "def": 71, "pace": 90, "phy": 86, "ovr": 71, "star_power": 57, "salary": 766000, "team_id": ""}, {"player_id": "256", "name": "Amara Nowak", "position": "MF", "age": 19, "att": 68, "def": 75, "pace": 89, "phy": 52, "ovr": 71, "star_power": 51, "salary": 827000, "team_id": ""}, {"player_id": "284", "name": "Kai Malik", "position": "MF", "age": 31, "att": 70, "def": 75, "pace": 64, "phy": 75, "ovr": 71, "star_power": 53, "salary": 795000, "team_id": ""}, {"player_id": "303", "name": "Cesar Wallin", "position": "DF", "age": 20, "att": 59, "def": 75, "pace": 85, "phy": 73, "ovr": 71, "star_power": 76, "salary": 873000, "team_id": ""}, {"player_id": "317", "name": "Lars Duarte", "position": "MF", "age": 29, "att": 57, "def": 68, "pace": 87, "phy": 85, "ovr": 71, "star_power": 46, "salary": 716000, "team_id": ""}, {"player_id": "360", "name": "Mateo Ivanov", "position": "DF", "age": 32, "att": 59, "def": 88, "pace": 69, "phy": 62, "ovr": 71, "star_power": 76, "salary": 890000, "team_id": ""}, {"player_id": "391", "name": "Tomas Toure", "position": "DF", "age": 22, "att": 38, "def": 84, "pace": 85, "phy": 90, "ovr": 71, "star_power": 81, "salary": 978000, "team_id": ""}, {"player_id": "16", "name": "Luca Vidal", "position": "MF", "age": 22, "att": 74, "def": 62, "pace": 62, "phy": 84, "ovr": 70, "star_power": 72, "salary": 823000, "team_id": ""}, {"player_id": "55", "name": "Radek Osei", "position": "DF", "age": 30, "att": 59, "def": 78, "pace": 69, "phy": 75, "ovr": 70, "star_power": 42, "salary": 735000, "team_id": ""}, {"player_id": "57", "name": "Mateo Diallo", "position": "MF", "age": 30, "att": 64, "def": 74, "pace": 79, "phy": 66, "ovr": 70, "star_power": 66, "salary": 967000, "team_id": ""}, {"player_id": "67", "name": "Nikolai Novak", "position": "MF", "age": 21, "att": 66, "def": 59, "pace": 78, "phy": 90, "ovr": 70, "star_power": 58, "salary": 995000, "team_id": ""}, {"player_id": "107", "name": "Stefan Braga", "position": "DF", "age": 34, "att": 59, "def": 67, "pace": 89, "phy": 75, "ovr": 70, "star_power": 71, "salary": 921000, "team_id": ""}, {"player_id": "108", "name": "Adrian Novak", "position": "MF", "age": 19, "att": 70, "def": 66, "pace": 72, "phy": 77, "ovr": 70, "star_power": 58, "salary": 830000, "team_id": ""}, {"player_id": "114", "name": "Youssef Almeida", "position": "MF", "age": 19, "att": 70, "def": 51, "pace": 94, "phy": 81, "ovr": 70, "star_power": 60, "salary": 881000, "team_id": ""}, {"player_id": "116", "name": "Igor Santos", "position": "MF", "age": 21, "att": 51, "def": 70, "pace": 85, "phy": 86, "ovr": 70, "star_power": 57, "salary": 816000, "team_id": ""}, {"player_id": "132", "name": "Emil Santos", "position": "DF", "age": 31, "att": 54, "def": 85, "pace": 84, "phy": 59, "ovr": 70, "star_power": 76, "salary": 947000, "team_id": ""}, {"player_id": "160", "name": "Sami Suarez", "position": "DF", "age": 24, "att": 51, "def": 73, "pace": 81, "phy": 88, "ovr": 70, "star_power": 77, "salary": 859000, "team_id": ""}, {"player_id": "197", "name": "Kai Adeyemi", "position": "DF", "age": 29, "att": 49, "def": 73, "pace": 91, "phy": 82, "ovr": 70, "star_power": 54, "salary": 953000, "team_id": ""}, {"player_id": "201", "name": "Felix Malik", "position": "DF", "age": 26, "att": 57, "def": 69, "pace": 89, "phy": 74, "ovr": 70, "star_power": 45, "salary": 921000, "team_id": ""}, {"player_id": "203", "name": "Rafael Reyes", "position": "DF", "age": 24, "att": 60, "def": 74, "pace": 63, "phy": 88, "ovr": 70, "star_power": 66, "salary": 780000, "team_id": ""}, {"player_id": "265", "name": "Tariq Kovac", "position": "FW", "age": 34, "att": 84, "def": 39, "pace": 81, "phy": 92, "ovr": 70, "star_power": 76, "salary": 980000, "team_id": ""}, {"player_id": "268", "name": "Pavel Berg", "position": "MF", "age": 22, "att": 71, "def": 61, "pace": 90, "phy": 64, "ovr": 70, "star_power": 73, "salary": 993000, "team_id": ""}, {"player_id": "330", "name": "Rafael Kucera", "position": "DF", "age": 26, "att": 47, "def": 86, "pace": 85, "phy": 68, "ovr": 70, "star_power": 46, "salary": 802000, "team_id": ""}, {"player_id": "365", "name": "Igor Malik", "position": "MF", "age": 31, "att": 68, "def": 66, "pace": 93, "phy": 57, "ovr": 70, "star_power": 50, "salary": 923000, "team_id": ""}, {"player_id": "377", "name": "Nikolai Mensah", "position": "MF", "age": 25, "att": 63, "def": 67, "pace": 80, "phy": 75, "ovr": 70, "star_power": 76, "salary": 1050000, "team_id": ""}, {"player_id": "396", "name": "Milan Reyes", "position": "DF", "age": 29, "att": 46, "def": 85, "pace": 95, "phy": 60, "ovr": 70, "star_power": 68, "salary": 770000, "team_id": ""}, {"player_id": "2", "name": "Sami Kovac", "position": "DF", "age": 27, "att": 59, "def": 79, "pace": 48, "phy": 88, "ovr": 69, "star_power": 45, "salary": 781000, "team_id": ""}, {"player_id": "3", "name": "Kofi Diallo", "position": "MF", "age": 29, "att": 78, "def": 67, "pace": 73, "phy": 50, "ovr": 69, "star_power": 77, "salary": 1015000, "team_id": ""}, {"player_id": "24", "name": "Sven Kucera", "position": "DF", "age": 33, "att": 44, "def": 80, "pace": 72, "phy": 89, "ovr": 69, "star_power": 53, "salary": 936000, "team_id": ""}, {"player_id": "47", "name": "Lars Novak", "position": "MF", "age": 20, "att": 69, "def": 64, "pace": 77, "phy": 69, "ovr": 69, "star_power": 62, "salary": 868000, "team_id": ""}, {"player_id": "119", "name": "Milan Sato", "position": "MF", "age": 20, "att": 69, "def": 68, "pace": 82, "phy": 60, "ovr": 69, "star_power": 52, "salary": 881000, "team_id": ""}, {"player_id": "125", "name": "Mateo Malik", "position": "MF", "age": 24, "att": 59, "def": 59, "pace": 83, "phy": 90, "ovr": 69, "star_power": 61, "salary": 935000, "team_id": ""}, {"player_id": "140", "name": "Hassan Adeyemi", "position": "MF", "age": 21, "att": 66, "def": 58, "pace": 94, "phy": 71, "ovr": 69, "star_power": 78, "salary": 842000, "team_id": ""}, {"player_id": "193", "name": "Luca Horvat", "position": "MF", "age": 21, "att": 65, "def": 73, "pace": 64, "phy": 76, "ovr": 69, "star_power": 42, "salary": 900000, "team_id": ""}, {"player_id": "209", "name": "Mateo Keller", "position": "MF", "age": 23, "att": 64, "def": 59, "pace": 88, "phy": 78, "ovr": 69, "star_power": 57, "salary": 969000, "team_id": ""}, {"player_id": "224", "name": "Igor Krause", "position": "DF", "age": 31, "att": 57, "def": 75, "pace": 63, "phy": 87, "ovr": 69, "star_power": 84, "salary": 1103000, "team_id": ""}, {"player_id": "235", "name": "Nikolai Ferreira", "position": "MF", "age": 28, "att": 62, "def": 74, "pace": 60, "phy": 80, "ovr": 69, "star_power": 56, "salary": 818000, "team_id": ""}, {"player_id": "237", "name": "Felix Bauer", "position": "MF", "age": 20, "att": 77, "def": 67, "pace": 54, "phy": 74, "ovr": 69, "star_power": 82, "salary": 1007000, "team_id": ""}, {"player_id": "296", "name": "Tomas Duarte", "position": "MF", "age": 25, "att": 64, "def": 65, "pace": 61, "phy": 92, "ovr": 69, "star_power": 63, "salary": 798000, "team_id": ""}, {"player_id": "300", "name": "Stefan Diallo", "position": "MF", "age": 20, "att": 78, "def": 62, "pace": 86, "phy": 48, "ovr": 69, "star_power": 65, "salary": 1003000, "team_id": ""}, {"player_id": "327", "name": "Nikolai Nowak", "position": "DF", "age": 19, "att": 48, "def": 83, "pace": 65, "phy": 83, "ovr": 69, "star_power": 53, "salary": 721000, "team_id": ""}, {"player_id": "20", "name": "Diego Vidal", "position": "MF", "age": 20, "att": 69, "def": 66, "pace": 90, "phy": 48, "ovr": 68, "star_power": 52, "salary": 797000, "team_id": ""}, {"player_id": "39", "name": "Kwame Braga", "position": "GK", "age": 32, "att": 36, "def": 77, "pace": 86, "phy": 89, "ovr": 68, "star_power": 65, "salary": 806000, "team_id": ""}, {"player_id": "46", "name": "Nikolai Silva", "position": "DF", "age": 19, "att": 59, "def": 86, "pace": 55, "phy": 64, "ovr": 68, "star_power": 46, "salary": 910000, "team_id": ""}, {"player_id": "65", "name": "Kenji Berg", "position": "MF", "age": 30, "att": 61, "def": 70, "pace": 66, "phy": 80, "ovr": 68, "star_power": 83, "salary": 1069000, "team_id": ""}, {"player_id": "73", "name": "Kai Sokol", "position": "MF", "age": 27, "att": 65, "def": 73, "pace": 53, "phy": 77, "ovr": 68, "star_power": 62, "salary": 784000, "team_id": ""}, {"player_id": "76", "name": "Felix Krause", "position": "DF", "age": 22, "att": 45, "def": 86, "pace": 74, "phy": 70, "ovr": 68, "star_power": 60, "salary": 810000, "team_id": ""}, {"player_id": "77", "name": "Andre Suarez", "position": "FW", "age": 30, "att": 66, "def": 50, "pace": 92, "phy": 82, "ovr": 68, "star_power": 72, "salary": 1041000, "team_id": ""}, {"player_id": "78", "name": "Radek Braga", "position": "DF", "age": 28, "att": 57, "def": 70, "pace": 69, "phy": 83, "ovr": 68, "star_power": 64, "salary": 872000, "team_id": ""}, {"player_id": "110", "name": "Tariq Moreno", "position": "FW", "age": 21, "att": 84, "def": 38, "pace": 72, "phy": 89, "ovr": 68, "star_power": 59, "salary": 901000, "team_id": ""}, {"player_id": "139", "name": "Radek Haddad", "position": "MF", "age": 31, "att": 61, "def": 54, "pace": 86, "phy": 89, "ovr": 68, "star_power": 71, "salary": 805000, "team_id": ""}, {"player_id": "152", "name": "Enzo Rossi", "position": "MF", "age": 23, "att": 59, "def": 53, "pace": 91, "phy": 87, "ovr": 68, "star_power": 82, "salary": 922000, "team_id": ""}, {"player_id": "167", "name": "Diego Krause", "position": "MF", "age": 28, "att": 61, "def": 66, "pace": 91, "phy": 60, "ovr": 68, "star_power": 61, "salary": 945000, "team_id": ""}, {"player_id": "184", "name": "Yusuf Keller", "position": "MF", "age": 24, "att": 71, "def": 65, "pace": 70, "phy": 68, "ovr": 68, "star_power": 64, "salary": 1023000, "team_id": ""}, {"player_id": "188", "name": "Stefan Ivanov", "position": "FW", "age": 22, "att": 88, "def": 46, "pace": 93, "phy": 48, "ovr": 68, "star_power": 43, "salary": 811000, "team_id": ""}, {"player_id": "206", "name": "Pavel Lindqvist", "position": "FW", "age": 27, "att": 90, "def": 36, "pace": 78, "phy": 78, "ovr": 68, "star_power": 76, "salary": 839000, "team_id": ""}, {"player_id": "211", "name": "Andre Almeida", "position": "FW", "age": 31, "att": 81, "def": 40, "pace": 78, "phy": 85, "ovr": 68, "star_power": 55, "salary": 871000, "team_id": ""}, {"player_id": "242", "name": "Andre Ivanov", "position": "MF", "age": 24, "att": 55, "def": 68, "pace": 74, "phy": 86, "ovr": 68, "star_power": 53, "salary": 692000, "team_id": ""}, {"player_id": "288", "name": "Milan Krause", "position": "MF", "age": 31, "att": 61, "def": 73, "pace": 69, "phy": 73, "ovr": 68, "star_power": 80, "salary": 927000, "team_id": ""}, {"player_id": "304", "name": "Nikolai Toure", "position": "GK", "age": 25, "att": 36, "def": 72, "pace": 93, "phy": 91, "ovr": 68, "star_power": 72, "salary": 994000, "team_id": ""}, {"player_id": "311", "name": "Ivan Duarte", "position": "FW", "age": 25, "att": 87, "def": 27, "pace": 95, "phy": 79, "ovr": 68, "star_power": 59, "salary": 997000, "team_id": ""}, {"player_id": "346", "name": "Enzo Novak", "position": "FW", "age": 31, "att": 79, "def": 44, "pace": 95, "phy": 65, "ovr": 68, "star_power": 80, "salary": 806000, "team_id": ""}, {"player_id": "372", "name": "Rui Adamu", "position": "DF", "age": 30, "att": 57, "def": 67, "pace": 77, "phy": 80, "ovr": 68, "star_power": 78, "salary": 817000, "team_id": ""}, {"player_id": "384", "name": "Andre Barros", "position": "MF", "age": 23, "att": 76, "def": 62, "pace": 77, "phy": 57, "ovr": 68, "star_power": 67, "salary": 798000, "team_id": ""}, {"player_id": "12", "name": "Amara Krause", "position": "FW", "age": 21, "att": 89, "def": 48, "pace": 65, "phy": 62, "ovr": 67, "star_power": 78, "salary": 972000, "team_id": ""}, {"player_id": "69", "name": "Andre Larsson", "position": "FW", "age": 20, "att": 84, "def": 42, "pace": 68, "phy": 79, "ovr": 67, "star_power": 78, "salary": 1033000, "team_id": ""}, {"player_id": "71", "name": "Tobias Ivanov", "position": "DF", "age": 28, "att": 37, "def": 86, "pace": 93, "phy": 60, "ovr": 67, "star_power": 71, "salary": 827000, "team_id": ""}, {"player_id": "74", "name": "Hassan Duarte", "position": "MF", "age": 28, "att": 74, "def": 70, "pace": 54, "phy": 63, "ovr": 67, "star_power": 42, "salary": 884000, "team_id": ""}, {"player_id": "100", "name": "Enzo Petrov", "position": "DF", "age": 19, "att": 44, "def": 74, "pace": 89, "phy": 76, "ovr": 67, "star_power": 46, "salary": 912000, "team_id": ""}, {"player_id": "112", "name": "Cesar Mensah", "position": "MF", "age": 23, "att": 62, "def": 75, "pace": 81, "phy": 47, "ovr": 67, "star_power": 68, "salary": 953000, "team_id": ""}, {"player_id": "121", "name": "Sami Rossi", "position": "FW", "age": 31, "att": 82, "def": 50, "pace": 85, "phy": 54, "ovr": 67, "star_power": 74, "salary": 871000, "team_id": ""}, {"player_id": "146", "name": "Nikolai Wallin", "position": "FW", "age": 27, "att": 90, "def": 44, "pace": 70, "phy": 65, "ovr": 67, "star_power": 42, "salary": 839000, "team_id": ""}, {"player_id": "149", "name": "Sami Santos", "position": "MF", "age": 21, "att": 71, "def": 70, "pace": 73, "phy": 47, "ovr": 67, "star_power": 47, "salary": 719000, "team_id": ""}, {"player_id": "174", "name": "Tobias Bauer", "position": "MF", "age": 34, "att": 68, "def": 55, "pace": 77, "phy": 77, "ovr": 67, "star_power": 65, "salary": 945000, "team_id": ""}, {"player_id": "202", "name": "Tomas Larsson", "position": "DF", "age": 31, "att": 49, "def": 67, "pace": 93, "phy": 74, "ovr": 67, "star_power": 66, "salary": 838000, "team_id": ""}, {"player_id": "218", "name": "Radek Adamu", "position": "FW", "age": 33, "att": 65, "def": 46, "pace": 94, "phy": 80, "ovr": 67, "star_power": 42, "salary": 880000, "team_id": ""}, {"player_id": "219", "name": "Omar Vidal", "position": "DF", "age": 34, "att": 43, "def": 84, "pace": 60, "phy": 85, "ovr": 67, "star_power": 53, "salary": 857000, "team_id": ""}, {"player_id": "251", "name": "Sven Braga", "position": "DF", "age": 26, "att": 48, "def": 79, "pace": 92, "phy": 54, "ovr": 67, "star_power": 82, "salary": 1090000, "team_id": ""}, {"player_id": "299", "name": "Tomas Wallin", "position": "DF", "age": 23, "att": 47, "def": 79, "pace": 88, "phy": 60, "ovr": 67, "star_power": 63, "salary": 793000, "team_id": ""}, {"player_id": "355", "name": "Yusuf Novak", "position": "MF", "age": 20, "att": 70, "def": 63, "pace": 59, "phy": 79, "ovr": 67, "star_power": 74, "salary": 1060000, "team_id": ""}, {"player_id": "356", "name": "Mateo Costa", "position": "DF", "age": 32, "att": 57, "def": 67, "pace": 81, "phy": 69, "ovr": 67, "star_power": 51, "salary": 684000, "team_id": ""}, {"player_id": "361", "name": "Rafael Horvat", "position": "GK", "age": 34, "att": 39, "def": 68, "pace": 89, "phy": 91, "ovr": 67, "star_power": 76, "salary": 828000, "team_id": ""}, {"player_id": "367", "name": "Emil Fischer", "position": "DF", "age": 25, "att": 47, "def": 82, "pace": 63, "phy": 80, "ovr": 67, "star_power": 47, "salary": 769000, "team_id": ""}, {"player_id": "373", "name": "Lars Horvat", "position": "FW", "age": 21, "att": 87, "def": 34, "pace": 94, "phy": 64, "ovr": 67, "star_power": 55, "salary": 846000, "team_id": ""}, {"player_id": "374", "name": "Enzo Moreno", "position": "FW", "age": 32, "att": 80, "def": 40, "pace": 71, "phy": 88, "ovr": 67, "star_power": 63, "salary": 935000, "team_id": ""}, {"player_id": "380", "name": "Sven Adamu", "position": "MF", "age": 33, "att": 60, "def": 71, "pace": 86, "phy": 56, "ovr": 67, "star_power": 78, "salary": 1105000, "team_id": ""}, {"player_id": "392", "name": "Youssef Suarez", "position": "FW", "age": 31, "att": 78, "def": 37, "pace": 88, "phy": 79, "ovr": 67, "star_power": 56, "salary": 909000, "team_id": ""}, {"player_id": "398", "name": "Tomas Bauer", "position": "MF", "age": 23, "att": 67, "def": 57, "pace": 86, "phy": 66, "ovr": 67, "star_power": 78, "salary": 1004000, "team_id": ""}, {"player_id": "15", "name": "Hassan Almeida", "position": "MF", "age": 21, "att": 76, "def": 45, "pace": 92, "phy": 58, "ovr": 66, "star_power": 67, "salary": 747000, "team_id": ""}, {"player_id": "35", "name": "Rafael Nowak", "position": "MF", "age": 20, "att": 74, "def": 65, "pace": 57, "phy": 63, "ovr": 66, "star_power": 56, "salary": 932000, "team_id": ""}, {"player_id": "41", "name": "Rafael Barros", "position": "DF", "age": 21, "att": 39, "def": 83, "pace": 71, "phy": 78, "ovr": 66, "star_power": 46, "salary": 771000, "team_id": ""}, {"player_id": "43", "name": "Youssef Vidal", "position": "MF", "age": 32, "att": 64, "def": 69, "pace": 63, "phy": 69, "ovr": 66, "star_power": 63, "salary": 1002000, "team_id": ""}, {"player_id": "50", "name": "Kofi Bauer", "position": "DF", "age": 20, "att": 53, "def": 73, "pace": 64, "phy": 81, "ovr": 66, "star_power": 68, "salary": 923000, "team_id": ""}, {"player_id": "60", "name": "Yusuf Haddad", "position": "DF", "age": 26, "att": 39, "def": 85, "pace": 81, "phy": 64, "ovr": 66, "star_power": 44, "salary": 667000, "team_id": ""}, {"player_id": "88", "name": "Leon Wallin", "position": "MF", "age": 23, "att": 67, "def": 47, "pace": 77, "phy": 86, "ovr": 66, "star_power": 48, "salary": 699000, "team_id": ""}, {"player_id": "99", "name": "Ivan Keller", "position": "DF", "age": 31, "att": 39, "def": 84, "pace": 59, "phy": 88, "ovr": 66, "star_power": 73, "salary": 1061000, "team_id": ""}, {"player_id": "101", "name": "Andre Sokol", "position": "DF", "age": 23, "att": 51, "def": 66, "pace": 94, "phy": 67, "ovr": 66, "star_power": 56, "salary": 754000, "team_id": ""}, {"player_id": "143", "name": "Cesar Adeyemi", "position": "DF", "age": 29, "att": 52, "def": 76, "pace": 67, "phy": 72, "ovr": 66, "star_power": 74, "salary": 874000, "team_id": ""}, {"player_id": "180", "name": "Jonas Kovac", "position": "DF", "age": 29, "att": 43, "def": 86, "pace": 75, "phy": 63, "ovr": 66, "star_power": 74, "salary": 1016000, "team_id": ""}, {"player_id": "182", "name": "Marco Krause", "position": "MF", "age": 23, "att": 54, "def": 71, "pace": 85, "phy": 59, "ovr": 66, "star_power": 44, "salary": 638000, "team_id": ""}, {"player_id": "213", "name": "Youssef Weber", "position": "MF", "age": 31, "att": 73, "def": 46, "pace": 82, "phy": 75, "ovr": 66, "star_power": 48, "salary": 693000, "team_id": ""}, {"player_id": "220", "name": "Kofi Nowak", "position": "DF", "age": 28, "att": 53, "def": 71, "pace": 91, "phy": 53, "ovr": 66, "star_power": 44, "salary": 721000, "team_id": ""}, {"player_id": "231", "name": "Tobias Braga", "position": "DF", "age": 33, "att": 45, "def": 79, "pace": 59, "phy": 86, "ovr": 66, "star_power": 44, "salary": 874000, "team_id": ""}, {"player_id": "271", "name": "Emil Rossi", "position": "FW", "age": 26, "att": 84, "def": 27, "pace": 91, "phy": 80, "ovr": 66, "star_power": 81, "salary": 980000, "team_id": ""}, {"player_id": "322", "name": "Rui Diallo", "position": "DF", "age": 19, "att": 54, "def": 78, "pace": 64, "phy": 70, "ovr": 66, "star_power": 65, "salary": 816000, "team_id": ""}, {"player_id": "342", "name": "Felix Adamu", "position": "MF", "age": 28, "att": 56, "def": 69, "pace": 94, "phy": 48, "ovr": 66, "star_power": 46, "salary": 706000, "team_id": ""}, {"player_id": "350", "name": "Tomas Vidal", "position": "MF", "age": 25, "att": 77, "def": 56, "pace": 50, "phy": 79, "ovr": 66, "star_power": 73, "salary": 775000, "team_id": ""}, {"player_id": "363", "name": "Rui Ivanov", "position": "MF", "age": 27, "att": 55, "def": 60, "pace": 89, "phy": 76, "ovr": 66, "star_power": 57, "salary": 919000, "team_id": ""}, {"player_id": "366", "name": "Idris Adeyemi", "position": "DF", "age": 32, "att": 51, "def": 80, "pace": 73, "phy": 62, "ovr": 66, "star_power": 48, "salary": 823000, "team_id": ""}, {"player_id": "395", "name": "Emil Wallin", "position": "MF", "age": 21, "att": 74, "def": 74, "pace": 46, "phy": 60, "ovr": 66, "star_power": 50, "salary": 689000, "team_id": ""}, {"player_id": "397", "name": "Ivan Bauer", "position": "DF", "age": 34, "att": 57, "def": 72, "pace": 62, "phy": 77, "ovr": 66, "star_power": 65, "salary": 856000, "team_id": ""}, {"player_id": "6", "name": "Nikolai Suarez", "position": "DF", "age": 32, "att": 57, "def": 65, "pace": 64, "phy": 80, "ovr": 65, "star_power": 40, "salary": 635000, "team_id": ""}, {"player_id": "8", "name": "Stefan Lindqvist", "position": "MF", "age": 23, "att": 64, "def": 50, "pace": 91, "phy": 67, "ovr": 65, "star_power": 48, "salary": 838000, "team_id": ""}, {"player_id": "21", "name": "Sven Vidal", "position": "MF", "age": 27, "att": 51, "def": 68, "pace": 67, "phy": 84, "ovr": 65, "star_power": 59, "salary": 875000, "team_id": ""}, {"player_id": "26", "name": "Pavel Fischer", "position": "MF", "age": 24, "att": 68, "def": 68, "pace": 65, "phy": 57, "ovr": 65, "star_power": 74, "salary": 912000, "team_id": ""}, {"player_id": "32", "name": "Marco Neumann", "position": "DF", "age": 24, "att": 44, "def": 75, "pace": 75, "phy": 73, "ovr": 65, "star_power": 55, "salary": 944000, "team_id": ""}, {"player_id": "48", "name": "Kofi Adamu", "position": "DF", "age": 31, "att": 50, "def": 71, "pace": 66, "phy": 80, "ovr": 65, "star_power": 74, "salary": 898000, "team_id": ""}, {"player_id": "58", "name": "Milan Neumann", "position": "GK", "age": 32, "att": 45, "def": 62, "pace": 95, "phy": 75, "ovr": 65, "star_power": 76, "salary": 825000, "team_id": ""}, {"player_id": "63", "name": "Omar Diallo", "position": "MF", "age": 33, "att": 75, "def": 49, "pace": 49, "phy": 90, "ovr": 65, "star_power": 75, "salary": 772000, "team_id": ""}, {"player_id": "87", "name": "Nikolai Moreno", "position": "DF", "age": 32, "att": 58, "def": 88, "pace": 53, "phy": 49, "ovr": 65, "star_power": 52, "salary": 756000, "team_id": ""}, {"player_id": "90", "name": "Igor Larsson", "position": "MF", "age": 31, "att": 53, "def": 70, "pace": 68, "phy": 72, "ovr": 65, "star_power": 80, "salary": 1021000, "team_id": ""}, {"player_id": "103", "name": "Nico Kucera", "position": "FW", "age": 21, "att": 64, "def": 49, "pace": 90, "phy": 70, "ovr": 65, "star_power": 82, "salary": 888000, "team_id": ""}, {"player_id": "105", "name": "Youssef Kucera", "position": "DF", "age": 20, "att": 35, "def": 84, "pace": 88, "phy": 62, "ovr": 65, "star_power": 66, "salary": 950000, "team_id": ""}, {"player_id": "118", "name": "Enzo Larsson", "position": "MF", "age": 31, "att": 59, "def": 48, "pace": 81, "phy": 88, "ovr": 65, "star_power": 64, "salary": 977000, "team_id": ""}, {"player_id": "122", "name": "Lars Vidal", "position": "FW", "age": 32, "att": 79, "def": 40, "pace": 82, "phy": 70, "ovr": 65, "star_power": 64, "salary": 874000, "team_id": ""}, {"player_id": "124", "name": "Tomas Silva", "position": "FW", "age": 29, "att": 86, "def": 48, "pace": 54, "phy": 67, "ovr": 65, "star_power": 54, "salary": 797000, "team_id": ""}, {"player_id": "194", "name": "Emil Haddad", "position": "MF", "age": 34, "att": 63, "def": 67, "pace": 58, "phy": 71, "ovr": 65, "star_power": 63, "salary": 965000, "team_id": ""}, {"player_id": "208", "name": "Dario Novak", "position": "MF", "age": 29, "att": 63, "def": 64, "pace": 56, "phy": 79, "ovr": 65, "star_power": 53, "salary": 695000, "team_id": ""}, {"player_id": "210", "name": "Yusuf Braga", "position": "DF", "age": 34, "att": 44, "def": 82, "pace": 53, "phy": 85, "ovr": 65, "star_power": 79, "salary": 811000, "team_id": ""}, {"player_id": "214", "name": "Pavel Barros", "position": "FW", "age": 26, "att": 72, "def": 45, "pace": 64, "phy": 91, "ovr": 65, "star_power": 71, "salary": 875000, "team_id": ""}, {"player_id": "221", "name": "Stefan Santos", "position": "MF", "age": 26, "att": 67, "def": 45, "pace": 85, "phy": 77, "ovr": 65, "star_power": 66, "salary": 936000, "team_id": ""}, {"player_id": "228", "name": "Youssef Osei", "position": "FW", "age": 27, "att": 85, "def": 49, "pace": 59, "phy": 63, "ovr": 65, "star_power": 42, "salary": 678000, "team_id": ""}, {"player_id": "252", "name": "Hassan Moreno", "position": "DF", "age": 20, "att": 35, "def": 81, "pace": 79, "phy": 74, "ovr": 65, "star_power": 59, "salary": 746000, "team_id": ""}, {"player_id": "254", "name": "Kenji Ferreira", "position": "DF", "age": 24, "att": 55, "def": 66, "pace": 61, "phy": 87, "ovr": 65, "star_power": 44, "salary": 691000, "team_id": ""}, {"player_id": "263", "name": "Adrian Vidal", "position": "MF", "age": 34, "att": 53, "def": 66, "pace": 58, "phy": 90, "ovr": 65, "star_power": 66, "salary": 750000, "team_id": ""}, {"player_id": "283", "name": "Lars Ivanov", "position": "DF", "age": 28, "att": 54, "def": 70, "pace": 87, "phy": 52, "ovr": 65, "star_power": 73, "salary": 909000, "team_id": ""}, {"player_id": "307", "name": "Amara Larsson", "position": "DF", "age": 20, "att": 40, "def": 85, "pace": 89, "phy": 51, "ovr": 65, "star_power": 57, "salary": 926000, "team_id": ""}, {"player_id": "309", "name": "Emil Diallo", "position": "DF", "age": 30, "att": 41, "def": 64, "pace": 95, "phy": 79, "ovr": 65, "star_power": 80, "salary": 953000, "team_id": ""}, {"player_id": "316", "name": "Amara Silva", "position": "DF", "age": 29, "att": 49, "def": 64, "pace": 74, "phy": 87, "ovr": 65, "star_power": 64, "salary": 993000, "team_id": ""}, {"player_id": "333", "name": "Dario Lindqvist", "position": "DF", "age": 22, "att": 54, "def": 74, "pace": 71, "phy": 62, "ovr": 65, "star_power": 50, "salary": 748000, "team_id": ""}, {"player_id": "338", "name": "Tariq Malik", "position": "FW", "age": 22, "att": 78, "def": 33, "pace": 77, "phy": 88, "ovr": 65, "star_power": 77, "salary": 812000, "team_id": ""}, {"player_id": "352", "name": "Tobias Santos", "position": "MF", "age": 19, "att": 60, "def": 71, "pace": 81, "phy": 47, "ovr": 65, "star_power": 77, "salary": 795000, "team_id": ""}, {"player_id": "368", "name": "Mateo Almeida", "position": "DF", "age": 21, "att": 46, "def": 64, "pace": 88, "phy": 75, "ovr": 65, "star_power": 43, "salary": 839000, "team_id": ""}, {"player_id": "375", "name": "Tomas Diallo", "position": "FW", "age": 32, "att": 73, "def": 39, "pace": 80, "phy": 80, "ovr": 65, "star_power": 63, "salary": 740000, "team_id": ""}, {"player_id": "5", "name": "Kenji Petrov", "position": "MF", "age": 34, "att": 50, "def": 75, "pace": 80, "phy": 55, "ovr": 64, "star_power": 58, "salary": 816000, "team_id": ""}, {"player_id": "29", "name": "Lars Almeida", "position": "FW", "age": 33, "att": 82, "def": 43, "pace": 85, "phy": 49, "ovr": 64, "star_power": 62, "salary": 846000, "team_id": ""}, {"player_id": "30", "name": "Kwame Suarez", "position": "DF", "age": 26, "att": 41, "def": 86, "pace": 46, "phy": 84, "ovr": 64, "star_power": 46, "salary": 663000, "team_id": ""}, {"player_id": "61", "name": "Sami Toure", "position": "MF", "age": 30, "att": 52, "def": 75, "pace": 59, "phy": 73, "ovr": 64, "star_power": 79, "salary": 1066000, "team_id": ""}, {"player_id": "75", "name": "Yusuf Petrov", "position": "MF", "age": 34, "att": 66, "def": 51, "pace": 80, "phy": 65, "ovr": 64, "star_power": 70, "salary": 891000, "team_id": ""}, {"player_id": "85", "name": "Nico Wallin", "position": "MF", "age": 23, "att": 59, "def": 67, "pace": 76, "phy": 57, "ovr": 64, "star_power": 45, "salary": 846000, "team_id": ""}, {"player_id": "86", "name": "Sami Adamu", "position": "FW", "age": 21, "att": 70, "def": 37, "pace": 82, "phy": 85, "ovr": 64, "star_power": 74, "salary": 845000, "team_id": ""}, {"player_id": "92", "name": "Sven Fischer", "position": "DF", "age": 25, "att": 48, "def": 79, "pace": 77, "phy": 52, "ovr": 64, "star_power": 57, "salary": 749000, "team_id": ""}, {"player_id": "138", "name": "Cesar Malik", "position": "GK", "age": 19, "att": 35, "def": 69, "pace": 79, "phy": 90, "ovr": 64, "star_power": 54, "salary": 847000, "team_id": ""}, {"player_id": "155", "name": "Enzo Weber", "position": "GK", "age": 20, "att": 40, "def": 79, "pace": 94, "phy": 48, "ovr": 64, "star_power": 50, "salary": 862000, "team_id": ""}, {"player_id": "164", "name": "Youssef Duarte", "position": "FW", "age": 29, "att": 77, "def": 33, "pace": 83, "phy": 79, "ovr": 64, "star_power": 47, "salary": 891000, "team_id": ""}, {"player_id": "171", "name": "Cesar Moreno", "position": "DF", "age": 20, "att": 53, "def": 63, "pace": 73, "phy": 77, "ovr": 64, "star_power": 50, "salary": 842000, "team_id": ""}, {"player_id": "217", "name": "Pavel Novak", "position": "FW", "age": 22, "att": 75, "def": 38, "pace": 86, "phy": 66, "ovr": 64, "star_power": 65, "salary": 974000, "team_id": ""}, {"player_id": "234", "name": "Sven Silva", "position": "MF", "age": 26, "att": 55, "def": 62, "pace": 70, "phy": 78, "ovr": 64, "star_power": 46, "salary": 848000, "team_id": ""}, {"player_id": "244", "name": "Jonas Krause", "position": "DF", "age": 23, "att": 50, "def": 75, "pace": 60, "phy": 74, "ovr": 64, "star_power": 65, "salary": 824000, "team_id": ""}, {"player_id": "259", "name": "Kwame Novak", "position": "DF", "age": 28, "att": 44, "def": 67, "pace": 70, "phy": 89, "ovr": 64, "star_power": 51, "salary": 830000, "team_id": ""}, {"player_id": "274", "name": "Cesar Haddad", "position": "FW", "age": 31, "att": 76, "def": 37, "pace": 71, "phy": 83, "ovr": 64, "star_power": 46, "salary": 741000, "team_id": ""}, {"player_id": "290", "name": "Omar Nowak", "position": "MF", "age": 19, "att": 70, "def": 57, "pace": 68, "phy": 61, "ovr": 64, "star_power": 73, "salary": 855000, "team_id": ""}, {"player_id": "292", "name": "Kai Diallo", "position": "DF", "age": 28, "att": 41, "def": 66, "pace": 92, "phy": 75, "ovr": 64, "star_power": 52, "salary": 921000, "team_id": ""}, {"player_id": "301", "name": "Andre Neumann", "position": "DF", "age": 30, "att": 41, "def": 74, "pace": 89, "phy": 61, "ovr": 64, "star_power": 74, "salary": 801000, "team_id": ""}, {"player_id": "305", "name": "Yusuf Lindqvist", "position": "FW", "age": 27, "att": 87, "def": 43, "pace": 55, "phy": 68, "ovr": 64, "star_power": 47, "salary": 837000, "team_id": ""}, {"player_id": "308", "name": "Diego Weber", "position": "FW", "age": 20, "att": 66, "def": 47, "pace": 81, "phy": 75, "ovr": 64, "star_power": 52, "salary": 906000, "team_id": ""}, {"player_id": "323", "name": "Dario Mensah", "position": "DF", "age": 32, "att": 37, "def": 76, "pace": 86, "phy": 66, "ovr": 64, "star_power": 40, "salary": 810000, "team_id": ""}, {"player_id": "341", "name": "Tariq Ferreira", "position": "GK", "age": 29, "att": 31, "def": 73, "pace": 92, "phy": 79, "ovr": 64, "star_power": 42, "salary": 628000, "team_id": ""}, {"player_id": "22", "name": "Kai Petrov", "position": "GK", "age": 27, "att": 34, "def": 76, "pace": 75, "phy": 80, "ovr": 63, "star_power": 47, "salary": 765000, "team_id": ""}, {"player_id": "27", "name": "Hassan Bauer", "position": "DF", "age": 24, "att": 58, "def": 70, "pace": 59, "phy": 66, "ovr": 63, "star_power": 74, "salary": 766000, "team_id": ""}, {"player_id": "42", "name": "Jonas Mensah", "position": "FW", "age": 21, "att": 74, "def": 40, "pace": 65, "phy": 82, "ovr": 63, "star_power": 40, "salary": 779000, "team_id": ""}, {"player_id": "89", "name": "Dario Braga", "position": "MF", "age": 31, "att": 65, "def": 46, "pace": 67, "phy": 86, "ovr": 63, "star_power": 69, "salary": 955000, "team_id": ""}, {"player_id": "102", "name": "Sami Larsson", "position": "GK", "age": 25, "att": 39, "def": 74, "pace": 58, "phy": 90, "ovr": 63, "star_power": 55, "salary": 850000, "team_id": ""}, {"player_id": "128", "name": "Leon Ferreira", "position": "FW", "age": 31, "att": 76, "def": 44, "pace": 77, "phy": 57, "ovr": 63, "star_power": 73, "salary": 829000, "team_id": ""}, {"player_id": "129", "name": "Tobias Costa", "position": "FW", "age": 25, "att": 74, "def": 43, "pace": 72, "phy": 69, "ovr": 63, "star_power": 40, "salary": 649000, "team_id": ""}, {"player_id": "130", "name": "Adrian Sokol", "position": "MF", "age": 28, "att": 69, "def": 50, "pace": 68, "phy": 68, "ovr": 63, "star_power": 80, "salary": 891000, "team_id": ""}, {"player_id": "137", "name": "Tobias Rossi", "position": "FW", "age": 23, "att": 85, "def": 35, "pace": 73, "phy": 66, "ovr": 63, "star_power": 59, "salary": 763000, "team_id": ""}, {"player_id": "144", "name": "Marco Bauer", "position": "MF", "age": 33, "att": 68, "def": 64, "pace": 51, "phy": 66, "ovr": 63, "star_power": 52, "salary": 914000, "team_id": ""}, {"player_id": "145", "name": "Sven Kovac", "position": "FW", "age": 31, "att": 80, "def": 44, "pace": 47, "phy": 81, "ovr": 63, "star_power": 69, "salary": 1009000, "team_id": ""}, {"player_id": "158", "name": "Rui Novak", "position": "FW", "age": 21, "att": 84, "def": 44, "pace": 63, "phy": 60, "ovr": 63, "star_power": 71, "salary": 755000, "team_id": ""}, {"player_id": "172", "name": "Marco Sato", "position": "DF", "age": 33, "att": 59, "def": 73, "pace": 59, "phy": 56, "ovr": 63, "star_power": 76, "salary": 767000, "team_id": ""}, {"player_id": "176", "name": "Tomas Sokol", "position": "MF", "age": 19, "att": 61, "def": 47, "pace": 78, "phy": 79, "ovr": 63, "star_power": 62, "salary": 803000, "team_id": ""}, {"player_id": "178", "name": "Kofi Weber", "position": "MF", "age": 25, "att": 67, "def": 52, "pace": 64, "phy": 75, "ovr": 63, "star_power": 80, "salary": 885000, "team_id": ""}, {"player_id": "204", "name": "Kofi Suarez", "position": "DF", "age": 30, "att": 46, "def": 63, "pace": 88, "phy": 68, "ovr": 63, "star_power": 64, "salary": 718000, "team_id": ""}, {"player_id": "222", "name": "Hassan Keller", "position": "DF", "age": 25, "att": 39, "def": 83, "pace": 85, "phy": 46, "ovr": 63, "star_power": 43, "salary": 706000, "team_id": ""}, {"player_id": "236", "name": "Ivan Ivanov", "position": "DF", "age": 21, "att": 40, "def": 71, "pace": 64, "phy": 91, "ovr": 63, "star_power": 54, "salary": 897000, "team_id": ""}, {"player_id": "239", "name": "Kenji Mensah", "position": "DF", "age": 29, "att": 60, "def": 64, "pace": 80, "phy": 48, "ovr": 63, "star_power": 66, "salary": 904000, "team_id": ""}, {"player_id": "246", "name": "Ivan Petrov", "position": "DF", "age": 19, "att": 54, "def": 77, "pace": 46, "phy": 70, "ovr": 63, "star_power": 66, "salary": 733000, "team_id": ""}, {"player_id": "253", "name": "Cesar Novak", "position": "DF", "age": 31, "att": 48, "def": 87, "pace": 51, "phy": 60, "ovr": 63, "star_power": 59, "salary": 826000, "team_id": ""}, {"player_id": "258", "name": "Youssef Petrov", "position": "MF", "age": 27, "att": 66, "def": 56, "pace": 70, "phy": 65, "ovr": 63, "star_power": 69, "salary": 796000, "team_id": ""}, {"player_id": "273", "name": "Radek Silva", "position": "FW", "age": 28, "att": 71, "def": 36, "pace": 74, "phy": 84, "ovr": 63, "star_power": 48, "salary": 872000, "team_id": ""}, {"player_id": "287", "name": "Yusuf Horvat", "position": "MF", "age": 20, "att": 54, "def": 61, "pace": 71, "phy": 74, "ovr": 63, "star_power": 65, "salary": 867000, "team_id": ""}, {"player_id": "293", "name": "Nico Vidal", "position": "FW", "age": 32, "att": 85, "def": 34, "pace": 89, "phy": 49, "ovr": 63, "star_power": 76, "salary": 960000, "team_id": ""}, {"player_id": "312", "name": "Amara Lindqvist", "position": "FW", "age": 23, "att": 79, "def": 44, "pace": 57, "phy": 74, "ovr": 63, "star_power": 44, "salary": 693000, "team_id": ""}, {"player_id": "313", "name": "Stefan Novak", "position": "DF", "age": 22, "att": 50, "def": 71, "pace": 71, "phy": 66, "ovr": 63, "star_power": 54, "salary": 890000, "team_id": ""}, {"player_id": "315", "name": "Leon Kucera", "position": "MF", "age": 30, "att": 73, "def": 63, "pace": 45, "phy": 61, "ovr": 63, "star_power": 69, "salary": 928000, "team_id": ""}, {"player_id": "329", "name": "Youssef Reyes", "position": "FW", "age": 25, "att": 79, "def": 45, "pace": 55, "phy": 73, "ovr": 63, "star_power": 55, "salary": 833000, "team_id": ""}, {"player_id": "340", "name": "Idris Lindqvist", "position": "MF", "age": 27, "att": 66, "def": 57, "pace": 80, "phy": 52, "ovr": 63, "star_power": 51, "salary": 832000, "team_id": ""}, {"player_id": "362", "name": "Leon Adeyemi", "position": "MF", "age": 22, "att": 76, "def": 45, "pace": 68, "phy": 66, "ovr": 63, "star_power": 70, "salary": 1019000, "team_id": ""}, {"player_id": "390", "name": "Lars Barros", "position": "MF", "age": 25, "att": 55, "def": 59, "pace": 71, "phy": 75, "ovr": 63, "star_power": 60, "salary": 779000, "team_id": ""}, {"player_id": "19", "name": "Kai Duarte", "position": "MF", "age": 34, "att": 59, "def": 53, "pace": 68, "phy": 77, "ovr": 62, "star_power": 79, "salary": 903000, "team_id": ""}, {"player_id": "25", "name": "Bruno Ivanov", "position": "MF", "age": 29, "att": 57, "def": 57, "pace": 81, "phy": 60, "ovr": 62, "star_power": 61, "salary": 753000, "team_id": ""}, {"player_id": "37", "name": "Emil Barros", "position": "MF", "age": 21, "att": 62, "def": 61, "pace": 68, "phy": 60, "ovr": 62, "star_power": 56, "salary": 761000, "team_id": ""}, {"player_id": "38", "name": "Kwame Reyes", "position": "MF", "age": 27, "att": 67, "def": 62, "pace": 71, "phy": 45, "ovr": 62, "star_power": 40, "salary": 722000, "team_id": ""}, {"player_id": "45", "name": "Mateo Haddad", "position": "MF", "age": 28, "att": 64, "def": 47, "pace": 75, "phy": 73, "ovr": 62, "star_power": 68, "salary": 944000, "team_id": ""}, {"player_id": "81", "name": "Diego Novak", "position": "FW", "age": 20, "att": 72, "def": 37, "pace": 69, "phy": 80, "ovr": 62, "star_power": 61, "salary": 859000, "team_id": ""}, {"player_id": "141", "name": "Stefan Neumann", "position": "FW", "age": 31, "att": 85, "def": 32, "pace": 65, "phy": 69, "ovr": 62, "star_power": 52, "salary": 739000, "team_id": ""}, {"player_id": "165", "name": "Jonas Costa", "position": "DF", "age": 25, "att": 38, "def": 87, "pace": 74, "phy": 50, "ovr": 62, "star_power": 69, "salary": 904000, "team_id": ""}, {"player_id": "189", "name": "Rui Duarte", "position": "FW", "age": 27, "att": 90, "def": 38, "pace": 65, "phy": 53, "ovr": 62, "star_power": 50, "salary": 802000, "team_id": ""}, {"player_id": "191", "name": "Milan Moreno", "position": "DF", "age": 33, "att": 53, "def": 70, "pace": 51, "phy": 73, "ovr": 62, "star_power": 44, "salary": 612000, "team_id": ""}, {"player_id": "198", "name": "Marco Mensah", "position": "FW", "age": 32, "att": 89, "def": 35, "pace": 53, "phy": 69, "ovr": 62, "star_power": 78, "salary": 866000, "team_id": ""}, {"player_id": "238", "name": "Milan Mensah", "position": "MF", "age": 33, "att": 66, "def": 62, "pace": 51, "phy": 65, "ovr": 62, "star_power": 50, "salary": 666000, "team_id": ""}, {"player_id": "266", "name": "Milan Haddad", "position": "DF", "age": 25, "att": 42, "def": 72, "pace": 89, "phy": 54, "ovr": 62, "star_power": 71, "salary": 742000, "team_id": ""}, {"player_id": "267", "name": "Enzo Neumann", "position": "MF", "age": 21, "att": 61, "def": 59, "pace": 80, "phy": 53, "ovr": 62, "star_power": 67, "salary": 725000, "team_id": ""}, {"player_id": "306", "name": "Cesar Horvat", "position": "DF", "age": 27, "att": 57, "def": 64, "pace": 72, "phy": 56, "ovr": 62, "star_power": 72, "salary": 912000, "team_id": ""}, {"player_id": "320", "name": "Enzo Kucera", "position": "MF", "age": 20, "att": 55, "def": 69, "pace": 53, "phy": 72, "ovr": 62, "star_power": 62, "salary": 920000, "team_id": ""}, {"player_id": "339", "name": "Emil Ivanov", "position": "DF", "age": 32, "att": 52, "def": 74, "pace": 71, "phy": 48, "ovr": 62, "star_power": 49, "salary": 731000, "team_id": ""}, {"player_id": "349", "name": "Hassan Ivanov", "position": "DF", "age": 31, "att": 43, "def": 87, "pace": 49, "phy": 62, "ovr": 62, "star_power": 55, "salary": 839000, "team_id": ""}, {"player_id": "1", "name": "Amara Adamu", "position": "DF", "age": 32, "att": 39, "def": 72, "pace": 74, "phy": 68, "ovr": 61, "star_power": 69, "salary": 879000, "team_id": ""}, {"player_id": "18", "name": "Luca Larsson", "position": "DF", "age": 34, "att": 35, "def": 69, "pace": 91, "phy": 64, "ovr": 61, "star_power": 76, "salary": 1001000, "team_id": ""}, {"player_id": "31", "name": "Milan Larsson", "position": "FW", "age": 32, "att": 83, "def": 28, "pace": 94, "phy": 46, "ovr": 61, "star_power": 54, "salary": 716000, "team_id": ""}, {"player_id": "34", "name": "Amara Reyes", "position": "MF", "age": 27, "att": 58, "def": 57, "pace": 60, "phy": 73, "ovr": 61, "star_power": 73, "salary": 1010000, "team_id": ""}, {"player_id": "51", "name": "Diego Berg", "position": "MF", "age": 28, "att": 51, "def": 63, "pace": 80, "phy": 57, "ovr": 61, "star_power": 55, "salary": 668000, "team_id": ""}, {"player_id": "54", "name": "Hassan Larsson", "position": "GK", "age": 25, "att": 32, "def": 61, "pace": 81, "phy": 90, "ovr": 61, "star_power": 53, "salary": 813000, "team_id": ""}, {"player_id": "62", "name": "Adrian Silva", "position": "MF", "age": 33, "att": 59, "def": 47, "pace": 93, "phy": 55, "ovr": 61, "star_power": 51, "salary": 867000, "team_id": ""}, {"player_id": "66", "name": "Sami Sato", "position": "MF", "age": 26, "att": 51, "def": 54, "pace": 69, "phy": 84, "ovr": 61, "star_power": 58, "salary": 923000, "team_id": ""}, {"player_id": "82", "name": "Yusuf Silva", "position": "GK", "age": 21, "att": 34, "def": 75, "pace": 55, "phy": 88, "ovr": 61, "star_power": 58, "salary": 766000, "team_id": ""}, {"player_id": "93", "name": "Tomas Adeyemi", "position": "DF", "age": 30, "att": 35, "def": 83, "pace": 79, "phy": 48, "ovr": 61, "star_power": 81, "salary": 829000, "team_id": ""}, {"player_id": "95", "name": "Nikolai Osei", "position": "DF", "age": 25, "att": 36, "def": 85, "pace": 66, "phy": 60, "ovr": 61, "star_power": 45, "salary": 623000, "team_id": ""}, {"player_id": "115", "name": "Tobias Barros", "position": "FW", "age": 25, "att": 87, "def": 36, "pace": 45, "phy": 76, "ovr": 61, "star_power": 45, "salary": 809000, "team_id": ""}, {"player_id": "127", "name": "Igor Petrov", "position": "GK", "age": 32, "att": 38, "def": 60, "pace": 92, "phy": 73, "ovr": 61, "star_power": 64, "salary": 845000, "team_id": ""}, {"player_id": "134", "name": "Rafael Adeyemi", "position": "DF", "age": 21, "att": 38, "def": 86, "pace": 49, "phy": 70, "ovr": 61, "star_power": 61, "salary": 834000, "team_id": ""}, {"player_id": "135", "name": "Nikolai Reyes", "position": "DF", "age": 27, "att": 43, "def": 87, "pace": 54, "phy": 53, "ovr": 61, "star_power": 63, "salary": 907000, "team_id": ""}, {"player_id": "175", "name": "Adrian Horvat", "position": "MF", "age": 29, "att": 54, "def": 64, "pace": 77, "phy": 53, "ovr": 61, "star_power": 53, "salary": 683000, "team_id": ""}, {"player_id": "177", "name": "Enzo Ferreira", "position": "DF", "age": 23, "att": 53, "def": 66, "pace": 59, "phy": 66, "ovr": 61, "star_power": 74, "salary": 966000, "team_id": ""}, {"player_id": "181", "name": "Felix Berg", "position": "FW", "age": 32, "att": 80, "def": 30, "pace": 56, "phy": 85, "ovr": 61, "star_power": 69, "salary": 823000, "team_id": ""}, {"player_id": "233", "name": "Hassan Lindqvist", "position": "FW", "age": 32, "att": 64, "def": 43, "pace": 85, "phy": 62, "ovr": 61, "star_power": 67, "salary": 808000, "team_id": ""}, {"player_id": "241", "name": "Jonas Keller", "position": "GK", "age": 33, "att": 35, "def": 72, "pace": 91, "phy": 60, "ovr": 61, "star_power": 46, "salary": 706000, "team_id": ""}, {"player_id": "248", "name": "Adrian Malik", "position": "MF", "age": 27, "att": 77, "def": 47, "pace": 61, "phy": 57, "ovr": 61, "star_power": 67, "salary": 736000, "team_id": ""}, {"player_id": "276", "name": "Sami Keller", "position": "DF", "age": 28, "att": 36, "def": 65, "pace": 95, "phy": 64, "ovr": 61, "star_power": 66, "salary": 821000, "team_id": ""}, {"player_id": "278", "name": "Andre Horvat", "position": "DF", "age": 28, "att": 38, "def": 80, "pace": 54, "phy": 76, "ovr": 61, "star_power": 81, "salary": 918000, "team_id": ""}, {"player_id": "295", "name": "Kenji Toure", "position": "GK", "age": 20, "att": 41, "def": 68, "pace": 71, "phy": 74, "ovr": 61, "star_power": 78, "salary": 953000, "team_id": ""}, {"player_id": "318", "name": "Sven Sato", "position": "DF", "age": 34, "att": 53, "def": 76, "pace": 58, "phy": 54, "ovr": 61, "star_power": 69, "salary": 773000, "team_id": ""}, {"player_id": "358", "name": "Felix Costa", "position": "DF", "age": 19, "att": 49, "def": 71, "pace": 64, "phy": 59, "ovr": 61, "star_power": 49, "salary": 792000, "team_id": ""}, {"player_id": "381", "name": "Radek Larsson", "position": "GK", "age": 29, "att": 30, "def": 79, "pace": 55, "phy": 89, "ovr": 61, "star_power": 58, "salary": 737000, "team_id": ""}, {"player_id": "7", "name": "Milan Novak", "position": "FW", "age": 32, "att": 76, "def": 48, "pace": 67, "phy": 48, "ovr": 60, "star_power": 43, "salary": 647000, "team_id": ""}, {"player_id": "13", "name": "Jonas Vidal", "position": "DF", "age": 29, "att": 37, "def": 82, "pace": 63, "phy": 60, "ovr": 60, "star_power": 51, "salary": 707000, "team_id": ""}, {"player_id": "23", "name": "Luca Fischer", "position": "MF", "age": 23, "att": 52, "def": 57, "pace": 87, "phy": 51, "ovr": 60, "star_power": 47, "salary": 727000, "team_id": ""}, {"player_id": "40", "name": "Tariq Osei", "position": "DF", "age": 20, "att": 56, "def": 72, "pace": 62, "phy": 45, "ovr": 60, "star_power": 64, "salary": 935000, "team_id": ""}, {"player_id": "159", "name": "Enzo Mensah", "position": "DF", "age": 22, "att": 37, "def": 85, "pace": 70, "phy": 45, "ovr": 60, "star_power": 50, "salary": 737000, "team_id": ""}, {"player_id": "170", "name": "Bruno Santos", "position": "MF", "age": 34, "att": 54, "def": 72, "pace": 61, "phy": 48, "ovr": 60, "star_power": 68, "salary": 948000, "team_id": ""}, {"player_id": "173", "name": "Idris Krause", "position": "DF", "age": 32, "att": 35, "def": 65, "pace": 92, "phy": 66, "ovr": 60, "star_power": 74, "salary": 961000, "team_id": ""}, {"player_id": "232", "name": "Lars Braga", "position": "MF", "age": 24, "att": 67, "def": 54, "pace": 64, "phy": 55, "ovr": 60, "star_power": 70, "salary": 936000, "team_id": ""}, {"player_id": "243", "name": "Luca Weber", "position": "MF", "age": 34, "att": 53, "def": 51, "pace": 95, "phy": 53, "ovr": 60, "star_power": 50, "salary": 627000, "team_id": ""}, {"player_id": "249", "name": "Kofi Lindqvist", "position": "FW", "age": 24, "att": 67, "def": 36, "pace": 80, "phy": 69, "ovr": 60, "star_power": 58, "salary": 838000, "team_id": ""}, {"player_id": "255", "name": "Rui Larsson", "position": "GK", "age": 30, "att": 44, "def": 75, "pace": 68, "phy": 55, "ovr": 60, "star_power": 55, "salary": 697000, "team_id": ""}, {"player_id": "257", "name": "Emil Braga", "position": "MF", "age": 25, "att": 66, "def": 49, "pace": 69, "phy": 60, "ovr": 60, "star_power": 50, "salary": 705000, "team_id": ""}, {"player_id": "260", "name": "Mateo Krause", "position": "MF", "age": 34, "att": 63, "def": 49, "pace": 64, "phy": 69, "ovr": 60, "star_power": 47, "salary": 668000, "team_id": ""}, {"player_id": "285", "name": "Lars Neumann", "position": "FW", "age": 29, "att": 63, "def": 50, "pace": 79, "phy": 56, "ovr": 60, "star_power": 55, "salary": 694000, "team_id": ""}, {"player_id": "314", "name": "Igor Novak", "position": "MF", "age": 33, "att": 66, "def": 65, "pace": 56, "phy": 47, "ovr": 60, "star_power": 50, "salary": 874000, "team_id": ""}, {"player_id": "321", "name": "Nikolai Larsson", "position": "DF", "age": 26, "att": 52, "def": 60, "pace": 78, "phy": 57, "ovr": 60, "star_power": 42, "salary": 760000, "team_id": ""}, {"player_id": "326", "name": "Jonas Toure", "position": "DF", "age": 31, "att": 50, "def": 60, "pace": 69, "phy": 66, "ovr": 60, "star_power": 68, "salary": 905000, "team_id": ""}, {"player_id": "334", "name": "Leon Nowak", "position": "FW", "age": 29, "att": 85, "def": 47, "pace": 52, "phy": 46, "ovr": 60, "star_power": 77, "salary": 931000, "team_id": ""}, {"player_id": "335", "name": "Kenji Duarte", "position": "DF", "age": 26, "att": 52, "def": 71, "pace": 52, "phy": 62, "ovr": 60, "star_power": 64, "salary": 906000, "team_id": ""}, {"player_id": "354", "name": "Bruno Nowak", "position": "MF", "age": 28, "att": 75, "def": 51, "pace": 47, "phy": 65, "ovr": 60, "star_power": 80, "salary": 907000, "team_id": ""}, {"player_id": "359", "name": "Kenji Lindqvist", "position": "DF", "age": 30, "att": 54, "def": 73, "pace": 62, "phy": 47, "ovr": 60, "star_power": 70, "salary": 769000, "team_id": ""}, {"player_id": "364", "name": "Sami Krause", "position": "DF", "age": 27, "att": 55, "def": 64, "pace": 49, "phy": 75, "ovr": 60, "star_power": 74, "salary": 823000, "team_id": ""}, {"player_id": "369", "name": "Tobias Petrov", "position": "MF", "age": 24, "att": 69, "def": 57, "pace": 54, "phy": 55, "ovr": 60, "star_power": 47, "salary": 788000, "team_id": ""}, {"player_id": "382", "name": "Youssef Rossi", "position": "DF", "age": 26, "att": 47, "def": 82, "pace": 57, "phy": 49, "ovr": 60, "star_power": 65, "salary": 713000, "team_id": ""}, {"player_id": "383", "name": "Leon Osei", "position": "DF", "age": 30, "att": 36, "def": 70, "pace": 95, "phy": 48, "ovr": 60, "star_power": 52, "salary": 726000, "team_id": ""}, {"player_id": "386", "name": "Radek Costa", "position": "DF", "age": 23, "att": 48, "def": 63, "pace": 79, "phy": 59, "ovr": 60, "star_power": 68, "salary": 958000, "team_id": ""}, {"player_id": "388", "name": "Omar Fischer", "position": "MF", "age": 26, "att": 56, "def": 56, "pace": 65, "phy": 71, "ovr": 60, "star_power": 40, "salary": 754000, "team_id": ""}, {"player_id": "9", "name": "Radek Barros", "position": "MF", "age": 33, "att": 61, "def": 61, "pace": 49, "phy": 64, "ovr": 59, "star_power": 59, "salary": 662000, "team_id": ""}, {"player_id": "14", "name": "Youssef Silva", "position": "FW", "age": 19, "att": 67, "def": 48, "pace": 77, "phy": 45, "ovr": 59, "star_power": 40, "salary": 629000, "team_id": ""}, {"player_id": "49", "name": "Emil Kucera", "position": "GK", "age": 29, "att": 40, "def": 63, "pace": 58, "phy": 87, "ovr": 59, "star_power": 70, "salary": 767000, "team_id": ""}, {"player_id": "52", "name": "Tariq Mensah", "position": "MF", "age": 23, "att": 69, "def": 52, "pace": 59, "phy": 53, "ovr": 59, "star_power": 60, "salary": 779000, "team_id": ""}, {"player_id": "68", "name": "Kenji Barros", "position": "GK", "age": 25, "att": 42, "def": 78, "pace": 66, "phy": 51, "ovr": 59, "star_power": 49, "salary": 657000, "team_id": ""}, {"player_id": "72", "name": "Ivan Neumann", "position": "FW", "age": 21, "att": 67, "def": 47, "pace": 59, "phy": 64, "ovr": 59, "star_power": 69, "salary": 881000, "team_id": ""}, {"player_id": "83", "name": "Cesar Bauer", "position": "FW", "age": 23, "att": 64, "def": 37, "pace": 94, "phy": 53, "ovr": 59, "star_power": 67, "salary": 705000, "team_id": ""}, {"player_id": "117", "name": "Stefan Fischer", "position": "DF", "age": 27, "att": 40, "def": 75, "pace": 58, "phy": 67, "ovr": 59, "star_power": 74, "salary": 816000, "team_id": ""}, {"player_id": "120", "name": "Bruno Rossi", "position": "DF", "age": 30, "att": 50, "def": 63, "pace": 60, "phy": 69, "ovr": 59, "star_power": 64, "salary": 833000, "team_id": ""}, {"player_id": "123", "name": "Sami Sokol", "position": "MF", "age": 24, "att": 57, "def": 58, "pace": 64, "phy": 62, "ovr": 59, "star_power": 41, "salary": 724000, "team_id": ""}, {"player_id": "126", "name": "Pavel Adamu", "position": "GK", "age": 22, "att": 30, "def": 74, "pace": 65, "phy": 76, "ovr": 59, "star_power": 39, "salary": 784000, "team_id": ""}, {"player_id": "192", "name": "Nikolai Horvat", "position": "GK", "age": 22, "att": 38, "def": 72, "pace": 45, "phy": 88, "ovr": 59, "star_power": 71, "salary": 900000, "team_id": ""}, {"player_id": "216", "name": "Pavel Toure", "position": "FW", "age": 21, "att": 68, "def": 38, "pace": 64, "phy": 75, "ovr": 59, "star_power": 74, "salary": 822000, "team_id": ""}, {"player_id": "262", "name": "Hassan Mensah", "position": "GK", "age": 26, "att": 44, "def": 71, "pace": 73, "phy": 52, "ovr": 59, "star_power": 49, "salary": 626000, "team_id": ""}, {"player_id": "275", "name": "Tariq Toure", "position": "MF", "age": 32, "att": 50, "def": 64, "pace": 67, "phy": 60, "ovr": 59, "star_power": 64, "salary": 725000, "team_id": ""}, {"player_id": "294", "name": "Kofi Keller", "position": "DF", "age": 23, "att": 37, "def": 70, "pace": 83, "phy": 54, "ovr": 59, "star_power": 42, "salary": 645000, "team_id": ""}, {"player_id": "297", "name": "Tomas Osei", "position": "MF", "age": 32, "att": 58, "def": 51, "pace": 54, "phy": 80, "ovr": 59, "star_power": 81, "salary": 780000, "team_id": ""}, {"player_id": "298", "name": "Mateo Santos", "position": "MF", "age": 22, "att": 65, "def": 61, "pace": 54, "phy": 48, "ovr": 59, "star_power": 58, "salary": 864000, "team_id": ""}, {"player_id": "325", "name": "Igor Bauer", "position": "MF", "age": 34, "att": 50, "def": 51, "pace": 57, "phy": 92, "ovr": 59, "star_power": 44, "salary": 810000, "team_id": ""}, {"player_id": "348", "name": "Rafael Wallin", "position": "MF", "age": 28, "att": 65, "def": 51, "pace": 60, "phy": 62, "ovr": 59, "star_power": 63, "salary": 731000, "team_id": ""}, {"player_id": "351", "name": "Diego Bauer", "position": "GK", "age": 26, "att": 41, "def": 80, "pace": 47, "phy": 67, "ovr": 59, "star_power": 48, "salary": 771000, "team_id": ""}, {"player_id": "376", "name": "Sami Almeida", "position": "MF", "age": 21, "att": 56, "def": 50, "pace": 83, "phy": 54, "ovr": 59, "star_power": 72, "salary": 759000, "team_id": ""}, {"player_id": "385", "name": "Omar Keller", "position": "FW", "age": 22, "att": 67, "def": 37, "pace": 50, "phy": 91, "ovr": 59, "star_power": 74, "salary": 746000, "team_id": ""}, {"player_id": "28", "name": "Enzo Nowak", "position": "DF", "age": 22, "att": 49, "def": 62, "pace": 65, "phy": 61, "ovr": 58, "star_power": 52, "salary": 861000, "team_id": ""}, {"player_id": "97", "name": "Pavel Suarez", "position": "FW", "age": 32, "att": 76, "def": 30, "pace": 80, "phy": 55, "ovr": 58, "star_power": 53, "salary": 864000, "team_id": ""}, {"player_id": "98", "name": "Rafael Moreno", "position": "GK", "age": 25, "att": 35, "def": 71, "pace": 51, "phy": 85, "ovr": 58, "star_power": 52, "salary": 654000, "team_id": ""}, {"player_id": "148", "name": "Jonas Adamu", "position": "FW", "age": 29, "att": 78, "def": 46, "pace": 47, "phy": 56, "ovr": 58, "star_power": 80, "salary": 739000, "team_id": ""}, {"player_id": "163", "name": "Youssef Sato", "position": "GK", "age": 23, "att": 32, "def": 72, "pace": 58, "phy": 77, "ovr": 58, "star_power": 50, "salary": 840000, "team_id": ""}, {"player_id": "196", "name": "Adrian Bauer", "position": "DF", "age": 31, "att": 49, "def": 80, "pace": 46, "phy": 48, "ovr": 58, "star_power": 59, "salary": 758000, "team_id": ""}, {"player_id": "226", "name": "Enzo Keller", "position": "DF", "age": 34, "att": 40, "def": 60, "pace": 71, "phy": 73, "ovr": 58, "star_power": 69, "salary": 770000, "team_id": ""}, {"player_id": "227", "name": "Omar Malik", "position": "MF", "age": 27, "att": 67, "def": 45, "pace": 51, "phy": 72, "ovr": 58, "star_power": 44, "salary": 756000, "team_id": ""}, {"player_id": "250", "name": "Bruno Malik", "position": "DF", "age": 23, "att": 42, "def": 71, "pace": 56, "phy": 64, "ovr": 58, "star_power": 38, "salary": 619000, "team_id": ""}, {"player_id": "261", "name": "Sven Keller", "position": "MF", "age": 28, "att": 67, "def": 46, "pace": 49, "phy": 75, "ovr": 58, "star_power": 40, "salary": 659000, "team_id": ""}, {"player_id": "277", "name": "Cesar Adamu", "position": "FW", "age": 26, "att": 79, "def": 45, "pace": 50, "phy": 51, "ovr": 58, "star_power": 73, "salary": 895000, "team_id": ""}, {"player_id": "302", "name": "Nikolai Costa", "position": "FW", "age": 28, "att": 75, "def": 35, "pace": 56, "phy": 70, "ovr": 58, "star_power": 52, "salary": 802000, "team_id": ""}, {"player_id": "328", "name": "Nico Sokol", "position": "FW", "age": 33, "att": 75, "def": 36, "pace": 75, "phy": 51, "ovr": 58, "star_power": 58, "salary": 725000, "team_id": ""}, {"player_id": "17", "name": "Kofi Petrov", "position": "GK", "age": 21, "att": 43, "def": 60, "pace": 62, "phy": 74, "ovr": 57, "star_power": 49, "salary": 705000, "team_id": ""}, {"player_id": "56", "name": "Pavel Larsson", "position": "FW", "age": 30, "att": 62, "def": 45, "pace": 68, "phy": 61, "ovr": 57, "star_power": 42, "salary": 721000, "team_id": ""}, {"player_id": "104", "name": "Amara Ferreira", "position": "MF", "age": 34, "att": 68, "def": 56, "pace": 48, "phy": 48, "ovr": 57, "star_power": 51, "salary": 753000, "team_id": ""}, {"player_id": "161", "name": "Amara Horvat", "position": "MF", "age": 22, "att": 61, "def": 49, "pace": 62, "phy": 57, "ovr": 57, "star_power": 79, "salary": 733000, "team_id": ""}, {"player_id": "247", "name": "Adrian Weber", "position": "MF", "age": 29, "att": 70, "def": 52, "pace": 48, "phy": 51, "ovr": 57, "star_power": 56, "salary": 810000, "team_id": ""}, {"player_id": "269", "name": "Lars Suarez", "position": "GK", "age": 20, "att": 42, "def": 58, "pace": 81, "phy": 60, "ovr": 57, "star_power": 64, "salary": 828000, "team_id": ""}, {"player_id": "280", "name": "Lars Nowak", "position": "GK", "age": 26, "att": 37, "def": 79, "pace": 63, "phy": 50, "ovr": 57, "star_power": 76, "salary": 964000, "team_id": ""}, {"player_id": "289", "name": "Tobias Sokol", "position": "FW", "age": 30, "att": 68, "def": 36, "pace": 62, "phy": 70, "ovr": 57, "star_power": 42, "salary": 790000, "team_id": ""}, {"player_id": "370", "name": "Milan Bauer", "position": "FW", "age": 32, "att": 67, "def": 33, "pace": 87, "phy": 54, "ovr": 57, "star_power": 70, "salary": 908000, "team_id": ""}, {"player_id": "36", "name": "Stefan Adamu", "position": "DF", "age": 28, "att": 36, "def": 79, "pace": 49, "phy": 60, "ovr": 56, "star_power": 66, "salary": 933000, "team_id": ""}, {"player_id": "80", "name": "Jonas Petrov", "position": "FW", "age": 29, "att": 82, "def": 29, "pace": 60, "phy": 54, "ovr": 56, "star_power": 69, "salary": 904000, "team_id": ""}, {"player_id": "106", "name": "Radek Novak", "position": "FW", "age": 28, "att": 81, "def": 29, "pace": 65, "phy": 52, "ovr": 56, "star_power": 48, "salary": 613000, "team_id": ""}, {"player_id": "113", "name": "Nico Lindqvist", "position": "FW", "age": 23, "att": 68, "def": 35, "pace": 63, "phy": 66, "ovr": 56, "star_power": 62, "salary": 794000, "team_id": ""}, {"player_id": "136", "name": "Enzo Sato", "position": "GK", "age": 26, "att": 31, "def": 75, "pace": 79, "phy": 45, "ovr": 56, "star_power": 41, "salary": 593000, "team_id": ""}, {"player_id": "147", "name": "Ivan Osei", "position": "FW", "age": 32, "att": 63, "def": 30, "pace": 73, "phy": 74, "ovr": 56, "star_power": 38, "salary": 587000, "team_id": ""}, {"player_id": "156", "name": "Yusuf Suarez", "position": "FW", "age": 21, "att": 75, "def": 37, "pace": 52, "phy": 60, "ovr": 56, "star_power": 60, "salary": 774000, "team_id": ""}, {"player_id": "168", "name": "Rafael Malik", "position": "DF", "age": 32, "att": 45, "def": 63, "pace": 45, "phy": 76, "ovr": 56, "star_power": 71, "salary": 732000, "team_id": ""}, {"player_id": "186", "name": "Stefan Almeida", "position": "GK", "age": 27, "att": 31, "def": 57, "pace": 85, "phy": 72, "ovr": 56, "star_power": 75, "salary": 712000, "team_id": ""}, {"player_id": "205", "name": "Ivan Larsson", "position": "DF", "age": 25, "att": 44, "def": 68, "pace": 59, "phy": 52, "ovr": 56, "star_power": 70, "salary": 766000, "team_id": ""}, {"player_id": "282", "name": "Dario Petrov", "position": "DF", "age": 29, "att": 49, "def": 65, "pace": 48, "phy": 61, "ovr": 56, "star_power": 55, "salary": 668000, "team_id": ""}, {"player_id": "286", "name": "Rui Santos", "position": "MF", "age": 25, "att": 69, "def": 46, "pace": 49, "phy": 57, "ovr": 56, "star_power": 74, "salary": 833000, "team_id": ""}, {"player_id": "291", "name": "Kai Larsson", "position": "GK", "age": 33, "att": 40, "def": 58, "pace": 63, "phy": 72, "ovr": 56, "star_power": 45, "salary": 573000, "team_id": ""}, {"player_id": "331", "name": "Adrian Haddad", "position": "MF", "age": 26, "att": 59, "def": 50, "pace": 55, "phy": 65, "ovr": 56, "star_power": 79, "salary": 819000, "team_id": ""}, {"player_id": "393", "name": "Tobias Vidal", "position": "FW", "age": 22, "att": 87, "def": 31, "pace": 50, "phy": 51, "ovr": 56, "star_power": 43, "salary": 700000, "team_id": ""}, {"player_id": "11", "name": "Bruno Haddad", "position": "DF", "age": 21, "att": 35, "def": 61, "pace": 60, "phy": 75, "ovr": 55, "star_power": 65, "salary": 772000, "team_id": ""}, {"player_id": "79", "name": "Andre Keller", "position": "GK", "age": 23, "att": 34, "def": 72, "pace": 47, "phy": 68, "ovr": 55, "star_power": 63, "salary": 755000, "team_id": ""}, {"player_id": "91", "name": "Kenji Suarez", "position": "FW", "age": 21, "att": 69, "def": 26, "pace": 73, "phy": 61, "ovr": 55, "star_power": 53, "salary": 708000, "team_id": ""}, {"player_id": "96", "name": "Tobias Toure", "position": "FW", "age": 25, "att": 65, "def": 44, "pace": 53, "phy": 58, "ovr": 55, "star_power": 74, "salary": 917000, "team_id": ""}, {"player_id": "142", "name": "Diego Toure", "position": "DF", "age": 32, "att": 35, "def": 74, "pace": 49, "phy": 65, "ovr": 55, "star_power": 63, "salary": 793000, "team_id": ""}, {"player_id": "150", "name": "Diego Horvat", "position": "GK", "age": 30, "att": 33, "def": 67, "pace": 50, "phy": 80, "ovr": 55, "star_power": 50, "salary": 726000, "team_id": ""}, {"player_id": "154", "name": "Diego Ivanov", "position": "GK", "age": 34, "att": 32, "def": 71, "pace": 60, "phy": 62, "ovr": 55, "star_power": 67, "salary": 717000, "team_id": ""}, {"player_id": "157", "name": "Emil Malik", "position": "DF", "age": 33, "att": 38, "def": 72, "pace": 46, "phy": 65, "ovr": 55, "star_power": 44, "salary": 753000, "team_id": ""}, {"player_id": "162", "name": "Jonas Bauer", "position": "DF", "age": 23, "att": 45, "def": 71, "pace": 45, "phy": 56, "ovr": 55, "star_power": 76, "salary": 860000, "team_id": ""}, {"player_id": "199", "name": "Kenji Novak", "position": "FW", "age": 27, "att": 60, "def": 34, "pace": 73, "phy": 68, "ovr": 55, "star_power": 71, "salary": 704000, "team_id": ""}, {"player_id": "200", "name": "Kofi Reyes", "position": "FW", "age": 32, "att": 60, "def": 47, "pace": 66, "phy": 52, "ovr": 55, "star_power": 76, "salary": 896000, "team_id": ""}, {"player_id": "225", "name": "Hassan Petrov", "position": "GK", "age": 33, "att": 39, "def": 69, "pace": 65, "phy": 49, "ovr": 55, "star_power": 38, "salary": 672000, "team_id": ""}, {"player_id": "240", "name": "Luca Toure", "position": "FW", "age": 23, "att": 85, "def": 30, "pace": 51, "phy": 51, "ovr": 55, "star_power": 61, "salary": 696000, "team_id": ""}, {"player_id": "379", "name": "Dario Kucera", "position": "GK", "age": 34, "att": 42, "def": 66, "pace": 59, "phy": 53, "ovr": 55, "star_power": 60, "salary": 653000, "team_id": ""}, {"player_id": "389", "name": "Andre Moreno", "position": "FW", "age": 20, "att": 81, "def": 26, "pace": 56, "phy": 59, "ovr": 55, "star_power": 73, "salary": 953000, "team_id": ""}, {"player_id": "207", "name": "Idris Braga", "position": "FW", "age": 29, "att": 65, "def": 40, "pace": 63, "phy": 53, "ovr": 54, "star_power": 45, "salary": 752000, "team_id": ""}, {"player_id": "215", "name": "Tariq Suarez", "position": "MF", "age": 33, "att": 59, "def": 48, "pace": 48, "phy": 60, "ovr": 54, "star_power": 55, "salary": 616000, "team_id": ""}, {"player_id": "229", "name": "Radek Moreno", "position": "FW", "age": 28, "att": 64, "def": 36, "pace": 46, "phy": 75, "ovr": 54, "star_power": 41, "salary": 634000, "team_id": ""}, {"player_id": "357", "name": "Kwame Kucera", "position": "GK", "age": 20, "att": 37, "def": 73, "pace": 59, "phy": 45, "ovr": 54, "star_power": 40, "salary": 588000, "team_id": ""}, {"player_id": "33", "name": "Pavel Rossi", "position": "FW", "age": 34, "att": 65, "def": 29, "pace": 62, "phy": 64, "ovr": 53, "star_power": 49, "salary": 603000, "team_id": ""}, {"player_id": "53", "name": "Luca Berg", "position": "MF", "age": 29, "att": 66, "def": 46, "pace": 47, "phy": 47, "ovr": 53, "star_power": 42, "salary": 717000, "team_id": ""}, {"player_id": "133", "name": "Leon Suarez", "position": "GK", "age": 34, "att": 31, "def": 62, "pace": 81, "phy": 50, "ovr": 53, "star_power": 40, "salary": 709000, "team_id": ""}, {"player_id": "151", "name": "Lars Osei", "position": "FW", "age": 20, "att": 78, "def": 27, "pace": 45, "phy": 61, "ovr": 53, "star_power": 46, "salary": 767000, "team_id": ""}, {"player_id": "264", "name": "Hassan Santos", "position": "DF", "age": 25, "att": 36, "def": 60, "pace": 58, "phy": 64, "ovr": 53, "star_power": 79, "salary": 916000, "team_id": ""}, {"player_id": "4", "name": "Stefan Adeyemi", "position": "GK", "age": 19, "att": 36, "def": 67, "pace": 48, "phy": 55, "ovr": 52, "star_power": 53, "salary": 814000, "team_id": ""}, {"player_id": "10", "name": "Kai Ivanov", "position": "DF", "age": 27, "att": 35, "def": 63, "pace": 61, "phy": 56, "ovr": 52, "star_power": 62, "salary": 627000, "team_id": ""}, {"player_id": "64", "name": "Radek Adeyemi", "position": "GK", "age": 24, "att": 35, "def": 56, "pace": 77, "phy": 50, "ovr": 52, "star_power": 74, "salary": 687000, "team_id": ""}, {"player_id": "166", "name": "Kai Wallin", "position": "FW", "age": 25, "att": 64, "def": 33, "pace": 50, "phy": 64, "ovr": 52, "star_power": 40, "salary": 734000, "team_id": ""}, {"player_id": "169", "name": "Dario Suarez", "position": "FW", "age": 33, "att": 61, "def": 32, "pace": 50, "phy": 72, "ovr": 52, "star_power": 42, "salary": 666000, "team_id": ""}, {"player_id": "371", "name": "Andre Osei", "position": "GK", "age": 22, "att": 38, "def": 62, "pace": 59, "phy": 53, "ovr": 52, "star_power": 70, "salary": 833000, "team_id": ""}, {"player_id": "84", "name": "Tomas Sato", "position": "FW", "age": 26, "att": 60, "def": 31, "pace": 75, "phy": 49, "ovr": 51, "star_power": 42, "salary": 638000, "team_id": ""}, {"player_id": "270", "name": "Hassan Horvat", "position": "GK", "age": 27, "att": 34, "def": 63, "pace": 53, "phy": 60, "ovr": 51, "star_power": 69, "salary": 837000, "team_id": ""}, {"player_id": "337", "name": "Omar Mensah", "position": "FW", "age": 32, "att": 72, "def": 29, "pace": 56, "phy": 47, "ovr": 51, "star_power": 61, "salary": 662000, "team_id": ""}, {"player_id": "109", "name": "Leon Krause", "position": "DF", "age": 34, "att": 38, "def": 64, "pace": 47, "phy": 47, "ovr": 50, "star_power": 49, "salary": 574000, "team_id": ""}, {"player_id": "344", "name": "Enzo Bauer", "position": "GK", "age": 22, "att": 33, "def": 59, "pace": 61, "phy": 52, "ovr": 50, "star_power": 75, "salary": 860000, "team_id": ""}, {"player_id": "399", "name": "Nico Ivanov", "position": "GK", "age": 30, "att": 33, "def": 57, "pace": 69, "phy": 51, "ovr": 50, "star_power": 51, "salary": 695000, "team_id": ""}, {"player_id": "70", "name": "Kai Novak", "position": "GK", "age": 26, "att": 43, "def": 56, "pace": 46, "phy": 50, "ovr": 49, "star_power": 45, "salary": 634000, "team_id": ""}, {"player_id": "279", "name": "Igor Toure", "position": "FW", "age": 26, "att": 63, "def": 25, "pace": 51, "phy": 61, "ovr": 48, "star_power": 45, "salary": 613000, "team_id": ""}];
+(async function initDashboardForms() {
+  await Promise.all([loadPlayers(), loadTeams(), loadCatalog()]);
+  populateTeamSelects();
+  initRenameForm();
+  initDraftBoardForm();
+  initLineupForm();
+})();
 </script>
 </body>
 </html>

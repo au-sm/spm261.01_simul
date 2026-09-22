@@ -1,8 +1,9 @@
 """
-Regenerates submit/players.json (the Submit page's static reference copy
-of the player pool) from data/players.csv -- includes team_id (null
-until drafted) so the Weekly Lineup form can filter to a team's actual
-roster, and the Draft Board form can exclude already-drafted players.
+Regenerates players.json (repo root -- fetched as ../players.json by
+assets/submissions.js from any one-level-deep page: Dashboard, Sponsorship,
+TV) from data/players.csv -- includes team_id (null until drafted) so the
+Weekly Lineup form can filter to a team's actual roster, and the Draft
+Board form can exclude already-drafted players.
 
 Run after any draft/round resolution (team_id assignments change),
 then push. engine/auto_resolve.py calls this automatically as part of
@@ -36,7 +37,7 @@ def build():
 
 
 if __name__ == "__main__":
-    out_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(BASE, "submit", "players.json")
+    out_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(BASE, "players.json")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w") as f:
         json.dump(build(), f)

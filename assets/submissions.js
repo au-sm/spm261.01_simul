@@ -1,7 +1,11 @@
-// SPM261.01 Soccer League -- submission frontend.
-// Talks to backend.gs (Apps Script Web App) at BACKEND_URL (config.js).
-// PIN checks happen server-side in backend.gs; this file never embeds
-// or checks PINs itself.
+// SPM261.01 Soccer League -- shared submission frontend, mounted directly
+// on Dashboard (Rename Team / Draft Board / Weekly Lineup), Sponsorship
+// Marketplace (Sponsorship Deal), and TV Rights Marketplace (Local TV
+// Deal) -- there is no separate Submit page anymore. Talks to backend.gs
+// (Apps Script Web App) at BACKEND_URL (assets/config.js). PIN checks
+// happen server-side in backend.gs; this file never embeds or checks
+// PINs itself. Each host page loads this file, then calls only the
+// init*Form() functions for the forms it actually has on the page.
 
 let TEAMS = [];
 let PLAYERS = [];
@@ -11,13 +15,13 @@ let EXISTING_SPONSORSHIP_DEALS = []; // {team_id, category, brand} -- no revenue
 let EXISTING_LOCAL_TV_DEALS = []; // {team_id} -- just "has negotiated"
 
 async function loadPlayers() {
-  const res = await fetch('players.json');
+  const res = await fetch('../players.json');
   PLAYERS = await res.json();
 }
 
 async function loadTeams() {
   if (!BACKEND_URL) {
-    document.querySelectorAll('.backend-warning').forEach(el => el.hidden = false);
+    document.querySelectorAll('.sub-backend-warning').forEach(el => el.hidden = false);
     return;
   }
   const res = await fetch(BACKEND_URL);
@@ -38,7 +42,7 @@ async function loadCatalog() {
 }
 
 function populateTeamSelects() {
-  document.querySelectorAll('.team-select').forEach(sel => {
+  document.querySelectorAll('.sub-team-select').forEach(sel => {
     sel.innerHTML = TEAMS.map(t => `<option value="${t.id}">${t.name} (${t.owner})</option>`).join('');
   });
 }
@@ -55,7 +59,7 @@ async function postSubmission(body) {
   return res.json();
 }
 
-// ---------------- Rename Your Team ----------------
+// ---------------- Rename Your Team (Dashboard) ----------------
 function initRenameForm() {
   const teamSel = document.getElementById('rn-team');
   const pinInput = document.getElementById('rn-pin');
@@ -67,17 +71,17 @@ function initRenameForm() {
     const teamId = teamSel.value;
     const pin = pinInput.value.trim();
     const newName = nameInput.value.trim();
-    if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'msg'; return; }
-    if (!newName) { msg.textContent = 'Type your new team name.'; msg.className = 'msg'; return; }
+    if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'sub-msg'; return; }
+    if (!newName) { msg.textContent = 'Type your new team name.'; msg.className = 'sub-msg'; return; }
 
     btn.disabled = true;
     msg.textContent = 'Submitting...';
-    msg.className = 'msg';
+    msg.className = 'sub-msg';
     try {
       const result = await postSubmission({ type: 'rename_team', team_id: teamId, pin, new_name: newName });
       if (result.ok) {
         msg.textContent = `Saved -- your team is now "${result.name}".`;
-        msg.className = 'msg ok';
+        msg.className = 'sub-msg ok';
         pinInput.value = '';
         nameInput.value = '';
         await loadTeams();
@@ -85,49 +89,49 @@ function initRenameForm() {
         teamSel.value = teamId;
       } else {
         msg.textContent = result.error || 'Something went wrong.';
-        msg.className = 'msg';
+        msg.className = 'sub-msg';
       }
     } catch (e) {
       msg.textContent = 'Could not reach the server -- check your connection and try again.';
-      msg.className = 'msg';
+      msg.className = 'sub-msg';
     }
     btn.disabled = false;
   });
 }
 
-// ---------------- Draft Board ----------------
+// ---------------- Draft Board submission (Dashboard) ----------------
 let boardPicks = []; // array of player objects, in ranked order
 
 function renderBoard() {
   const list = document.getElementById('db-board');
   if (boardPicks.length === 0) {
-    list.innerHTML = '<li class="empty">Your ranked board is empty -- search below and add players.</li>';
+    list.innerHTML = '<li class="sub-empty">Your ranked board is empty -- search below and add players.</li>';
   } else {
     list.innerHTML = boardPicks.map((p, i) => `
       <li>
-        <span class="rank">${i + 1}</span>
-        <span class="pos pos-${p.position}">${p.position}</span>
-        <span class="name">${p.name}</span>
-        <span class="ovr">OVR ${p.ovr}</span>
-        <button type="button" class="up" data-i="${i}" ${i === 0 ? 'disabled' : ''}>&uarr;</button>
-        <button type="button" class="down" data-i="${i}" ${i === boardPicks.length - 1 ? 'disabled' : ''}>&darr;</button>
-        <button type="button" class="remove" data-i="${i}">remove</button>
+        <span class="sub-rank">${i + 1}</span>
+        <span class="sub-pos sub-pos-${p.position}">${p.position}</span>
+        <span class="sub-name">${p.name}</span>
+        <span class="sub-ovr">OVR ${p.ovr}</span>
+        <button type="button" class="sub-up" data-i="${i}" ${i === 0 ? 'disabled' : ''}>&uarr;</button>
+        <button type="button" class="sub-down" data-i="${i}" ${i === boardPicks.length - 1 ? 'disabled' : ''}>&darr;</button>
+        <button type="button" class="sub-remove" data-i="${i}">remove</button>
       </li>`).join('');
   }
   document.getElementById('db-count').textContent =
     `${boardPicks.length} player${boardPicks.length === 1 ? '' : 's'} ranked (at least 25 recommended)`;
 
-  list.querySelectorAll('.up').forEach(b => b.addEventListener('click', () => {
+  list.querySelectorAll('.sub-up').forEach(b => b.addEventListener('click', () => {
     const i = parseInt(b.dataset.i, 10);
     [boardPicks[i - 1], boardPicks[i]] = [boardPicks[i], boardPicks[i - 1]];
     renderBoard();
   }));
-  list.querySelectorAll('.down').forEach(b => b.addEventListener('click', () => {
+  list.querySelectorAll('.sub-down').forEach(b => b.addEventListener('click', () => {
     const i = parseInt(b.dataset.i, 10);
     [boardPicks[i + 1], boardPicks[i]] = [boardPicks[i], boardPicks[i + 1]];
     renderBoard();
   }));
-  list.querySelectorAll('.remove').forEach(b => b.addEventListener('click', () => {
+  list.querySelectorAll('.sub-remove').forEach(b => b.addEventListener('click', () => {
     boardPicks.splice(parseInt(b.dataset.i, 10), 1);
     renderBoard();
   }));
@@ -148,13 +152,13 @@ function renderSearchResults() {
 
   results.innerHTML = matches.map(p => `
     <li>
-      <span class="pos pos-${p.position}">${p.position}</span>
-      <span class="name">${p.name}</span>
-      <span class="ovr">OVR ${p.ovr}</span>
-      <button type="button" class="add" data-id="${p.id}">add</button>
+      <span class="sub-pos sub-pos-${p.position}">${p.position}</span>
+      <span class="sub-name">${p.name}</span>
+      <span class="sub-ovr">OVR ${p.ovr}</span>
+      <button type="button" class="sub-add" data-id="${p.id}">add</button>
     </li>`).join('');
 
-  results.querySelectorAll('.add').forEach(b => b.addEventListener('click', () => {
+  results.querySelectorAll('.sub-add').forEach(b => b.addEventListener('click', () => {
     const player = PLAYERS.find(p => p.id === parseInt(b.dataset.id, 10));
     if (player) boardPicks.push(player);
     renderBoard();
@@ -174,12 +178,12 @@ function initDraftBoardForm() {
     const btn = document.getElementById('db-submit');
     const pin = pinInput.value.trim();
 
-    if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'msg'; return; }
-    if (boardPicks.length === 0) { msg.textContent = 'Add at least one player to your board first.'; msg.className = 'msg'; return; }
+    if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'sub-msg'; return; }
+    if (boardPicks.length === 0) { msg.textContent = 'Add at least one player to your board first.'; msg.className = 'sub-msg'; return; }
 
     btn.disabled = true;
     msg.textContent = 'Submitting...';
-    msg.className = 'msg';
+    msg.className = 'sub-msg';
     try {
       const result = await postSubmission({
         type: 'draft_board', team_id: teamSel.value, pin,
@@ -187,21 +191,21 @@ function initDraftBoardForm() {
       });
       if (result.ok) {
         msg.textContent = `Saved -- ${result.count} players ranked. You can keep editing and resubmit any time before Draft Day.`;
-        msg.className = 'msg ok';
+        msg.className = 'sub-msg ok';
         pinInput.value = '';
       } else {
         msg.textContent = result.error || 'Something went wrong.';
-        msg.className = 'msg';
+        msg.className = 'sub-msg';
       }
     } catch (e) {
       msg.textContent = 'Could not reach the server -- check your connection and try again.';
-      msg.className = 'msg';
+      msg.className = 'sub-msg';
     }
     btn.disabled = false;
   });
 }
 
-// ---------------- Local TV Rate ----------------
+// ---------------- Local TV Rate (TV Rights Marketplace) ----------------
 function initTvForm() {
   const teamSel = document.getElementById('tv-team');
   const pinInput = document.getElementById('tv-pin');
@@ -235,11 +239,11 @@ function initTvForm() {
 
   btn.addEventListener('click', async () => {
     const pin = pinInput.value.trim();
-    if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'msg'; return; }
+    if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'sub-msg'; return; }
     const body = { type: 'local_tv_deal', team_id: teamSel.value, pin, mode: modeSel.value };
     if (modeSel.value === 'negotiate') {
       const revenue = parseInt(document.getElementById('tv-revenue').value, 10);
-      if (!revenue) { msg.textContent = 'Enter the final agreed rate.'; msg.className = 'msg'; return; }
+      if (!revenue) { msg.textContent = 'Enter the final agreed rate.'; msg.className = 'sub-msg'; return; }
       body.final_revenue = revenue;
       if (revenue > (LOCAL_TV_BASE[teamSel.value]?.base_revenue || 0)) {
         body.rep_team_id = repSel.value;
@@ -248,29 +252,29 @@ function initTvForm() {
 
     btn.disabled = true;
     msg.textContent = 'Submitting...';
-    msg.className = 'msg';
+    msg.className = 'sub-msg';
     try {
       const result = await postSubmission(body);
       if (result.ok) {
         msg.textContent = `Saved -- $${result.final_revenue.toLocaleString()}/season` +
           (result.commission ? `, $${result.commission.toLocaleString()} commission credited to the rep.` : '.');
-        msg.className = 'msg ok';
+        msg.className = 'sub-msg ok';
         pinInput.value = '';
         await loadCatalog();
         updateTierNote();
       } else {
         msg.textContent = result.error || 'Something went wrong.';
-        msg.className = 'msg';
+        msg.className = 'sub-msg';
       }
     } catch (e) {
       msg.textContent = 'Could not reach the server -- check your connection and try again.';
-      msg.className = 'msg';
+      msg.className = 'sub-msg';
     }
     btn.disabled = false;
   });
 }
 
-// ---------------- Sponsorship Deal ----------------
+// ---------------- Sponsorship Deal (Sponsorship Marketplace) ----------------
 function initSponsorshipForm() {
   const teamSel = document.getElementById('sp-team');
   const pinInput = document.getElementById('sp-pin');
@@ -317,13 +321,13 @@ function initSponsorshipForm() {
 
   btn.addEventListener('click', async () => {
     const pin = pinInput.value.trim();
-    if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'msg'; return; }
+    if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'sub-msg'; return; }
     const brand = SPONSOR_CATALOG.find(b => b.name === brandSel.value);
     const body = { type: 'sponsorship_deal', team_id: teamSel.value, pin, brand: brandSel.value, mode: modeSel.value };
     if (modeSel.value === 'negotiate') {
       const revenue = parseInt(document.getElementById('sp-revenue').value, 10);
       const clause = document.getElementById('sp-clause').value;
-      if (!revenue) { msg.textContent = 'Enter the final agreed revenue.'; msg.className = 'msg'; return; }
+      if (!revenue) { msg.textContent = 'Enter the final agreed revenue.'; msg.className = 'sub-msg'; return; }
       body.final_revenue = revenue;
       body.final_clause = clause;
       if (brand && revenue > brand.base_revenue) body.rep_team_id = repSel.value;
@@ -331,31 +335,31 @@ function initSponsorshipForm() {
 
     btn.disabled = true;
     msg.textContent = 'Submitting...';
-    msg.className = 'msg';
+    msg.className = 'sub-msg';
     try {
       const result = await postSubmission(body);
       if (result.ok) {
         msg.textContent = `Saved -- ${result.brand} (${result.category}): $${result.final_revenue.toLocaleString()}, ${result.final_clause} clause` +
           (result.commission ? `. $${result.commission.toLocaleString()} commission credited to the rep.` : '.');
-        msg.className = 'msg ok';
+        msg.className = 'sub-msg ok';
         pinInput.value = '';
         await loadCatalog();
         updateBrands();
         updateOwnedNote();
       } else {
         msg.textContent = result.error || 'Something went wrong.';
-        msg.className = 'msg';
+        msg.className = 'sub-msg';
       }
     } catch (e) {
       msg.textContent = 'Could not reach the server -- check your connection and try again.';
-      msg.className = 'msg';
+      msg.className = 'sub-msg';
     }
     btn.disabled = false;
   });
 }
 
-// ---------------- Weekly Lineup ----------------
-const FORMATIONS = {
+// ---------------- Weekly Lineup (Dashboard) ----------------
+const SUB_FORMATIONS = {
   '4-4-2': { GK: 1, DF: 4, MF: 4, FW: 2 }, '4-3-3': { GK: 1, DF: 4, MF: 3, FW: 3 },
   '3-5-2': { GK: 1, DF: 3, MF: 5, FW: 2 }, '5-3-2': { GK: 1, DF: 5, MF: 3, FW: 2 },
   '4-5-1': { GK: 1, DF: 4, MF: 5, FW: 1 },
@@ -382,13 +386,13 @@ function initLineupForm() {
     roster_note.textContent = roster.length
       ? `${roster.length} players on this roster.`
       : 'No players drafted yet for this team -- the lineup form needs a completed draft first.';
-    const counts = FORMATIONS[formationSel.value];
+    const counts = SUB_FORMATIONS[formationSel.value];
     slotsEl.innerHTML = ['GK', 'DF', 'MF', 'FW'].map(pos => {
       const n = counts[pos];
       const selects = Array.from({ length: n }, () =>
-        `<select class="lu-slot" data-pos="${pos}">${playerOptions(pos)}</select>`
+        `<select class="sub-lineup-slot" data-pos="${pos}">${playerOptions(pos)}</select>`
       ).join('');
-      return `<div class="slot-group"><h4>${pos} (${n})</h4>${selects}</div>`;
+      return `<div class="sub-slot-group"><h4>${pos} (${n})</h4>${selects}</div>`;
     }).join('');
   }
   teamSel.addEventListener('change', rebuildSlots);
@@ -399,14 +403,14 @@ function initLineupForm() {
     const pinInput = document.getElementById('lu-pin');
     const pin = pinInput.value.trim();
     const round = parseInt(document.getElementById('lu-round').value, 10);
-    if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'msg'; return; }
-    if (!round || round < 1 || round > 17) { msg.textContent = 'Enter a valid round number (1-17).'; msg.className = 'msg'; return; }
+    if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'sub-msg'; return; }
+    if (!round || round < 1 || round > 17) { msg.textContent = 'Enter a valid round number (1-17).'; msg.className = 'sub-msg'; return; }
 
-    const slots = Array.from(document.querySelectorAll('.lu-slot'));
+    const slots = Array.from(document.querySelectorAll('.sub-lineup-slot'));
     const chosen = slots.map(s => ({ pos: s.dataset.pos, name: s.value }));
-    if (chosen.some(c => !c.name)) { msg.textContent = 'Fill every starting slot first.'; msg.className = 'msg'; return; }
+    if (chosen.some(c => !c.name)) { msg.textContent = 'Fill every starting slot first.'; msg.className = 'sub-msg'; return; }
     const names = chosen.map(c => c.name);
-    if (new Set(names).size !== names.length) { msg.textContent = 'The same player is selected in two slots.'; msg.className = 'msg'; return; }
+    if (new Set(names).size !== names.length) { msg.textContent = 'The same player is selected in two slots.'; msg.className = 'sub-msg'; return; }
 
     const byPos = pos => chosen.filter(c => c.pos === pos).map(c => c.name);
     const rationale = document.getElementById('lu-rationale').value.trim();
@@ -420,31 +424,21 @@ function initLineupForm() {
 
     btn.disabled = true;
     msg.textContent = 'Submitting...';
-    msg.className = 'msg';
+    msg.className = 'sub-msg';
     try {
       const result = await postSubmission(body);
       if (result.ok) {
         msg.textContent = `Saved -- Round ${result.round} lineup submitted. You can resubmit any time before the deadline.`;
-        msg.className = 'msg ok';
+        msg.className = 'sub-msg ok';
         pinInput.value = '';
       } else {
         msg.textContent = result.error || 'Something went wrong.';
-        msg.className = 'msg';
+        msg.className = 'sub-msg';
       }
     } catch (e) {
       msg.textContent = 'Could not reach the server -- check your connection and try again.';
-      msg.className = 'msg';
+      msg.className = 'sub-msg';
     }
     btn.disabled = false;
   });
 }
-
-(async function init() {
-  await Promise.all([loadPlayers(), loadTeams(), loadCatalog()]);
-  populateTeamSelects();
-  initRenameForm();
-  initDraftBoardForm();
-  initTvForm();
-  initSponsorshipForm();
-  initLineupForm();
-})();

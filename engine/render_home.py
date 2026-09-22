@@ -32,16 +32,15 @@ def money(n):
 
 
 CARD_COPY = {
-    "dashboard": ("Dashboard", "Standings, rosters, salary caps, and this week's Player Condition report — the live state of the league."),
+    "dashboard": ("Dashboard", "Standings, rosters, salary caps, this week's Player Condition report, and every real submission tool — rename your team, submit your Draft Board, and turn in your weekly lineup."),
     "draftboard": ("Draft Board", "The full undrafted player pool — search, filter, and sort all 399 players before you rank your own board."),
     "budget": ("Budget Dashboard", "Draft money left, and cash on hand from ticket, sponsorship, and TV revenue — one team's whole financial picture."),
     "rulebook": ("Rulebook", "Every rule, every formula, every point your grade is built from — start here if you're new."),
-    "sponsorship": ("Sponsorship Marketplace", "Open brand slots, live deal status, and a negotiation simulator to rehearse your ask before your live turn."),
-    "tv": ("TV Rights Marketplace", "Your market tier, your Local TV base rate, and a negotiation simulator for the rate you'll lock in right after Draft Day."),
+    "sponsorship": ("Sponsorship Marketplace", "Open brand slots, live deal status, a negotiation simulator, and the real form to sign your sponsor."),
+    "tv": ("TV Rights Marketplace", "Your market tier, your Local TV base rate, a negotiation simulator, and the real form to lock in your rate."),
     "attendance": ("Attendance &amp; Ticket Sales", "Ticket revenue by team, the attendance formula explained, and a pricing simulator for your next home match."),
     "replay": ("Matchday Replay", "A 90-minute match compressed into a 30-second animated replay — real formation shape, real goal minutes, real final score."),
     "walkthrough": ("Match Engine Walkthrough", "Drag the sliders, hit Kickoff — see exactly how a lineup, formation, and strategy turn into a final score."),
-    "submit": ("Submit", "Rename your team and submit your Draft Board — real submissions, saved live, PIN-protected."),
 }
 
 

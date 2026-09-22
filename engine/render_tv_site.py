@@ -73,6 +73,7 @@ def render(config, ltv, tv_deal_formula):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TV Rights Marketplace</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/submissions.css">
 <style>
 :root{{
   --paper:#eef2ea; --ink:#16201a; --muted:#5b6b5e; --line:#d6decd;
@@ -197,6 +198,31 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
   </section>
 
   <section>
+    <p class="sub-backend-warning" hidden>Backend not configured yet &mdash; submissions are disabled until BACKEND_URL is set in assets/config.js.</p>
+    <div class="sub-card">
+      <h2>Lock In Your Local TV Rate</h2>
+      <p class="sub-sub">The real thing -- saved live. One-time only, right after Draft Day.</p>
+      <div class="sub-grid">
+        <div class="sub-field"><label for="tv-team">Team</label><select id="tv-team" class="sub-team-select"></select></div>
+        <div class="sub-field"><label for="tv-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="tv-pin" class="sub-pin" placeholder="4-digit PIN"></div>
+      </div>
+      <p class="sub-tier-note" id="tv-tier-note"></p>
+      <div class="sub-grid">
+        <div class="sub-field"><label for="tv-mode">Result</label>
+          <select id="tv-mode">
+            <option value="base">Take Base rate exactly</option>
+            <option value="negotiate">Negotiated a different rate</option>
+          </select>
+        </div>
+        <div class="sub-field" id="tv-revenue-field" hidden><label for="tv-revenue">Final agreed rate ($/season)</label><input type="number" id="tv-revenue" placeholder="e.g. 1320000"></div>
+        <div class="sub-field" id="tv-rep-field" hidden><label for="tv-rep">Network rep (if rate is ABOVE base)</label><select id="tv-rep" class="sub-team-select"></select></div>
+      </div>
+      <button class="sub-btn" id="tv-submit">Submit Local TV Rate</button>
+      <p class="sub-msg" id="tv-msg"></p>
+    </div>
+  </section>
+
+  <section>
     <div class="section-head">
       <h2>Try a Negotiation</h2>
       <span class="section-note">a rehearsal &mdash; the real negotiation still happens live, right after Draft Day</span>
@@ -232,11 +258,15 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
 <footer>{config["league_name"]} &middot; TV rights marketplace &mdash; math matches engine/negotiation.py and engine/resolve_local_tv_pick.py exactly</footer>
 
 <script>
-const TEAMS = {assignments_json};
+// TV_SIM_TEAMS, not TEAMS -- assets/submissions.js (loaded below, for the
+// REAL Local TV Rate form) declares its own `let TEAMS` populated live from
+// the backend; a same-name top-level const here would collide across the
+// two <script> tags and throw.
+const TV_SIM_TEAMS = {assignments_json};
 const REVENUE_RANGE = 0.10;
 
 const teamSel = document.getElementById('sim-team');
-teamSel.innerHTML = TEAMS.map(t => `<option value="${{t.team_id}}">${{t.team_name}} &mdash; ${{t.market_tier}} ($${{t.base_revenue.toLocaleString()}})</option>`).join('');
+teamSel.innerHTML = TV_SIM_TEAMS.map(t => `<option value="${{t.team_id}}">${{t.team_name}} &mdash; ${{t.market_tier}} ($${{t.base_revenue.toLocaleString()}})</option>`).join('');
 
 function computeLeverage(avgStar) {{
   return Math.max(0, Math.min(100, (avgStar - 50) * 2));
@@ -263,7 +293,7 @@ document.getElementById('sim-go').addEventListener('click', () => {{
   const star = parseFloat(document.getElementById('sim-star').value);
   const leverage = computeLeverage(star);
   const revenueAsk = document.getElementById('sim-revenue-ask').value;
-  const team = TEAMS.find(t => String(t.team_id) === teamSel.value);
+  const team = TV_SIM_TEAMS.find(t => String(t.team_id) === teamSel.value);
   const resultEl = document.getElementById('sim-result');
 
   let rate = team.base_revenue, commission = 0;
@@ -280,6 +310,15 @@ document.getElementById('sim-go').addEventListener('click', () => {{
   }}
   resultEl.textContent = text;
 }});
+</script>
+<script src="../assets/config.js"></script>
+<script src="../assets/submissions.js"></script>
+<script>
+(async function initLocalTvDealForm() {{
+  await Promise.all([loadPlayers(), loadTeams(), loadCatalog()]);
+  populateTeamSelects();
+  initTvForm();
+}})();
 </script>
 </body>
 </html>'''

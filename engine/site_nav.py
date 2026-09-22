@@ -29,7 +29,6 @@ PAGES = [
     ("attendance", "Attendance &amp; Ticket Sales", f"{GH_BASE}/attendance/"),
     ("walkthrough", "Match Engine Walkthrough", f"{GH_BASE}/walkthrough/"),
     ("replay", "Matchday Replay", f"{GH_BASE}/matchday-replay/"),
-    ("submit", "Submit", f"{GH_BASE}/submit/"),
 ]
 
 NAV_CSS = '''
