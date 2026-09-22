@@ -147,7 +147,7 @@ footer{{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
   </section>
 </div>
 
-<footer>{config["league_name"]} &middot; draft board &mdash; rank your own picks and submit at the Submit page</footer>
+<footer>{config["league_name"]} &middot; draft board &mdash; rank your own picks and submit them on the Dashboard</footer>
 
 <script>
 const PLAYERS = {players_json};
