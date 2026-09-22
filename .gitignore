@@ -1,0 +1,10 @@
+# Ephemeral files written by engine/auto_resolve.py + engine/pull_submissions.py
+# during a workflow run. _pulled_round_*.csv carries real team PINs
+# (pulled from the Teams sheet to satisfy resolve_round.py's own PIN
+# check) -- this repo is PUBLIC, these must never be committed.
+_pulled_round_*.csv
+_pulled_export.json
+_auto_resolve_actions.txt
+
+__pycache__/
+*.pyc

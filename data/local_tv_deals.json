@@ -1,0 +1,132 @@
+{
+  "_description": "Local TV Deals -- one per-team regional broadcast contract, fixed for the season, additional to the league-wide national TV deal. See data/deals.json -> local_tv_deal_formula for the full mechanic.",
+  "market_tiers": [
+    {
+      "tier": "Major Market",
+      "base_revenue": 1200000
+    },
+    {
+      "tier": "Mid Market",
+      "base_revenue": 700000
+    },
+    {
+      "tier": "Small Market",
+      "base_revenue": 500000
+    }
+  ],
+  "star_power_modifier": {
+    "description": "If a team's average starting-XI Star Power ranks in the league's top 3 at split time, its Local TV Deal pays +15% that round (same top-3 threshold as the national deal's star bonus) -- scaled off the team's own base rather than a flat dollar add, since a Major Market base and a Small Market base are already such different sizes.",
+    "multiplier_if_top3_star_power": 1.15,
+    "multiplier_otherwise": 1.0
+  },
+  "assignments": [
+    {
+      "team_id": 0,
+      "team_name": "Team 1",
+      "market_tier": "Major Market",
+      "base_revenue": 1200000
+    },
+    {
+      "team_id": 1,
+      "team_name": "Team 2",
+      "market_tier": "Major Market",
+      "base_revenue": 1200000
+    },
+    {
+      "team_id": 2,
+      "team_name": "Team 3",
+      "market_tier": "Mid Market",
+      "base_revenue": 700000
+    },
+    {
+      "team_id": 3,
+      "team_name": "Team 4",
+      "market_tier": "Small Market",
+      "base_revenue": 500000
+    },
+    {
+      "team_id": 4,
+      "team_name": "Team 5",
+      "market_tier": "Mid Market",
+      "base_revenue": 700000
+    },
+    {
+      "team_id": 5,
+      "team_name": "Team 6",
+      "market_tier": "Small Market",
+      "base_revenue": 500000
+    },
+    {
+      "team_id": 6,
+      "team_name": "Team 7",
+      "market_tier": "Small Market",
+      "base_revenue": 500000
+    },
+    {
+      "team_id": 7,
+      "team_name": "Team 8",
+      "market_tier": "Mid Market",
+      "base_revenue": 700000
+    },
+    {
+      "team_id": 8,
+      "team_name": "Team 9",
+      "market_tier": "Small Market",
+      "base_revenue": 500000
+    },
+    {
+      "team_id": 9,
+      "team_name": "Team 10",
+      "market_tier": "Major Market",
+      "base_revenue": 1200000
+    },
+    {
+      "team_id": 10,
+      "team_name": "Team 11",
+      "market_tier": "Major Market",
+      "base_revenue": 1200000
+    },
+    {
+      "team_id": 11,
+      "team_name": "Team 12",
+      "market_tier": "Small Market",
+      "base_revenue": 500000
+    },
+    {
+      "team_id": 12,
+      "team_name": "Team 13",
+      "market_tier": "Major Market",
+      "base_revenue": 1200000
+    },
+    {
+      "team_id": 13,
+      "team_name": "Team 14",
+      "market_tier": "Mid Market",
+      "base_revenue": 700000
+    },
+    {
+      "team_id": 14,
+      "team_name": "Team 15",
+      "market_tier": "Major Market",
+      "base_revenue": 1200000
+    },
+    {
+      "team_id": 15,
+      "team_name": "Team 16",
+      "market_tier": "Mid Market",
+      "base_revenue": 700000
+    },
+    {
+      "team_id": 16,
+      "team_name": "Team 17",
+      "market_tier": "Small Market",
+      "base_revenue": 500000
+    },
+    {
+      "team_id": 17,
+      "team_name": "Team 18",
+      "market_tier": "Mid Market",
+      "base_revenue": 700000
+    }
+  ]
+}

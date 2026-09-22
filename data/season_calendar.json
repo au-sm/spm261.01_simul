@@ -1,0 +1,18 @@
+{
+  "_notes": "Rebuilt 2026-09-20 for the real 18-student Section 1 roster (was a 20-team placeholder); Draft Day confirmed 2026-09-20 as Tue Oct 6, 2026 (was a Mon Oct 5 placeholder -- match days below deliberately left unmoved, still 1-2 days after Draft Day same as before). 18 teams -> 17-round round-robin, one fewer doubleheader match day than the old 20-team version. Same Mon/Wed match-day cadence: doubleheaders (2 rounds per match day) after an easing-in single-round Round 1, so the full 17-round round-robin completes with no partial schedule. TV Revenue Day (Round 9 split, see deals.json -> tv_deal_formula) lands on the 2026-10-21 match day; Trade Day is set for the Thu react-day right after it. Section 2 (21 teams, 21 rounds via bye) gets its own copy of this file with extra match days once that section's folder is created.",
+  "draft_day": "2026-10-06",
+  "match_days": "Monday and Wednesday -- doubleheaders (2 rounds resolved per match day) except Round 1, class meets Tuesday/Thursday to react to results",
+  "trade_day": "2026-10-22",
+  "match_day_schedule": [
+    {"date": "2026-10-07", "rounds": [1]},
+    {"date": "2026-10-12", "rounds": [2, 3]},
+    {"date": "2026-10-14", "rounds": [4, 5]},
+    {"date": "2026-10-19", "rounds": [6, 7]},
+    {"date": "2026-10-21", "rounds": [8, 9]},
+    {"date": "2026-10-26", "rounds": [10, 11]},
+    {"date": "2026-10-28", "rounds": [12, 13]},
+    {"date": "2026-11-02", "rounds": [14, 15]},
+    {"date": "2026-11-04", "rounds": [16, 17]}
+  ],
+  "season_end": "2026-11-04"
+}

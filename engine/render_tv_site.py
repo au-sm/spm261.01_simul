@@ -1,0 +1,302 @@
+"""
+Renders tv-site/index.html -- the standalone Local TV Rights
+Marketplace, the missing sibling to sponsorship-site/index.html. Same
+purpose: a live status page plus a client-side negotiation simulator
+students can rehearse on before their real negotiation locks a rate in.
+
+Reads data/local_tv_deals.json (market tier + base rate + negotiated
+rate once resolved) and data/league_config.json (team names/owners) --
+always current, never hand-typed. Simulator math mirrors
+engine/negotiation.py's revenue axis exactly (no clause here -- Local
+TV deals don't have one, see rulebook Section 9).
+
+Run after every resolve_local_tv_pick.py call, then republish.
+"""
+import json
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))
+from site_nav import NAV_CSS, render_nav
+
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def load_json(name):
+    with open(os.path.join(BASE, "data", name)) as f:
+        return json.load(f)
+
+
+def money(n):
+    return f"${n:,}"
+
+
+def render(config, ltv, tv_deal_formula):
+    owner_by_id = {t["team_id"]: t.get("owner", "") for t in config["teams"]}
+    assignments = ltv["assignments"]
+
+    tier_rows = []
+    for tier in ltv["market_tiers"]:
+        tier_rows.append(
+            f'<tr><td>{tier["tier"]}</td><td class="num">{money(tier["base_revenue"])}</td></tr>'
+        )
+    tier_rows_html = "".join(tier_rows)
+
+    team_rows = []
+    for a in sorted(assignments, key=lambda a: a["team_id"]):
+        owner = owner_by_id.get(a["team_id"], "")
+        name = a["team_name"] + (f" ({owner})" if owner else "")
+        negotiated = a.get("negotiated")
+        if negotiated:
+            rate = money(a["negotiated_revenue"])
+            status_cls = "complete"
+            status = a["mode"]
+        else:
+            rate = f'{money(a["base_revenue"])} (base, not yet negotiated)'
+            status_cls = "pending"
+            status = "pending"
+        team_rows.append(
+            f'<tr><td>{name}</td><td>{a["market_tier"]}</td><td class="num">{rate}</td>'
+            f'<td class="num status-{status_cls}">{status}</td></tr>'
+        )
+    team_rows_html = "".join(team_rows)
+
+    assignments_json = json.dumps([
+        {"team_id": a["team_id"], "team_name": a["team_name"], "market_tier": a["market_tier"], "base_revenue": a["base_revenue"]}
+        for a in assignments
+    ])
+
+    return f'''<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TV Rights Marketplace</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{{
+  --paper:#eef2ea; --ink:#16201a; --muted:#5b6b5e; --line:#d6decd;
+  --accent:#b8811f; --accent-ink:#3a2a08; --pitch:#2f5233; --pitch-ink:#eef2ea;
+  --navy:#223a5e; --navy-ink:#eef2ea; --surface:#f7f9f4;
+  --win:#2f7a4f; --loss:#b4472f; --draw:#a5791f;
+  --shadow: 0 1px 2px rgba(22,32,26,.06), 0 4px 14px rgba(22,32,26,.05);
+}}
+@media (prefers-color-scheme: dark){{
+  :root:not([data-theme="light"]){{
+    --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
+    --accent:#d9a44a; --accent-ink:#1c1404; --pitch:#4c7a52; --pitch-ink:#0d130e;
+    --navy:#4a6693; --navy-ink:#0d130e; --surface:#171d17;
+    --win:#4fae76; --loss:#e07a5c; --draw:#d1a13e;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.35);
+  }}
+}}
+:root[data-theme="dark"]{{
+    --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
+    --accent:#d9a44a; --accent-ink:#1c1404; --pitch:#4c7a52; --pitch-ink:#0d130e;
+    --navy:#4a6693; --navy-ink:#0d130e; --surface:#171d17;
+    --win:#4fae76; --loss:#e07a5c; --draw:#d1a13e;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.35);
+}}
+*{{box-sizing:border-box;}}
+body{{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;line-height:1.5;}}
+.mono{{font-family:"IBM Plex Mono",ui-monospace,monospace;}}
+h1,h2,h3{{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase;letter-spacing:.02em;text-wrap:balance;margin:0;}}
+.num{{font-variant-numeric:tabular-nums;text-align:right;}}
+
+.masthead{{background:var(--navy);color:var(--navy-ink);padding:28px clamp(16px,4vw,48px);}}
+.masthead-inner{{max-width:1180px;margin:0 auto;}}
+.masthead h1{{font-size:clamp(26px,4vw,38px);font-weight:800;}}
+.masthead p{{font-family:"IBM Plex Mono",monospace;font-size:12.5px;opacity:.85;margin:6px 0 0;letter-spacing:.03em;}}
+
+.wrap{{max-width:1180px;margin:0 auto;padding:28px clamp(16px,4vw,48px) 70px;}}
+section{{margin-bottom:36px;}}
+.section-head{{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:16px;}}
+.section-head h2{{font-size:21px;}}
+.section-note{{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);}}
+
+.how-it-works{{background:var(--surface);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow);padding:18px 22px;}}
+.how-it-works ul{{margin:8px 0 0;padding-left:20px;}}
+.how-it-works li{{margin-bottom:6px;}}
+.asks-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:14px;}}
+.ask-chip{{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:8px 12px;font-size:13px;}}
+.ask-chip b{{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;}}
+
+table{{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--surface);border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow);margin-bottom:16px;}}
+thead th{{background:var(--navy);color:var(--navy-ink);text-align:left;padding:9px 10px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;}}
+thead th.num{{text-align:right;}}
+tbody td{{padding:7px 10px;border-top:1px solid var(--line);}}
+.status-complete{{color:var(--win);font-weight:600;text-transform:capitalize;}}
+.status-pending{{color:var(--draw);font-weight:600;}}
+
+.sim{{background:var(--surface);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow);padding:20px 22px;}}
+.sim-grid{{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}}
+@media (max-width:640px){{.sim-grid{{grid-template-columns:1fr;}}}}
+.field label{{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}}
+.field select, .field input[type=range]{{width:100%;}}
+select{{font-family:"Source Serif 4",serif;font-size:14px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:6px 8px;}}
+input[type=range]{{accent-color:var(--accent);}}
+.sim-readout{{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:14px;font-family:"IBM Plex Mono",monospace;font-size:13px;}}
+.sim-readout .stat{{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:8px 14px;}}
+.sim-readout .stat b{{display:block;font-size:20px;font-family:"Big Shoulders Display",sans-serif;}}
+.btn{{font-family:"Big Shoulders Display",sans-serif;font-weight:800;font-size:16px;letter-spacing:.03em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);border:none;border-radius:4px;padding:12px 28px;cursor:pointer;}}
+.btn:hover{{filter:brightness(1.08);}}
+.sim-result{{margin-top:16px;padding:14px 16px;border-radius:3px;background:var(--paper);border:1px solid var(--line);font-family:"IBM Plex Mono",monospace;font-size:13px;min-height:1.4em;}}
+.sim-result.accepted{{border-color:var(--win);}}
+.sim-result.walk_away{{border-color:var(--loss);}}
+
+footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:var(--muted);font-size:12px;font-family:"IBM Plex Mono",monospace;}}
+{NAV_CSS}
+</style>
+</head>
+<body>
+{render_nav("tv")}
+<div class="masthead">
+  <div class="masthead-inner">
+    <h1>TV Rights Marketplace</h1>
+    <p>{config["league_name"]} &middot; every team negotiates ONE Local TV Deal rate, right after Draft Day</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section>
+    <div class="section-head"><h2>How It Works</h2></div>
+    <div class="how-it-works">
+      <p>Unlike Sponsorship, there's no brand catalog here &mdash; your Local TV Deal is tied to a market tier randomly
+      assigned right after Draft Day (evenly split league-wide, drawn from the season seed). That tier sets your PUBLIC
+      base rate:</p>
+      <table><thead><tr><th>Market Tier</th><th class="num">Base Rate</th></tr></thead><tbody>{tier_rows_html}</tbody></table>
+      <p>Right after that assignment, you negotiate LIVE against a classmate playing the network rep (rotation:
+      <span class="mono">engine/generate_tv_negotiation_rotation.py</span>). Same revenue mechanic as Sponsorship &mdash;
+      the ONLY axis here, no clause:</p>
+      <div class="asks-grid">
+        <div class="ask-chip"><b>Revenue</b>Take the market-tier Base exactly (guaranteed), or Negotiate &mdash; lands
+        anywhere from &minus;10% to +10% of base, set by your <b>Negotiating Leverage</b> (roster avg. Star Power + a
+        standings bonus once the season starts). A weak hand can genuinely land below base.</div>
+        <div class="ask-chip"><b>The commission</b>Land ABOVE base, and the overage is credited &mdash; immediately, not
+        at the Round 9 split &mdash; as bonus revenue to whichever team played the network rep. Landing at or below base
+        costs the rep's team nothing, but earns them nothing either.</div>
+      </div>
+      <p style="margin-top:12px;"><b>This negotiation sets the RATE only.</b> The money itself is still paid at the
+      league's Round 9 TV Revenue Day, with the Star Power modifier (+15% if your starting XI is top-3 league-wide then)
+      still applied on top of whatever rate you locked in here.</p>
+      <p style="margin-top:10px;"><b>The League-Wide (National) TV Deal is separate and fully automatic</b> &mdash; a
+      shared formula-only split (base + standings/Star Power bonus) with no live negotiation, since there's no natural
+      second party to negotiate a league-wide number against. See the Rulebook, Section 9.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Team Status</h2>
+      <span class="section-note">live: rate + status update as negotiations resolve</span>
+    </div>
+    <table>
+      <thead><tr><th>Team</th><th>Market Tier</th><th class="num">Rate</th><th class="num">Status</th></tr></thead>
+      <tbody>{team_rows_html}</tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Try a Negotiation</h2>
+      <span class="section-note">a rehearsal &mdash; the real negotiation still happens live, right after Draft Day</span>
+    </div>
+    <div class="sim">
+      <div class="sim-grid">
+        <div class="field">
+          <label for="sim-team">Team (sets your market-tier base)</label>
+          <select id="sim-team"></select>
+        </div>
+        <div class="field">
+          <label for="sim-star">Your Roster Avg. Star Power: <span id="sim-star-v">65</span></label>
+          <input type="range" min="30" max="99" value="65" id="sim-star">
+        </div>
+        <div class="field">
+          <label for="sim-revenue-ask">Revenue</label>
+          <select id="sim-revenue-ask">
+            <option value="base">Take Base (guaranteed)</option>
+            <option value="negotiate">Negotiate (&minus;10% to +10%, by leverage)</option>
+          </select>
+        </div>
+      </div>
+      <div class="sim-readout">
+        <div class="stat">Leverage<br><b id="sim-leverage">0</b></div>
+        <div class="stat">Rate Adjustment<br><b id="sim-adjustment">&ndash;</b></div>
+      </div>
+      <button class="btn" id="sim-go">Make This Ask</button>
+      <div class="sim-result" id="sim-result">Pick a team and your ask, then hit the button.</div>
+    </div>
+  </section>
+</div>
+
+<footer>{config["league_name"]} &middot; TV rights marketplace &mdash; math matches engine/negotiation.py and engine/resolve_local_tv_pick.py exactly</footer>
+
+<script>
+const TEAMS = {assignments_json};
+const REVENUE_RANGE = 0.10;
+
+const teamSel = document.getElementById('sim-team');
+teamSel.innerHTML = TEAMS.map(t => `<option value="${{t.team_id}}">${{t.team_name}} &mdash; ${{t.market_tier}} ($${{t.base_revenue.toLocaleString()}})</option>`).join('');
+
+function computeLeverage(avgStar) {{
+  return Math.max(0, Math.min(100, (avgStar - 50) * 2));
+}}
+
+function updateReadout() {{
+  const star = parseFloat(document.getElementById('sim-star').value);
+  document.getElementById('sim-star-v').textContent = star;
+  const leverage = computeLeverage(star);
+  document.getElementById('sim-leverage').textContent = leverage.toFixed(0);
+  const revenueAsk = document.getElementById('sim-revenue-ask').value;
+  if (revenueAsk === 'base') {{
+    document.getElementById('sim-adjustment').textContent = '0% (guaranteed)';
+  }} else {{
+    const adj = -REVENUE_RANGE + (leverage / 100) * (2 * REVENUE_RANGE);
+    document.getElementById('sim-adjustment').textContent = (adj >= 0 ? '+' : '') + (adj * 100).toFixed(1) + '%';
+  }}
+}}
+
+document.querySelectorAll('#sim-star, #sim-revenue-ask, #sim-team').forEach(el => el.addEventListener('input', updateReadout));
+updateReadout();
+
+document.getElementById('sim-go').addEventListener('click', () => {{
+  const star = parseFloat(document.getElementById('sim-star').value);
+  const leverage = computeLeverage(star);
+  const revenueAsk = document.getElementById('sim-revenue-ask').value;
+  const team = TEAMS.find(t => String(t.team_id) === teamSel.value);
+  const resultEl = document.getElementById('sim-result');
+
+  let rate = team.base_revenue, commission = 0;
+  if (revenueAsk === 'negotiate') {{
+    const adj = -REVENUE_RANGE + (leverage / 100) * (2 * REVENUE_RANGE);
+    rate = Math.round(team.base_revenue * (1 + adj));
+    commission = Math.max(0, rate - team.base_revenue);
+  }}
+
+  resultEl.className = 'sim-result ' + (revenueAsk === 'negotiate' && rate < team.base_revenue ? 'walk_away' : 'accepted');
+  let text = `Negotiated rate: $${{rate.toLocaleString()}}/season (base $${{team.base_revenue.toLocaleString()}}). Still paid at the Round 9 split, plus Star Power bonus if earned then.`;
+  if (commission > 0) {{
+    text += ` A live network rep here would earn a $${{commission.toLocaleString()}} commission for their own team, credited now.`;
+  }}
+  resultEl.textContent = text;
+}});
+</script>
+</body>
+</html>'''
+
+
+if __name__ == "__main__":
+    config = load_json("league_config.json")
+    deals = load_json("deals.json")
+    ltv_path = os.path.join(BASE, "data", "local_tv_deals.json")
+    if not os.path.exists(ltv_path):
+        print("ERROR: data/local_tv_deals.json not found -- run generate_local_tv_deals.py first.")
+        raise SystemExit(1)
+    ltv = load_json("local_tv_deals.json")
+    html = render(config, ltv, deals["tv_deal_formula"])
+    out_dir = os.path.join(BASE, "tv-site")
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, "index.html")
+    with open(out_path, "w") as f:
+        f.write(html)
+    print(f"Rendered -> {out_path}")

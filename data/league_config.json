@@ -1,0 +1,107 @@
+{
+  "league_name": "SPM261.01 Soccer League",
+  "season_label": "Fall 2026",
+  "phase": "pre-draft",
+  "current_round": 0,
+  "season_seed": 1556832574,
+  "n_teams": 18,
+  "roster_size": 18,
+  "starting_budget": 15000000,
+  "salary_cap": 18000000,
+  "sponsorship_categories_required": 6,
+  "playoff_teams": 6,
+  "champion_team_id": null,
+  "teams": [
+    {
+      "team_id": 0,
+      "name": "Team 1",
+      "owner": "Bianca Biagini"
+    },
+    {
+      "team_id": 1,
+      "name": "Team 2",
+      "owner": "Carlos Brito-Mezon"
+    },
+    {
+      "team_id": 2,
+      "name": "Team 3",
+      "owner": "Allison Dieckmann"
+    },
+    {
+      "team_id": 3,
+      "name": "Team 4",
+      "owner": "Jake Dunphy"
+    },
+    {
+      "team_id": 4,
+      "name": "Team 5",
+      "owner": "Jayden Geerders"
+    },
+    {
+      "team_id": 5,
+      "name": "Team 6",
+      "owner": "Yonelisa Hamusten"
+    },
+    {
+      "team_id": 6,
+      "name": "Team 7",
+      "owner": "Denim Horsford"
+    },
+    {
+      "team_id": 7,
+      "name": "Team 8",
+      "owner": "Max Lebisky"
+    },
+    {
+      "team_id": 8,
+      "name": "Team 9",
+      "owner": "Jordan Long"
+    },
+    {
+      "team_id": 9,
+      "name": "Team 10",
+      "owner": "Parker Miles"
+    },
+    {
+      "team_id": 10,
+      "name": "Team 11",
+      "owner": "Kyle Miller"
+    },
+    {
+      "team_id": 11,
+      "name": "Team 12",
+      "owner": "Maggie O'Shea"
+    },
+    {
+      "team_id": 12,
+      "name": "Team 13",
+      "owner": "Sawyer Ostroff"
+    },
+    {
+      "team_id": 13,
+      "name": "Team 14",
+      "owner": "Anthony Pope"
+    },
+    {
+      "team_id": 14,
+      "name": "Team 15",
+      "owner": "Jovanni Romeo"
+    },
+    {
+      "team_id": 15,
+      "name": "Team 16",
+      "owner": "Mason Walls"
+    },
+    {
+      "team_id": 16,
+      "name": "Team 17",
+      "owner": "Sydney Weathers"
+    },
+    {
+      "team_id": 17,
+      "name": "Team 18",
+      "owner": "Andre Yared"
+    }
+  ],
+  "_notes": "Section 1 of 2 -- 18 students (real roster loaded 2026-09-20, correcting the earlier 20-student placeholder). Each student is CEO/GM of their team (owner field) and will pick their own team name before Draft Day -- 'name' stays a placeholder ('Team 1', etc.) until then, not a real club name. Section 2 (21 students) gets its own independent copy of this whole project folder once Section 1 is finalized (per instructor's 2026-09-06 direction: 'copy later when finalizing everything'). PINs deliberately NOT stored here -- this repo is public. Pins live only in the Google Sheet Teams tab and are injected at runtime by engine/auto_resolve.py, never committed."
+}

@@ -1,0 +1,699 @@
+[
+  {
+    "round": 1,
+    "fixtures": [
+      {
+        "home_id": 0,
+        "away_id": 17
+      },
+      {
+        "home_id": 1,
+        "away_id": 16
+      },
+      {
+        "home_id": 15,
+        "away_id": 2
+      },
+      {
+        "home_id": 3,
+        "away_id": 14
+      },
+      {
+        "home_id": 13,
+        "away_id": 4
+      },
+      {
+        "home_id": 5,
+        "away_id": 12
+      },
+      {
+        "home_id": 11,
+        "away_id": 6
+      },
+      {
+        "home_id": 7,
+        "away_id": 10
+      },
+      {
+        "home_id": 9,
+        "away_id": 8
+      }
+    ]
+  },
+  {
+    "round": 2,
+    "fixtures": [
+      {
+        "home_id": 16,
+        "away_id": 0
+      },
+      {
+        "home_id": 15,
+        "away_id": 17
+      },
+      {
+        "home_id": 1,
+        "away_id": 14
+      },
+      {
+        "home_id": 13,
+        "away_id": 2
+      },
+      {
+        "home_id": 3,
+        "away_id": 12
+      },
+      {
+        "home_id": 11,
+        "away_id": 4
+      },
+      {
+        "home_id": 5,
+        "away_id": 10
+      },
+      {
+        "home_id": 9,
+        "away_id": 6
+      },
+      {
+        "home_id": 7,
+        "away_id": 8
+      }
+    ]
+  },
+  {
+    "round": 3,
+    "fixtures": [
+      {
+        "home_id": 0,
+        "away_id": 15
+      },
+      {
+        "home_id": 16,
+        "away_id": 14
+      },
+      {
+        "home_id": 13,
+        "away_id": 17
+      },
+      {
+        "home_id": 1,
+        "away_id": 12
+      },
+      {
+        "home_id": 11,
+        "away_id": 2
+      },
+      {
+        "home_id": 3,
+        "away_id": 10
+      },
+      {
+        "home_id": 9,
+        "away_id": 4
+      },
+      {
+        "home_id": 5,
+        "away_id": 8
+      },
+      {
+        "home_id": 7,
+        "away_id": 6
+      }
+    ]
+  },
+  {
+    "round": 4,
+    "fixtures": [
+      {
+        "home_id": 14,
+        "away_id": 0
+      },
+      {
+        "home_id": 13,
+        "away_id": 15
+      },
+      {
+        "home_id": 16,
+        "away_id": 12
+      },
+      {
+        "home_id": 11,
+        "away_id": 17
+      },
+      {
+        "home_id": 1,
+        "away_id": 10
+      },
+      {
+        "home_id": 9,
+        "away_id": 2
+      },
+      {
+        "home_id": 3,
+        "away_id": 8
+      },
+      {
+        "home_id": 7,
+        "away_id": 4
+      },
+      {
+        "home_id": 5,
+        "away_id": 6
+      }
+    ]
+  },
+  {
+    "round": 5,
+    "fixtures": [
+      {
+        "home_id": 0,
+        "away_id": 13
+      },
+      {
+        "home_id": 14,
+        "away_id": 12
+      },
+      {
+        "home_id": 11,
+        "away_id": 15
+      },
+      {
+        "home_id": 16,
+        "away_id": 10
+      },
+      {
+        "home_id": 9,
+        "away_id": 17
+      },
+      {
+        "home_id": 1,
+        "away_id": 8
+      },
+      {
+        "home_id": 7,
+        "away_id": 2
+      },
+      {
+        "home_id": 3,
+        "away_id": 6
+      },
+      {
+        "home_id": 5,
+        "away_id": 4
+      }
+    ]
+  },
+  {
+    "round": 6,
+    "fixtures": [
+      {
+        "home_id": 12,
+        "away_id": 0
+      },
+      {
+        "home_id": 11,
+        "away_id": 13
+      },
+      {
+        "home_id": 14,
+        "away_id": 10
+      },
+      {
+        "home_id": 9,
+        "away_id": 15
+      },
+      {
+        "home_id": 16,
+        "away_id": 8
+      },
+      {
+        "home_id": 7,
+        "away_id": 17
+      },
+      {
+        "home_id": 1,
+        "away_id": 6
+      },
+      {
+        "home_id": 5,
+        "away_id": 2
+      },
+      {
+        "home_id": 3,
+        "away_id": 4
+      }
+    ]
+  },
+  {
+    "round": 7,
+    "fixtures": [
+      {
+        "home_id": 0,
+        "away_id": 11
+      },
+      {
+        "home_id": 12,
+        "away_id": 10
+      },
+      {
+        "home_id": 9,
+        "away_id": 13
+      },
+      {
+        "home_id": 14,
+        "away_id": 8
+      },
+      {
+        "home_id": 7,
+        "away_id": 15
+      },
+      {
+        "home_id": 16,
+        "away_id": 6
+      },
+      {
+        "home_id": 5,
+        "away_id": 17
+      },
+      {
+        "home_id": 1,
+        "away_id": 4
+      },
+      {
+        "home_id": 3,
+        "away_id": 2
+      }
+    ]
+  },
+  {
+    "round": 8,
+    "fixtures": [
+      {
+        "home_id": 10,
+        "away_id": 0
+      },
+      {
+        "home_id": 9,
+        "away_id": 11
+      },
+      {
+        "home_id": 12,
+        "away_id": 8
+      },
+      {
+        "home_id": 7,
+        "away_id": 13
+      },
+      {
+        "home_id": 14,
+        "away_id": 6
+      },
+      {
+        "home_id": 5,
+        "away_id": 15
+      },
+      {
+        "home_id": 16,
+        "away_id": 4
+      },
+      {
+        "home_id": 3,
+        "away_id": 17
+      },
+      {
+        "home_id": 1,
+        "away_id": 2
+      }
+    ]
+  },
+  {
+    "round": 9,
+    "fixtures": [
+      {
+        "home_id": 0,
+        "away_id": 9
+      },
+      {
+        "home_id": 10,
+        "away_id": 8
+      },
+      {
+        "home_id": 7,
+        "away_id": 11
+      },
+      {
+        "home_id": 12,
+        "away_id": 6
+      },
+      {
+        "home_id": 5,
+        "away_id": 13
+      },
+      {
+        "home_id": 14,
+        "away_id": 4
+      },
+      {
+        "home_id": 3,
+        "away_id": 15
+      },
+      {
+        "home_id": 16,
+        "away_id": 2
+      },
+      {
+        "home_id": 1,
+        "away_id": 17
+      }
+    ]
+  },
+  {
+    "round": 10,
+    "fixtures": [
+      {
+        "home_id": 8,
+        "away_id": 0
+      },
+      {
+        "home_id": 7,
+        "away_id": 9
+      },
+      {
+        "home_id": 10,
+        "away_id": 6
+      },
+      {
+        "home_id": 5,
+        "away_id": 11
+      },
+      {
+        "home_id": 12,
+        "away_id": 4
+      },
+      {
+        "home_id": 3,
+        "away_id": 13
+      },
+      {
+        "home_id": 14,
+        "away_id": 2
+      },
+      {
+        "home_id": 1,
+        "away_id": 15
+      },
+      {
+        "home_id": 16,
+        "away_id": 17
+      }
+    ]
+  },
+  {
+    "round": 11,
+    "fixtures": [
+      {
+        "home_id": 0,
+        "away_id": 7
+      },
+      {
+        "home_id": 8,
+        "away_id": 6
+      },
+      {
+        "home_id": 5,
+        "away_id": 9
+      },
+      {
+        "home_id": 10,
+        "away_id": 4
+      },
+      {
+        "home_id": 3,
+        "away_id": 11
+      },
+      {
+        "home_id": 12,
+        "away_id": 2
+      },
+      {
+        "home_id": 1,
+        "away_id": 13
+      },
+      {
+        "home_id": 14,
+        "away_id": 17
+      },
+      {
+        "home_id": 16,
+        "away_id": 15
+      }
+    ]
+  },
+  {
+    "round": 12,
+    "fixtures": [
+      {
+        "home_id": 6,
+        "away_id": 0
+      },
+      {
+        "home_id": 5,
+        "away_id": 7
+      },
+      {
+        "home_id": 8,
+        "away_id": 4
+      },
+      {
+        "home_id": 3,
+        "away_id": 9
+      },
+      {
+        "home_id": 10,
+        "away_id": 2
+      },
+      {
+        "home_id": 1,
+        "away_id": 11
+      },
+      {
+        "home_id": 12,
+        "away_id": 17
+      },
+      {
+        "home_id": 16,
+        "away_id": 13
+      },
+      {
+        "home_id": 14,
+        "away_id": 15
+      }
+    ]
+  },
+  {
+    "round": 13,
+    "fixtures": [
+      {
+        "home_id": 0,
+        "away_id": 5
+      },
+      {
+        "home_id": 6,
+        "away_id": 4
+      },
+      {
+        "home_id": 3,
+        "away_id": 7
+      },
+      {
+        "home_id": 8,
+        "away_id": 2
+      },
+      {
+        "home_id": 1,
+        "away_id": 9
+      },
+      {
+        "home_id": 10,
+        "away_id": 17
+      },
+      {
+        "home_id": 16,
+        "away_id": 11
+      },
+      {
+        "home_id": 12,
+        "away_id": 15
+      },
+      {
+        "home_id": 14,
+        "away_id": 13
+      }
+    ]
+  },
+  {
+    "round": 14,
+    "fixtures": [
+      {
+        "home_id": 4,
+        "away_id": 0
+      },
+      {
+        "home_id": 3,
+        "away_id": 5
+      },
+      {
+        "home_id": 6,
+        "away_id": 2
+      },
+      {
+        "home_id": 1,
+        "away_id": 7
+      },
+      {
+        "home_id": 8,
+        "away_id": 17
+      },
+      {
+        "home_id": 16,
+        "away_id": 9
+      },
+      {
+        "home_id": 10,
+        "away_id": 15
+      },
+      {
+        "home_id": 14,
+        "away_id": 11
+      },
+      {
+        "home_id": 12,
+        "away_id": 13
+      }
+    ]
+  },
+  {
+    "round": 15,
+    "fixtures": [
+      {
+        "home_id": 0,
+        "away_id": 3
+      },
+      {
+        "home_id": 4,
+        "away_id": 2
+      },
+      {
+        "home_id": 1,
+        "away_id": 5
+      },
+      {
+        "home_id": 6,
+        "away_id": 17
+      },
+      {
+        "home_id": 16,
+        "away_id": 7
+      },
+      {
+        "home_id": 8,
+        "away_id": 15
+      },
+      {
+        "home_id": 14,
+        "away_id": 9
+      },
+      {
+        "home_id": 10,
+        "away_id": 13
+      },
+      {
+        "home_id": 12,
+        "away_id": 11
+      }
+    ]
+  },
+  {
+    "round": 16,
+    "fixtures": [
+      {
+        "home_id": 2,
+        "away_id": 0
+      },
+      {
+        "home_id": 1,
+        "away_id": 3
+      },
+      {
+        "home_id": 4,
+        "away_id": 17
+      },
+      {
+        "home_id": 16,
+        "away_id": 5
+      },
+      {
+        "home_id": 6,
+        "away_id": 15
+      },
+      {
+        "home_id": 14,
+        "away_id": 7
+      },
+      {
+        "home_id": 8,
+        "away_id": 13
+      },
+      {
+        "home_id": 12,
+        "away_id": 9
+      },
+      {
+        "home_id": 10,
+        "away_id": 11
+      }
+    ]
+  },
+  {
+    "round": 17,
+    "fixtures": [
+      {
+        "home_id": 0,
+        "away_id": 1
+      },
+      {
+        "home_id": 2,
+        "away_id": 17
+      },
+      {
+        "home_id": 16,
+        "away_id": 3
+      },
+      {
+        "home_id": 4,
+        "away_id": 15
+      },
+      {
+        "home_id": 14,
+        "away_id": 5
+      },
+      {
+        "home_id": 6,
+        "away_id": 13
+      },
+      {
+        "home_id": 12,
+        "away_id": 7
+      },
+      {
+        "home_id": 8,
+        "away_id": 11
+      },
+      {
+        "home_id": 10,
+        "away_id": 9
+      }
+    ]
+  }
+]

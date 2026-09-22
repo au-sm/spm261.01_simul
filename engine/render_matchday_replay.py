@@ -1,0 +1,766 @@
+"""
+Renders matchday-replay/index.html -- the standalone Matchday Replay
+page: a 30-second animated visualization of ANY resolved match, picked
+from a Round/Fixture dropdown, not one hardcoded example anymore.
+
+Reads data/matches.json (every fixture resolve_round.py has resolved
+so far, each carrying a real goal_events list -- minute, type, and
+scorer -- from engine/goal_events.py) and data/league_config.json for
+team names/owners. Pre-season (no matches resolved yet), the page
+renders a real empty state instead of fabricated data.
+
+GOAL TYPES and how they're animated:
+  Strike, Header, Corner Kick -- all three play out as the same 3-leg
+    open-play passing sequence (deep midfielder carries -> switched
+    wide -> cut back and finished) with the FINISHER drawn from the
+    real scorer's actual position (a defender-scored Header shows a
+    defender finishing it, not a forward). A dot-based canvas can't
+    meaningfully draw "header" differently from "strike" as a body
+    motion, so the type is differentiated in the goal timeline list
+    below the pitch (where the real scorer's name is shown), not by a
+    bespoke animation shape -- see the module docstring below the
+    imports for the honest reasoning.
+  Penalty Kick, Free Kick -- a genuinely different, simpler set-piece
+    sequence: the ball is placed at the spot, the real designated
+    taker approaches and strikes with no build-up play, and the
+    defending goalkeeper reacts. These ARE visually distinct from
+    open play because real free kicks/penalties are too.
+
+Run after any resolve_round.py call, then republish.
+"""
+import json
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))
+from site_nav import NAV_CSS, render_nav
+from match_summary import generate_summary
+
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def load_json(name):
+    with open(os.path.join(BASE, "data", name)) as f:
+        return json.load(f)
+
+
+def render(config, matches):
+    team_map = {t["team_id"]: t for t in config["teams"]}
+
+    sorted_matches = sorted(matches, key=lambda m: (m["round"], m["home_id"], m["away_id"]))
+
+    match_entries = []
+    for m in sorted_matches:
+        home = team_map[m["home_id"]]
+        away = team_map[m["away_id"]]
+        goals = [
+            {**g, "idx": i} for i, g in enumerate(m.get("goal_events", []))
+        ]
+        summary = generate_summary(home["name"], away["name"], m["home_goals"], m["away_goals"], m.get("goal_events", []))
+        match_entries.append({
+            "round": m["round"],
+            "home_name": home["name"], "home_owner": home.get("owner", ""),
+            "away_name": away["name"], "away_owner": away.get("owner", ""),
+            "home_goals": m["home_goals"], "away_goals": m["away_goals"],
+            "goals": goals,
+            "summary": summary,
+        })
+
+    matches_json = json.dumps(match_entries)
+    default_idx = len(match_entries) - 1  # most recently resolved match
+
+    options_html = ""
+    current_round = None
+    for i, m in enumerate(match_entries):
+        if m["round"] != current_round:
+            if current_round is not None:
+                options_html += "</optgroup>"
+            options_html += f'<optgroup label="Round {m["round"]}">'
+            current_round = m["round"]
+        label = f'{m["home_name"]} {m["home_goals"]}–{m["away_goals"]} {m["away_name"]}'
+        options_html += f'<option value="{i}"{" selected" if i == default_idx else ""}>{label}</option>'
+    if current_round is not None:
+        options_html += "</optgroup>"
+
+    has_matches = len(match_entries) > 0
+
+    note_text = (
+        "Pick any resolved match from the dropdown above the scoreboard -- every goal's minute, "
+        "type, and real scorer come straight from that match's simulation, not a scripted example."
+        if has_matches else
+        "No matches resolved yet -- check back after Round 1 resolves (Draft Day is "
+        f"{config.get('_draft_day_label', 'Oct 6, 2026')}). This page animates whichever match you "
+        "pick, using its real goal minutes, types, and scorers -- nothing here is scripted."
+    )
+
+    return f'''<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matchday Replay</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{{
+    --paper:#eef2ea; --ink:#16201a; --muted:#5b6b5e; --line:#d6decd;
+    --accent:#b8811f; --accent-ink:#3a2a08; --pitch:#2f5233; --pitch-line:rgba(238,242,234,.55);
+    --navy:#223a5e; --surface:#f7f9f4; --shadow: 0 1px 2px rgba(22,32,26,.06), 0 10px 30px rgba(22,32,26,.12);
+  }}
+  @media (prefers-color-scheme: dark){{
+    :root:not([data-theme="light"]){{
+      --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
+      --accent:#d9a44a; --accent-ink:#1c1404; --pitch:#20361f; --pitch-line:rgba(231,236,225,.4);
+      --navy:#4a6693; --surface:#171d17; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.4);
+    }}
+  }}
+  :root[data-theme="dark"]{{
+    --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
+    --accent:#d9a44a; --accent-ink:#1c1404; --pitch:#20361f; --pitch-line:rgba(231,236,225,.4);
+    --navy:#4a6693; --surface:#171d17; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.4);
+  }}
+  *{{box-sizing:border-box;}}
+  body{{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;}}
+  .mono{{font-family:"IBM Plex Mono",ui-monospace,monospace;}}
+  .wrap{{max-width:900px;margin:0 auto;padding:clamp(20px,4vw,48px);}}
+  h1{{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase;letter-spacing:.02em;
+     font-size:clamp(24px,4vw,34px);margin:0 0 4px;text-wrap:balance;}}
+  .subtitle{{color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12.5px;margin:0 0 16px;letter-spacing:.02em;}}
+  .note{{background:var(--surface);border-left:3px solid var(--accent);border-radius:2px;padding:9px 14px;
+        font-size:13px;color:var(--muted);margin:0 0 16px;max-width:64ch;}}
+
+  .picker{{display:flex;align-items:center;gap:10px;margin:0 0 16px;flex-wrap:wrap;}}
+  .picker label{{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}}
+  .picker select{{font-family:"Source Serif 4",serif;font-size:14px;background:var(--surface);color:var(--ink);
+    border:1px solid var(--line);border-radius:3px;padding:7px 10px;flex:1;min-width:220px;max-width:420px;}}
+
+  .board{{background:var(--ink);color:var(--paper);border-radius:10px 10px 0 0;box-shadow:var(--shadow);
+         display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:14px clamp(14px,3vw,28px);gap:12px;}}
+  .side{{display:flex;align-items:center;gap:10px;min-width:0;}}
+  .side.away{{flex-direction:row-reverse;text-align:right;}}
+  .dot-badge{{width:16px;height:16px;border-radius:50%;flex:none;box-shadow:0 0 0 3px rgba(238,242,234,.14);}}
+  .side-name{{min-width:0;}}
+  .side-name .club{{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase;font-size:clamp(14px,2.4vw,19px);
+                    letter-spacing:.01em;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}}
+  .side-name .owner{{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:rgba(238,242,234,.6);white-space:nowrap;}}
+  .score{{font-family:"Big Shoulders Display",sans-serif;font-weight:800;font-size:clamp(30px,6vw,44px);
+         font-variant-numeric:tabular-nums;letter-spacing:.02em;display:flex;align-items:center;gap:10px;}}
+  .clock{{grid-column:1/-1;text-align:center;font-family:"IBM Plex Mono",monospace;font-size:12px;
+        letter-spacing:.08em;color:rgba(238,242,234,.65);margin-top:2px;}}
+  .clock .live{{color:#e8543f;}}
+
+  .stage{{position:relative;border-radius:0 0 10px 10px;overflow:hidden;box-shadow:var(--shadow);}}
+  canvas{{display:block;width:100%;height:auto;background:var(--pitch);}}
+
+  .fulltime{{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+            background:rgba(17,24,17,.55);opacity:0;pointer-events:none;transition:opacity .5s ease;}}
+  .fulltime.show{{opacity:1;}}
+  .fulltime .badge{{background:var(--paper);color:var(--ink);border-radius:8px;padding:16px 28px;text-align:center;
+                    font-family:"Big Shoulders Display",sans-serif;box-shadow:var(--shadow);}}
+  .fulltime .badge .ft{{font-size:13px;letter-spacing:.12em;color:var(--muted);font-family:"IBM Plex Mono",monospace;
+                        text-transform:uppercase;margin-bottom:4px;}}
+  .fulltime .badge .fs{{font-size:clamp(28px,5vw,40px);font-variant-numeric:tabular-nums;}}
+
+  .empty-overlay{{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    text-align:center;padding:20px;color:var(--paper);font-family:"IBM Plex Mono",monospace;font-size:13px;}}
+
+  .controls{{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:16px;flex-wrap:wrap;}}
+  .replay{{font-family:"IBM Plex Mono",monospace;font-size:12.5px;letter-spacing:.03em;background:var(--ink);
+          color:var(--paper);border:none;border-radius:20px;padding:9px 18px;cursor:pointer;}}
+  .replay:hover{{background:var(--navy);}}
+  .replay:disabled{{opacity:.4;cursor:not-allowed;}}
+  .replay:focus-visible{{outline:2px solid var(--accent);outline-offset:2px;}}
+  .legend{{display:flex;gap:16px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);}}
+  .legend span{{display:inline-flex;align-items:center;gap:6px;}}
+  .legend i{{width:9px;height:9px;border-radius:50%;display:inline-block;}}
+
+  .match-story{{margin-top:22px;}}
+  .match-story h2{{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase;letter-spacing:.02em;
+    font-size:15px;margin:0 0 8px;color:var(--muted);}}
+  .story-text{{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px 16px;
+    margin:0;font-size:14.5px;line-height:1.55;}}
+
+  .timeline{{margin-top:22px;}}
+  .timeline h2{{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase;letter-spacing:.02em;
+    font-size:15px;margin:0 0 8px;color:var(--muted);}}
+  .timeline ul{{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;}}
+  .timeline li{{display:flex;gap:10px;align-items:baseline;background:var(--surface);border:1px solid var(--line);
+    border-radius:3px;padding:7px 12px;font-size:13.5px;transition:opacity .2s ease;}}
+  .timeline li.pending{{opacity:.45;}}
+  .timeline .t-min{{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);min-width:34px;}}
+  .timeline .t-type{{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.03em;text-transform:uppercase;
+    color:var(--accent-ink);background:color-mix(in srgb, var(--accent) 18%, transparent);border-radius:2px;padding:2px 6px;}}
+  .timeline .t-scorer{{font-weight:600;}}
+  .timeline .t-empty{{color:var(--muted);font-size:13px;padding:8px 0;}}
+
+  {NAV_CSS}
+</style>
+</head>
+<body>
+{render_nav("replay")}
+
+<div class="wrap">
+  <h1>Matchday Replay</h1>
+  <p class="subtitle">{config["league_name"]} &middot; 90 minutes, compressed to 30 seconds</p>
+  <p class="note">{note_text}</p>
+
+  <div class="picker">
+    <label for="matchSelect">Match</label>
+    <select id="matchSelect" {"disabled" if not has_matches else ""}>{options_html}</select>
+  </div>
+
+  <div class="board">
+    <div class="side home">
+      <span class="dot-badge" id="homeDot"></span>
+      <div class="side-name">
+        <div class="club" id="homeClub">&ndash;</div>
+        <div class="owner" id="homeOwner"></div>
+      </div>
+    </div>
+    <div class="score"><span id="scoreHome">0</span><span style="color:var(--muted);font-weight:400;">&ndash;</span><span id="scoreAway">0</span></div>
+    <div class="side away">
+      <span class="dot-badge" id="awayDot"></span>
+      <div class="side-name">
+        <div class="club" id="awayClub">&ndash;</div>
+        <div class="owner" id="awayOwner"></div>
+      </div>
+    </div>
+    <div class="clock"><span id="clockLabel">{"KICK-OFF" if has_matches else "NO MATCHES YET"}</span> &middot; <span class="live" id="clockMin">0&prime;</span></div>
+  </div>
+
+  <div class="stage">
+    <canvas id="pitch" width="1000" height="640"></canvas>
+    <div class="fulltime" id="fulltime">
+      <div class="badge">
+        <div class="ft">Full Time</div>
+        <div class="fs" id="ftScore">0 &ndash; 0</div>
+      </div>
+    </div>
+    {'<div class="empty-overlay">No matches resolved yet.<br>Check back after Round 1.</div>' if not has_matches else ''}
+  </div>
+
+  <div class="controls">
+    <div class="legend">
+      <span><i style="background:var(--navy)"></i>Home</span>
+      <span><i style="background:var(--accent)"></i>Away</span>
+      <span><i style="background:#f2f3f5;box-shadow:0 0 0 1px var(--muted) inset"></i>Ball</span>
+    </div>
+    <button class="replay" id="replayBtn" {"disabled" if not has_matches else ""}>&#9654; Replay</button>
+  </div>
+
+  <div class="match-story">
+    <h2>Match Story</h2>
+    <p id="storyText" class="story-text">Select a match above.</p>
+  </div>
+
+  <div class="timeline">
+    <h2>Goal Timeline</h2>
+    <ul id="timelineList"><li class="t-empty">Select a match above.</li></ul>
+  </div>
+</div>
+
+<script>
+(function(){{
+  var MATCHES = {matches_json};
+  var HAS_MATCHES = {"true" if has_matches else "false"};
+
+  function getVar(name){{
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#223a5e';
+  }}
+
+  var canvas = document.getElementById('pitch');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var PAD = 40;
+
+  // ---- Formation anchors (normalized 0..1 pitch space) -----------------
+  var ROLES = ['GK','DF','DF','DF','DF','MF','MF','MF','FW','FW','FW'];
+  var PUSH_RANGE = [0.02, 0.15,0.15,0.15,0.15, 0.26,0.26,0.26, 0.36,0.36,0.36];
+
+  function formation(side){{
+    var xs = side === 'home' ? [0.06,0.16,0.16,0.16,0.16,0.30,0.30,0.30,0.42,0.42,0.42]
+                              : [0.94,0.84,0.84,0.84,0.84,0.70,0.70,0.70,0.58,0.58,0.58];
+    var ys = [0.5, 0.14,0.38,0.62,0.86, 0.22,0.5,0.78, 0.28,0.5,0.72];
+    var pts = [];
+    for (var i=0;i<11;i++) pts.push({{x:xs[i], y:ys[i], role:ROLES[i], push:PUSH_RANGE[i]}});
+    return pts;
+  }}
+
+  // attackBias: -1..1, applied identically to both sides so a team's
+  // whole shape shifts coherently as play swings end to end.
+  var attackBias = 0;
+
+  var players = [];
+  function rebuildPlayers(){{
+    players = [];
+    formation('home').forEach(function(p){{ players.push({{side:'home', anchor:p, x:p.x, y:p.y, vx:0, vy:0, jx:Math.random()*1000, jy:Math.random()*1000}}); }});
+    formation('away').forEach(function(p){{ players.push({{side:'away', anchor:p, x:p.x, y:p.y, vx:0, vy:0, jx:Math.random()*1000, jy:Math.random()*1000}}); }});
+  }}
+  rebuildPlayers();
+
+  function playersOf(side, role){{
+    return players.filter(function(p){{ return p.side === side && p.anchor.role === role; }});
+  }}
+
+  // ---- Ball / match state -------------------------------------------
+  var ball = {{ x:0.5, y:0.5, targetX:0.5, targetY:0.5, wanderAt:0 }};
+  var scored = {{ home:0, away:0 }};
+  var flashUntil = -1;
+  var flashSide = null;
+  var goalsFired = {{}};
+  var MATCH = null; // set by loadMatch()
+  var DURATION_SECONDS = 30;
+
+  // OPEN-PLAY goal types (Strike/Header/Corner Kick) share one 3-leg
+  // passing sequence; SET-PIECE types (Penalty/Free Kick) use a
+  // separate, simpler approach-then-strike sequence -- see this file's
+  // Python docstring for why the two groups aren't further split.
+  var OPEN_TYPES = {{'Strike':1, 'Header':1, 'Corner Kick':1}};
+  var LEAD_MINUTES = {{'Strike':16, 'Header':16, 'Corner Kick':16, 'Penalty Kick':8, 'Free Kick':8}};
+
+  var activeGoalIdx = null;
+  var carrier = null;
+  var sequence = null;
+  var step = 0;
+  var subphase = 'carry'; // open-play: 'carry' | 'pass'   set-piece: 'approach' | 'strike'
+  var passFrom = null, passTo = null, passStart = 0;
+  var PASS_DURATION = 380;
+  var REACH_EPS = 0.035;
+
+  var setpiece = null; // {{taker, spot, keeper, diveTarget}}
+
+  function alongX(side, frac){{ return side === 'home' ? frac : 1 - frac; }}
+
+  function buildSequence(side, goal){{
+    var finisherPool = playersOf(side, goal.scorer_position);
+    if (!finisherPool.length) finisherPool = playersOf(side, 'FW');
+    var mids = playersOf(side, 'MF');
+    var fwds = playersOf(side, 'FW');
+    var passer = mids.length ? mids[goal.minute % mids.length] : (fwds[0] || finisherPool[0]);
+    var winger = fwds.length ? fwds[goal.minute % fwds.length] : finisherPool[0];
+    var finisher = finisherPool[(goal.minute + 1) % finisherPool.length];
+    if (finisher === passer && finisherPool.length > 1) finisher = finisherPool[(goal.minute + 2) % finisherPool.length];
+    var wideY = (goal.minute % 2 === 0) ? 0.13 : 0.87;
+
+    return [
+      {{ player: passer, receiveAt: null,
+        advanceTo: {{ x: alongX(side, 0.60), y: 0.5 }} }},
+      {{ player: winger, receiveAt: {{ x: alongX(side, 0.60), y: wideY }},
+        advanceTo: {{ x: alongX(side, 0.88), y: wideY }} }},
+      {{ player: finisher, receiveAt: {{ x: alongX(side, 0.80), y: 0.5 }},
+        advanceTo: {{ x: alongX(side, 0.97), y: 0.5 }} }},
+    ];
+  }}
+
+  function buildSetPiece(side, goal){{
+    var takerPool = playersOf(side, goal.scorer_position);
+    if (!takerPool.length) takerPool = playersOf(side, 'MF').concat(playersOf(side, 'FW'));
+    var taker = takerPool[0] || playersOf(side, 'FW')[0];
+    var spotFrac = goal.type === 'Penalty Kick' ? 0.83 : 0.67;
+    var spotY = goal.type === 'Penalty Kick' ? 0.5 : (goal.minute % 2 === 0 ? 0.38 : 0.62);
+    var cornerSign = goal.minute % 2 === 0 ? -1 : 1;
+    var keeperPool = playersOf(side === 'home' ? 'away' : 'home', 'GK');
+    return {{
+      taker: taker,
+      spot: {{ x: alongX(side, spotFrac), y: spotY }},
+      target: {{ x: alongX(side, 0.985), y: 0.5 + cornerSign*0.045 }},
+      keeper: keeperPool[0] || null,
+      diveTarget: {{ x: alongX(side, 0.95), y: 0.5 + cornerSign*0.05 }},
+    }};
+  }}
+
+  function pitchToPx(nx, ny){{
+    return {{ x: PAD + nx*(W-2*PAD), y: PAD + ny*(H-2*PAD) }};
+  }}
+
+  function drawPitch(){{
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = getVar('--pitch');
+    ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = 'rgba(255,255,255,.035)';
+    var stripeW = (W-2*PAD)/10;
+    for (var i=0;i<10;i+=2){{ ctx.fillRect(PAD+i*stripeW,PAD,stripeW,H-2*PAD); }}
+
+    ctx.strokeStyle = getVar('--pitch-line');
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(PAD,PAD,W-2*PAD,H-2*PAD);
+    ctx.beginPath(); ctx.moveTo(W/2,PAD); ctx.lineTo(W/2,H-PAD); ctx.stroke();
+    ctx.beginPath(); ctx.arc(W/2,H/2,70,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(W/2,H/2,3,0,Math.PI*2); ctx.fillStyle=getVar('--pitch-line'); ctx.fill();
+    [0, W-2*PAD-190].forEach(function(bx, i){{
+      ctx.strokeRect(PAD+bx, H/2-140, 190, 280);
+      ctx.strokeRect(PAD+ (i===0?0:(W-2*PAD-90)), H/2-70, 90, 140);
+    }});
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = 'rgba(238,242,234,.85)';
+    ctx.beginPath(); ctx.moveTo(PAD-5,H/2-36); ctx.lineTo(PAD-5,H/2+36); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W-PAD+5,H/2-36); ctx.lineTo(W-PAD+5,H/2+36); ctx.stroke();
+
+    if (MATCH && performance.now() < flashUntil){{
+      ctx.fillStyle = flashSide === 'home' ? hexA(MATCH.home.color,0.18) : hexA(MATCH.away.color,0.18);
+      ctx.fillRect(0,0,W,H);
+    }}
+  }}
+
+  function hexA(hex, a){{
+    var h = hex.replace('#','');
+    if (h.length===3) h = h.split('').map(function(c){{return c+c;}}).join('');
+    var r=parseInt(h.substr(0,2),16), g=parseInt(h.substr(2,2),16), b=parseInt(h.substr(4,2),16);
+    return 'rgba('+r+','+g+','+b+','+a+')';
+  }}
+
+  var ACCEL = 0.024, FRICTION = 0.82, MAX_SPEED = 0.014;
+
+  function approach(p, targetX, targetY){{
+    targetX = Math.max(0.02, Math.min(0.98, targetX));
+    targetY = Math.max(0.05, Math.min(0.95, targetY));
+    p.vx = (p.vx + (targetX - p.x) * ACCEL) * FRICTION;
+    p.vy = (p.vy + (targetY - p.y) * ACCEL) * FRICTION;
+    var speed = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
+    if (speed > MAX_SPEED){{ p.vx = p.vx/speed*MAX_SPEED; p.vy = p.vy/speed*MAX_SPEED; }}
+    p.x += p.vx;
+    p.y += p.vy;
+  }}
+
+  function drawPlayers(t){{
+    players.forEach(function(p){{
+      var jitterX = Math.sin(t*0.0013 + p.jx)*0.012;
+      var jitterY = Math.cos(t*0.0011 + p.jy)*0.012;
+
+      if (setpiece && p === setpiece.keeper){{
+        approach(p, setpiece.diveTarget.x, setpiece.diveTarget.y);
+      }} else if (carrier && p === carrier){{
+        approach(p, p.runTargetX, p.runTargetY);
+      }} else if (carrier && p.side === carrier.side && (p.anchor.role === 'FW' || p.anchor.role === 'MF')){{
+        var pushX = attackBias * p.anchor.push * 1.4;
+        approach(p, p.anchor.x + pushX + jitterX, p.anchor.y*0.6 + carrier.y*0.4 + jitterY);
+      }} else if (carrier && p.side !== carrier.side){{
+        var dxc = carrier.x - p.anchor.x, dyc = carrier.y - p.anchor.y;
+        var dc = Math.max(0.001, Math.sqrt(dxc*dxc+dyc*dyc));
+        var standoff = 0.05;
+        var pull = Math.max(0, dc - standoff) * 0.5;
+        approach(p, p.anchor.x + (dxc/dc)*pull + jitterX, p.anchor.y + (dyc/dc)*pull + jitterY);
+      }} else {{
+        var pushX2 = attackBias * p.anchor.push;
+        var basePos = p.anchor.x + pushX2;
+        var isChaser = p.anchor.role === 'MF' || p.anchor.role === 'FW';
+        var pullRadius = isChaser ? 0.20 : 0.09;
+        var pullStrength = isChaser ? 0.10 : 0.06;
+        var dx = ball.x - basePos, dy = ball.y - p.anchor.y;
+        var dist = Math.max(0.001, Math.sqrt(dx*dx+dy*dy));
+        var pullX = dist < pullRadius ? dx*pullStrength : 0;
+        var pullY = dist < pullRadius ? dy*pullStrength : 0;
+        approach(p, basePos + pullX + jitterX, p.anchor.y + pullY + jitterY);
+      }}
+
+      var px = pitchToPx(p.x, p.y);
+      var color = MATCH ? (p.side === 'home' ? MATCH.home.color : MATCH.away.color) : '#888';
+      ctx.beginPath();
+      ctx.arc(px.x, px.y, 9, 0, Math.PI*2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = (carrier === p || (setpiece && p === setpiece.taker)) ? '#ffffff' : 'rgba(0,0,0,.25)';
+      ctx.stroke();
+    }});
+  }}
+
+  function drawBall(t){{
+    var pos = pitchToPx(ball.x, ball.y);
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 6, 0, Math.PI*2);
+    ctx.fillStyle = '#f2f3f5';
+    ctx.fill();
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(0,0,0,.35)';
+    ctx.stroke();
+  }}
+
+  function startPass(from, toEntry, t){{
+    subphase = 'pass';
+    passFrom = {{ x: from.x, y: from.y }};
+    passTo = toEntry.receiveAt;
+    passStart = t;
+    carrier = toEntry.player;
+    carrier.runTargetX = toEntry.receiveAt.x;
+    carrier.runTargetY = toEntry.receiveAt.y;
+  }}
+
+  function fireGoal(goal){{
+    goalsFired[goal.idx] = true;
+    scored[goal.side]++;
+    flashSide = goal.side;
+    flashUntil = performance.now() + 550;
+    document.getElementById('scoreHome').textContent = scored.home;
+    document.getElementById('scoreAway').textContent = scored.away;
+    pulseScore();
+    markTimelineFired(goal.idx);
+    ball.wanderAt = performance.now() + 900;
+    ball.x = 0.5; ball.y = 0.5;
+    carrier = null; sequence = null; setpiece = null; activeGoalIdx = null;
+  }}
+
+  function updateOpenPlay(goal, matchMinute, t){{
+    var leg = sequence[step];
+    leg.advanceTo.y = leg.advanceTo.y; // no-op, keeps shape explicit
+    carrier.runTargetY = leg.advanceTo.y + Math.sin(t*0.004 + carrier.jx)*0.05;
+    var leadDir = goal.side === 'home' ? 1 : -1;
+    ball.x += (carrier.x + leadDir*0.016 - ball.x) * 0.35;
+    ball.y += (carrier.y - ball.y) * 0.35;
+
+    var arrived = Math.abs(leg.advanceTo.x - carrier.x) < REACH_EPS;
+    if (arrived){{
+      if (step < 2){{
+        startPass(carrier, sequence[step + 1], t);
+      }} else if (matchMinute >= goal.minute){{
+        fireGoal(goal);
+        return;
+      }}
+    }}
+    var biasSource = subphase === 'pass' ? passTo.x : carrier.x;
+    var desiredBias = Math.max(-1, Math.min(1, (biasSource - 0.5) * 2.2));
+    attackBias += (desiredBias - attackBias) * 0.05;
+  }}
+
+  function advanceOpenPlayPass(t){{
+    var progress = Math.min(1, (t - passStart) / PASS_DURATION);
+    var ease = 1 - Math.pow(1 - progress, 2);
+    ball.x = passFrom.x + (passTo.x - passFrom.x) * ease;
+    ball.y = passFrom.y + (passTo.y - passFrom.y) * ease;
+    if (progress >= 1){{
+      step += 1;
+      subphase = 'carry';
+      var newLeg = sequence[step];
+      carrier.runTargetX = newLeg.advanceTo.x;
+      carrier.runTargetY = newLeg.advanceTo.y;
+    }}
+  }}
+
+  var SETPIECE_APPROACH_MS = 1500, SETPIECE_STRIKE_MS = 260;
+  var setpieceApproachStart = 0, setpieceStrikeStart = 0;
+
+  function updateSetPiece(goal, matchMinute, t){{
+    if (subphase === 'approach'){{
+      var progress = Math.min(1, (t - setpieceApproachStart) / SETPIECE_APPROACH_MS);
+      ball.x += (setpiece.spot.x - ball.x) * 0.15;
+      ball.y += (setpiece.spot.y - ball.y) * 0.15;
+      if (progress >= 1 && matchMinute >= goal.minute){{
+        subphase = 'strike';
+        setpieceStrikeStart = t;
+      }}
+    }} else {{ // 'strike'
+      var sp = Math.min(1, (t - setpieceStrikeStart) / SETPIECE_STRIKE_MS);
+      ball.x = setpiece.spot.x + (setpiece.target.x - setpiece.spot.x) * sp;
+      ball.y = setpiece.spot.y + (setpiece.target.y - setpiece.spot.y) * sp;
+      if (sp >= 1){{
+        fireGoal(goal);
+        return;
+      }}
+    }}
+    var desiredBias = Math.max(-1, Math.min(1, (setpiece.spot.x - 0.5) * 2.2));
+    attackBias += (desiredBias - attackBias) * 0.05;
+  }}
+
+  function updateBall(matchMinute, t){{
+    if (!MATCH) return;
+    var upcoming = MATCH.goals.filter(function(g){{
+      return !goalsFired[g.idx] && g.minute <= matchMinute + LEAD_MINUTES[g.type];
+    }})[0];
+
+    if (upcoming){{
+      if (activeGoalIdx !== upcoming.idx){{
+        activeGoalIdx = upcoming.idx;
+        if (OPEN_TYPES[upcoming.type]){{
+          setpiece = null;
+          sequence = buildSequence(upcoming.side, upcoming);
+          step = 0;
+          subphase = 'carry';
+          carrier = sequence[0].player;
+          carrier.runTargetX = sequence[0].advanceTo.x;
+          carrier.runTargetY = sequence[0].advanceTo.y;
+        }} else {{
+          sequence = null;
+          setpiece = buildSetPiece(upcoming.side, upcoming);
+          carrier = setpiece.taker;
+          carrier.runTargetX = setpiece.spot.x + (upcoming.side === 'home' ? -0.05 : 0.05);
+          carrier.runTargetY = setpiece.spot.y;
+          subphase = 'approach';
+          setpieceApproachStart = t;
+        }}
+      }}
+
+      if (OPEN_TYPES[upcoming.type]){{
+        if (subphase === 'carry') updateOpenPlay(upcoming, matchMinute, t);
+        else advanceOpenPlayPass(t);
+      }} else {{
+        updateSetPiece(upcoming, matchMinute, t);
+      }}
+    }} else {{
+      carrier = null; sequence = null; setpiece = null; activeGoalIdx = null; subphase = 'carry';
+      var desiredBias2 = Math.max(-1, Math.min(1, (ball.x - 0.5) * 2.0));
+      attackBias += (desiredBias2 - attackBias) * 0.02;
+      if (t > ball.wanderAt) {{
+        if (Math.random() < 0.02){{
+          ball.targetX = 0.15 + Math.random()*0.7;
+          ball.targetY = 0.15 + Math.random()*0.7;
+        }}
+      }}
+      ball.x += (ball.targetX - ball.x) * 0.035;
+      ball.y += (ball.targetY - ball.y) * 0.035;
+    }}
+  }}
+
+  function pulseScore(){{
+    var el = flashSide === 'home' ? document.getElementById('scoreHome') : document.getElementById('scoreAway');
+    el.style.transition = 'none';
+    el.style.transform = 'scale(1.4)';
+    el.style.color = flashSide === 'home' ? MATCH.home.color : MATCH.away.color;
+    requestAnimationFrame(function(){{
+      el.style.transition = 'transform .4s ease';
+      el.style.transform = 'scale(1)';
+    }});
+  }}
+
+  // ---- Goal timeline list -------------------------------------------
+  var GOAL_ICON = {{'Strike':'\\u26bd', 'Header':'\\u{{1F3AF}}', 'Corner Kick':'\\u2192', 'Penalty Kick':'\\u25CF', 'Free Kick':'\\u2192'}};
+
+  function renderTimeline(){{
+    var list = document.getElementById('timelineList');
+    if (!MATCH || !MATCH.goals.length){{
+      list.innerHTML = '<li class="t-empty">No goals in this match.</li>';
+      return;
+    }}
+    list.innerHTML = MATCH.goals.map(function(g){{
+      var sideLabel = g.side === 'home' ? MATCH.home.club : MATCH.away.club;
+      return '<li class="pending" data-idx="' + g.idx + '">' +
+        '<span class="t-min">' + g.minute + '&prime;</span>' +
+        '<span class="t-type">' + g.type + '</span>' +
+        '<span class="t-scorer">' + g.scorer + '</span>' +
+        '<span style="color:var(--muted);font-size:12px;">(' + g.scorer_position + ' &middot; ' + sideLabel + ')</span>' +
+      '</li>';
+    }}).join('');
+  }}
+
+  function markTimelineFired(idx){{
+    var el = document.querySelector('#timelineList li[data-idx="' + idx + '"]');
+    if (el) el.classList.remove('pending');
+  }}
+
+  // ---- Match loading / animation loop --------------------------------
+  var startTime = null;
+  var running = false;
+  var rafId = null;
+
+  function loadMatch(idx){{
+    if (rafId) cancelAnimationFrame(rafId);
+    running = false;
+    var m = MATCHES[idx];
+    MATCH = {{
+      home: {{ club: m.home_name, owner: m.home_owner, color: getVar('--navy') }},
+      away: {{ club: m.away_name, owner: m.away_owner, color: getVar('--accent') }},
+      goals: m.goals,
+      durationSeconds: DURATION_SECONDS,
+    }};
+    document.getElementById('homeClub').textContent = MATCH.home.club;
+    document.getElementById('homeOwner').textContent = MATCH.home.owner;
+    document.getElementById('awayClub').textContent = MATCH.away.club;
+    document.getElementById('awayOwner').textContent = MATCH.away.owner;
+    document.getElementById('homeDot').style.background = MATCH.home.color;
+    document.getElementById('awayDot').style.background = MATCH.away.color;
+    document.getElementById('storyText').textContent = m.summary;
+    renderTimeline();
+    start();
+  }}
+
+  function frame(now){{
+    if (!startTime) startTime = now;
+    var elapsed = (now - startTime) / 1000;
+    var matchMinute = Math.min(90, (elapsed / MATCH.durationSeconds) * 90);
+
+    document.getElementById('clockMin').textContent = Math.floor(matchMinute) + '\\u2032';
+    document.getElementById('clockLabel').textContent = matchMinute >= 90 ? 'FULL TIME' : 'LIVE';
+
+    drawPitch();
+    updateBall(matchMinute, now);
+    drawPlayers(now);
+    drawBall(now);
+
+    if (elapsed < MATCH.durationSeconds){{
+      rafId = requestAnimationFrame(frame);
+    }} else {{
+      running = false;
+      document.getElementById('ftScore').textContent = scored.home + ' \\u2013 ' + scored.away;
+      document.getElementById('fulltime').classList.add('show');
+    }}
+  }}
+
+  function start(){{
+    if (!MATCH || running) return;
+    running = true;
+    startTime = null;
+    scored = {{home:0, away:0}};
+    goalsFired = {{}};
+    attackBias = 0;
+    carrier = null; sequence = null; setpiece = null; activeGoalIdx = null;
+    ball = {{ x:0.5, y:0.5, targetX:0.5, targetY:0.5, wanderAt:0 }};
+    document.getElementById('scoreHome').textContent = '0';
+    document.getElementById('scoreAway').textContent = '0';
+    document.getElementById('fulltime').classList.remove('show');
+    rebuildPlayers();
+    renderTimeline();
+    rafId = requestAnimationFrame(frame);
+  }}
+
+  if (HAS_MATCHES){{
+    document.getElementById('replayBtn').addEventListener('click', start);
+    document.getElementById('matchSelect').addEventListener('change', function(e){{
+      loadMatch(parseInt(e.target.value, 10));
+    }});
+
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var initialIdx = parseInt(document.getElementById('matchSelect').value, 10);
+    var m0 = MATCHES[initialIdx];
+    MATCH = {{
+      home: {{ club: m0.home_name, owner: m0.home_owner, color: getVar('--navy') }},
+      away: {{ club: m0.away_name, owner: m0.away_owner, color: getVar('--accent') }},
+      goals: m0.goals, durationSeconds: DURATION_SECONDS,
+    }};
+    document.getElementById('homeClub').textContent = MATCH.home.club;
+    document.getElementById('homeOwner').textContent = MATCH.home.owner;
+    document.getElementById('awayClub').textContent = MATCH.away.club;
+    document.getElementById('awayOwner').textContent = MATCH.away.owner;
+    document.getElementById('homeDot').style.background = MATCH.home.color;
+    document.getElementById('awayDot').style.background = MATCH.away.color;
+    document.getElementById('storyText').textContent = m0.summary;
+    renderTimeline();
+    drawPitch(); drawPlayers(0); drawBall(0);
+    if (!reduceMotion) {{
+      start();
+    }} else {{
+      scored = {{home: m0.home_goals, away: m0.away_goals}};
+      document.getElementById('scoreHome').textContent = m0.home_goals;
+      document.getElementById('scoreAway').textContent = m0.away_goals;
+      document.getElementById('clockLabel').textContent = 'FULL TIME';
+      document.getElementById('clockMin').textContent = '90\\u2032';
+      document.getElementById('ftScore').textContent = m0.home_goals + ' \\u2013 ' + m0.away_goals;
+      document.getElementById('fulltime').classList.add('show');
+      MATCH.goals.forEach(function(g){{ markTimelineFired(g.idx); }});
+    }}
+  }} else {{
+    drawPitch(); drawPlayers(0); drawBall(0);
+  }}
+}})();
+</script>
+</body>
+</html>'''
+
+
+if __name__ == "__main__":
+    config = load_json("league_config.json")
+    matches = load_json("matches.json")
+    html = render(config, matches)
+    out_dir = os.path.join(BASE, "matchday-replay")
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, "index.html")
+    with open(out_path, "w") as f:
+        f.write(html)
+    print(f"Rendered -> {out_path}")

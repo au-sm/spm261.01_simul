@@ -1,0 +1,38 @@
+name: Auto-resolve season
+
+on:
+  schedule:
+    # every 30 minutes -- deliberately NOT on :00/:30 to avoid piling onto
+    # the same instant every other "every 30 min" job on GitHub hits
+    - cron: "7,37 * * * *"
+  workflow_dispatch: {} # manual "Run workflow" button, for testing or an on-demand trigger
+
+permissions:
+  contents: write
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run auto_resolve.py
+        env:
+          ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
+        run: python3 engine/auto_resolve.py
+
+      - name: Commit and push if anything changed
+        run: |
+          git config user.name "auto-resolve bot"
+          git config user.email "noreply@github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing changed -- skipping commit."
+          else
+            git commit -m "Auto-resolve: $(cat _auto_resolve_actions.txt | tr '\n' ',' | sed 's/,$//')"
+            git push
+          fi

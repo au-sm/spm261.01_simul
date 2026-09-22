@@ -18,7 +18,18 @@
  *   DraftBoards  -- team_id | player_ids_json | submitted_at
  *   Lineups      -- team_id | round | formation | strategy | gk | df | mf | fw
  *                    | ticket_price | rationale | submitted_at
+ *
+ * ADMIN EXPORT (?admin_key=...): the scheduled GitHub Actions job (see
+ * .github/workflows/auto-resolve.yml) pulls Teams/DraftBoards/Lineups
+ * through this every run so the site can resolve itself -- nobody
+ * needs to be in a live conversation with Claude for a round to
+ * resolve on time. ADMIN_KEY must match the ADMIN_KEY repo secret
+ * used by that workflow. This is a shared secret in a script property,
+ * not real security -- good enough to keep it off a public GET, not
+ * good enough for anything more sensitive than "who ranked which
+ * players."
  */
+var ADMIN_KEY = "afkib6IOV1gCxGzR0Q16n0IBAD3HCeXi";
 
 var SEED_TEAMS = [
   {id:0,name:"Team 1",owner:"Bianca Biagini",pin:"3062"},
@@ -105,10 +116,47 @@ function jsonOut_(obj) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+function readDraftBoards_(boardsSheet) {
+  var rows = boardsSheet.getDataRange().getValues();
+  var out = [];
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i][0] === "" || rows[i][0] == null) continue;
+    var ids;
+    try { ids = JSON.parse(rows[i][1]); } catch (e) { ids = []; }
+    out.push({ team_id: rows[i][0], player_ids: ids, submitted_at: rows[i][2] });
+  }
+  return out;
+}
+
+function readLineups_(lineupsSheet) {
+  var rows = lineupsSheet.getDataRange().getValues();
+  var out = [];
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i][0] === "" || rows[i][0] == null) continue;
+    out.push({
+      team_id: rows[i][0], round: rows[i][1], formation: rows[i][2], strategy: rows[i][3],
+      gk: rows[i][4], df: rows[i][5], mf: rows[i][6], fw: rows[i][7],
+      ticket_price: rows[i][8], rationale: rows[i][9], submitted_at: rows[i][10],
+    });
+  }
+  return out;
+}
+
 function doGet(e) {
   var sheets = ensureSheets_();
+  var params = (e && e.parameter) || {};
+
+  if (params.admin_key && params.admin_key === ADMIN_KEY) {
+    return jsonOut_({
+      ok: true,
+      teams: readTeams_(sheets.teams), // pins included -- admin-only export
+      draft_boards: readDraftBoards_(sheets.boards),
+      lineups: readLineups_(sheets.lineups),
+    });
+  }
+
   var teams = readTeams_(sheets.teams).map(function (t) {
-    return { id: t.id, name: t.name, owner: t.owner }; // never return pin on GET
+    return { id: t.id, name: t.name, owner: t.owner }; // never return pin on a public GET
   });
   return jsonOut_({ ok: true, teams: teams });
 }
