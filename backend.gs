@@ -5,7 +5,9 @@
  * Paste this into that Sheet's Extensions > Apps Script, then Deploy >
  * New deployment > Web app (Execute as: Me, Who has access: Anyone),
  * and send the resulting /exec URL back so it can be wired into
- * config.js.
+ * assets/config.js. Redeploying later (this file changed): Deploy >
+ * Manage deployments > edit the existing deployment > New version --
+ * keeps the same /exec URL, no config.js change needed.
  *
  * PIN CHECKING IS REAL HERE, unlike the Claude-artifact version this
  * replaced -- this runs server-side, so a wrong/missing PIN is
@@ -248,8 +250,8 @@ function doGet(e) {
     });
   }
 
-  // public, non-admin reads used by the Submit page to show live slot
-  // availability without needing the admin key
+  // public, non-admin reads used by the Sponsorship and TV Rights pages
+  // to show live slot availability without needing the admin key
   if (params.catalog === "1") {
     return jsonOut_({
       ok: true,
