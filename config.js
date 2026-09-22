@@ -1,4 +1,1 @@
-// Fill this in once backend.gs is deployed as a Web App (Deploy > New
-// deployment > Web app > Execute as: Me > Who has access: Anyone),
-// then paste the /exec URL here and push.
-const BACKEND_URL = "";
+const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzt5f3v5N02PlkztMKRtVTSCjgJmsISm_R_KA7LgIZhANrsYY-cbrDtp5ng9Jp7qdQd7g/exec";
