@@ -196,7 +196,12 @@ def resolve_local_tv_deals(sheet_local_tv_deals):
     """Applies every Sheet local_tv_deal row not yet reflected as
     'negotiated' in data/local_tv_deals.json. Same no-gate reasoning as
     resolve_sponsorship_deals -- runs unconditionally once a team has a
-    roster, since Local TV negotiation isn't tied to a round date either."""
+    roster, since Local TV negotiation isn't tied to a round date either.
+    The Sheet already resolved base-vs-negotiate into concrete
+    final_revenue / final_clause numbers at submission time (see
+    backend.gs's local_tv_deal handler), so this only ever needs
+    --live -- same as resolve_sponsorship_deals, there is no separate
+    base/negotiate branch here."""
     actions = []
     for d in pull_submissions.unapplied_local_tv_deals(sheet_local_tv_deals):
         print(f"\n=== Applying local TV deal: team {d['team_id']} ===")
@@ -204,6 +209,7 @@ def resolve_local_tv_deals(sheet_local_tv_deals):
             "python3", "engine/resolve_local_tv_pick.py",
             "--team", str(d["team_id"]), "--live",
             "--final-revenue", str(int(d["final_revenue"])),
+            "--final-clause", str(d["final_clause"]),
         ]
         if d.get("rep_team_id") not in (None, "", "null"):
             cmd += ["--network-rep-team", str(d["rep_team_id"])]

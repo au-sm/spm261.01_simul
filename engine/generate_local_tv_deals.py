@@ -34,9 +34,9 @@ import sys
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 MARKET_TIERS = [
-    {"tier": "Major Market", "base_revenue": 1200000},
-    {"tier": "Mid Market", "base_revenue": 700000},
-    {"tier": "Small Market", "base_revenue": 500000},
+    {"tier": "Major Market", "base_revenue": 1200000, "base_clause": "strict"},
+    {"tier": "Mid Market", "base_revenue": 700000, "base_clause": "standard"},
+    {"tier": "Small Market", "base_revenue": 500000, "base_clause": "loose"},
 ]
 
 STAR_POWER_MODIFIER = {
@@ -68,6 +68,7 @@ def assign_tiers(n_teams, season_seed, team_names=None):
             "team_name": team_names[tid],
             "market_tier": pool[tid]["tier"],
             "base_revenue": pool[tid]["base_revenue"],
+            "base_clause": pool[tid]["base_clause"],
         }
         for tid in range(n_teams)
     ]
@@ -104,4 +105,4 @@ if __name__ == "__main__":
 
     print(f"Assigned Local TV Deals for {args.n_teams} teams -> {out_path}")
     for a in assignments:
-        print(f"  {a['team_name']:<10} {a['market_tier']:<14} ${a['base_revenue']:,}")
+        print(f"  {a['team_name']:<10} {a['market_tier']:<14} ${a['base_revenue']:,}  {a['base_clause']} clause")

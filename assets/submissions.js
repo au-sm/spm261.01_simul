@@ -205,14 +205,13 @@ function initDraftBoardForm() {
   });
 }
 
-// ---------------- Local TV Rate (TV Rights Marketplace) ----------------
+// ---------------- Local TV Deal (TV Rights Marketplace) ----------------
 function initTvForm() {
   const teamSel = document.getElementById('tv-team');
   const pinInput = document.getElementById('tv-pin');
   const tierNote = document.getElementById('tv-tier-note');
   const modeSel = document.getElementById('tv-mode');
-  const revenueField = document.getElementById('tv-revenue-field');
-  const repField = document.getElementById('tv-rep-field');
+  const negotiateFields = document.getElementById('tv-negotiate-fields');
   const repSel = document.getElementById('tv-rep');
   const btn = document.getElementById('tv-submit');
   const msg = document.getElementById('tv-msg');
@@ -224,13 +223,11 @@ function initTvForm() {
     const already = EXISTING_LOCAL_TV_DEALS.some(d => String(d.team_id) === teamSel.value);
     if (!base) { tierNote.textContent = ''; return; }
     tierNote.textContent = already
-      ? `This team's Local TV rate is already negotiated -- it's a one-time deal, resubmitting will be rejected.`
-      : `Market tier: ${base.tier} -- Base rate: $${base.base_revenue.toLocaleString()}/season`;
+      ? `This team's Local TV Deal is already negotiated -- it's a one-time deal, resubmitting will be rejected.`
+      : `Market tier: ${base.tier} -- Base rate: $${base.base_revenue.toLocaleString()}/season, ${base.base_clause} clause`;
   }
   function updateModeFields() {
-    const negotiating = modeSel.value === 'negotiate';
-    revenueField.hidden = !negotiating;
-    repField.hidden = !negotiating;
+    negotiateFields.hidden = modeSel.value !== 'negotiate';
   }
   teamSel.addEventListener('change', updateTierNote);
   modeSel.addEventListener('change', updateModeFields);
@@ -243,8 +240,10 @@ function initTvForm() {
     const body = { type: 'local_tv_deal', team_id: teamSel.value, pin, mode: modeSel.value };
     if (modeSel.value === 'negotiate') {
       const revenue = parseInt(document.getElementById('tv-revenue').value, 10);
+      const clause = document.getElementById('tv-clause').value;
       if (!revenue) { msg.textContent = 'Enter the final agreed rate.'; msg.className = 'sub-msg'; return; }
       body.final_revenue = revenue;
+      body.final_clause = clause;
       if (revenue !== (LOCAL_TV_BASE[teamSel.value]?.base_revenue || 0)) {
         body.rep_team_id = repSel.value;
       }
@@ -256,8 +255,8 @@ function initTvForm() {
     try {
       const result = await postSubmission(body);
       if (result.ok) {
-        msg.textContent = `Saved -- $${result.final_revenue.toLocaleString()}/season` +
-          (result.commission ? `, $${result.commission.toLocaleString()} commission credited to the rep.` : '.');
+        msg.textContent = `Saved -- $${result.final_revenue.toLocaleString()}/season, ${result.final_clause} clause` +
+          (result.commission ? `. $${result.commission.toLocaleString()} commission credited to the rep.` : '.');
         msg.className = 'sub-msg ok';
         pinInput.value = '';
         await loadCatalog();

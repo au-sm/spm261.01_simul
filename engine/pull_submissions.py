@@ -126,8 +126,13 @@ def unapplied_sponsorship_deals(sheet_deals):
 
 def unapplied_local_tv_deals(sheet_deals):
     """Sheet rows not yet reflected in data/local_tv_deals.json's
-    per-team 'negotiated' flag -- a Local TV rate is one-time, so this
-    is a clean not-yet-applied check."""
+    per-team 'negotiated' flag -- a Local TV Deal is one-time, so this
+    is a clean not-yet-applied check. Each row is passed through
+    untouched -- final_clause (added to the LocalTVDeals sheet and
+    readLocalTVDeals_() in backend.gs alongside final_revenue) flows
+    through automatically here exactly like sponsorship deals' clause
+    field already does, since this function only filters the list, it
+    never drops fields off the dicts it returns."""
     ltv = load_json("local_tv_deals.json")
     negotiated_ids = {str(a["team_id"]) for a in ltv["assignments"] if a.get("negotiated")}
     return [d for d in sheet_deals if str(d["team_id"]) not in negotiated_ids]

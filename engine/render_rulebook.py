@@ -93,9 +93,11 @@ def render(config, deals, calendar=None):
         <tr><td>Loose</td><td class="num">Top {rt["loose"]}</td><td class="num">{int(ce["penalty_pct"]*100)}%</td></tr>
         <tr><td>None</td><td class="num">No requirement</td><td class="num">0%, ever</td></tr>
       </tbody></table>
-      <p>This is checked PER SPONSOR, off your one final rank -- a team can clear a loose-clause deal's easy bar while
-      missing a strict-clause deal's demanding one in the exact same season. A strict clause pays more up front for a
-      real bet that you'll actually contend; a loose clause is the safer, lower-upside insurance policy. Checked exactly
+      <p>This is checked PER DEAL, off your one final rank -- a team can clear a loose-clause deal's easy bar while
+      missing a strict-clause deal's demanding one in the exact same season, whether those deals are both sponsors or
+      one is a sponsor and the other your Local TV Deal (see the TV / Broadcast Revenue section below -- Local TV
+      deals carry a clause too, checked against this exact same table). A strict clause pays more up front for a real
+      bet that you'll actually contend; a loose clause is the safer, lower-upside insurance policy. Checked exactly
       once, at season end -- never applied twice to the same deal.</p>
       <p>Full live marketplace (open slots, who's signed what) and a negotiation simulator to rehearse your ask before
       your draft turn: see the separate Sponsorship Marketplace site.</p>'''
@@ -316,7 +318,15 @@ def render(config, deals, calendar=None):
           <p><strong>Payout timing:</strong> {ltv["payout_timing"]}</p>
           <p>{ltv["salary_cap_note"]}</p>
           <h3>Local TV Rights Negotiation</h3>
-          <p>{ltv["negotiation"]}</p>'''),
+          <p>{ltv["negotiation"]}</p>
+          <h3>Clause</h3>
+          <p>Exactly like Sponsorship, a Local TV Deal's clause is a separate ask from its rate: push for a looser
+          clause than your market tier's base clause, at Modest / Bold / Very Bold intensity, gated by your same
+          Negotiating Leverage number. Ask beyond what your leverage supports and the deal walks away on the clause
+          specifically &mdash; that costs you nothing on the revenue side, and you can simply not push the clause
+          further. See "What the Clause Actually Means" above (Section 10) for the rank-threshold table &mdash; the
+          same thresholds and the same {int(ce["penalty_pct"]*100)}% penalty apply to a Local TV Deal's clause, checked
+          once at season end off your one final rank.</p>'''),
 
         ("trades", "12. Trades &amp; Free Agency", f'''
           <p><strong>Deadline:</strong> {tr["deadline"]}</p>

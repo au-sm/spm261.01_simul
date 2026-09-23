@@ -13,11 +13,13 @@ for the shared leverage/revenue-axis math (the exact same -10%/+10%
 mechanic already used for Sponsorship Revenue) and
 engine/generate_tv_negotiation_rotation.py for who negotiates with whom.
 
-Unlike Sponsorship, there is no clause axis here and no brand choice --
-every team already has exactly one Local TV Deal, fixed by its
-randomly assigned market tier (data/local_tv_deals.json). Negotiating
-only ever moves that ONE number, and only once per team (re-running
-this for a team that already negotiated is refused).
+There is no brand choice here -- every team already has exactly one
+Local TV Deal, fixed by its randomly assigned market tier
+(data/local_tv_deals.json). But just like Sponsorship, TWO separate
+things are on the table: the revenue rate AND a performance clause
+(base_clause set by market tier -- see MARKET_TIERS in
+generate_local_tv_deals.py). Negotiating only ever runs once per team
+(re-running this for a team that already negotiated is refused).
 
 IMPORTANT -- this does NOT pay anyone yet. Local TV money is still
 paid out at the Round 3 split, same as before, with the Star Power
@@ -30,13 +32,15 @@ data/local_tv_deals.json, not data/team_finances.json.
 
 LIVE MODE (the normal path for the in-class negotiation exercise):
     python3 engine/resolve_local_tv_pick.py --team 3 \\
-        --live --final-revenue 770000 --network-rep-team 17
+        --live --final-revenue 770000 --final-clause standard \\
+        --network-rep-team 17
 
-  Team 3 is Mid Market ($700,000 base), so the live-negotiated
-  $770,000 rate credits a $70,000 commission to Team 17, whoever
-  played the network rep in that negotiation -- booked immediately
-  (the commission is a reward for negotiating skill, not TV money
-  itself, so it doesn't wait for the Round 3 split).
+  Team 3 is Mid Market ($700,000 base, standard clause), so the
+  live-negotiated $770,000 rate credits a $70,000 commission to
+  Team 17, whoever played the network rep in that negotiation --
+  booked immediately (the commission is a reward for negotiating
+  skill, not TV money itself, so it doesn't wait for the Round 3
+  split).
 
   The mirror case is rewarded too: if the rep instead talks the team
   down BELOW base (a good deal for the network), the same size
@@ -45,20 +49,23 @@ LIVE MODE (the normal path for the in-class negotiation exercise):
   requires --network-rep-team (only an exact match to base needs no
   rep). Never a deduction from the negotiating team's own rate --
   always additive, on top of whatever they locked in, in both
-  directions.
+  directions. --final-clause is required alongside --final-revenue,
+  same as Sponsorship's --live mode.
 
 ALGORITHMIC MODE (practice / fallback if a team never got a live
 negotiation -- no human played network rep, so no commission applies):
     python3 engine/resolve_local_tv_pick.py --team 3 --take-base
-    python3 engine/resolve_local_tv_pick.py --team 3 --negotiate
+    python3 engine/resolve_local_tv_pick.py --team 3 --negotiate \\
+        --negotiate-clause --clause-intensity bold
 """
 import argparse
 import json
 import os
+import random
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from negotiation import compute_leverage, resolve_revenue
+from negotiation import compute_leverage, resolve_revenue, resolve_clause
 from simulate import Standings
 import render_dashboard
 
@@ -99,10 +106,14 @@ def main():
 
     ap.add_argument("--live", action="store_true", help="record an already-negotiated live rate")
     ap.add_argument("--final-revenue", type=int, help="[live] the exact agreed season rate")
+    ap.add_argument("--final-clause", choices=["strict", "standard", "loose", "none"], help="[live] the exact agreed clause")
     ap.add_argument("--network-rep-team", type=int, help="[live] team whose student played network rep (receives a commission whenever the rate differs from base, either direction)")
 
     ap.add_argument("--take-base", action="store_true", help="[algorithmic] take the market-tier base exactly, no negotiation")
     ap.add_argument("--negotiate", action="store_true", help="[algorithmic] resolve the rate via leverage formula")
+    ap.add_argument("--negotiate-clause", action="store_true", help="[algorithmic] also attempt a clause ask")
+    ap.add_argument("--clause-intensity", choices=["modest", "bold", "very_bold"], default=None)
+    ap.add_argument("--seed", type=int, default=None)
     args = ap.parse_args()
 
     config = load_json("league_config.json")
@@ -124,6 +135,7 @@ def main():
     if assignment is None:
         print(f"ERROR: {team_name} has no Local TV Deal assignment -- run generate_local_tv_deals.py first."); return
     base_revenue = assignment["base_revenue"]
+    base_clause = assignment["base_clause"]
 
     if assignment.get("negotiated"):
         print(f"ERROR: {team_name}'s Local TV Deal rate is already negotiated "
@@ -134,8 +146,8 @@ def main():
 
     # ---------------- LIVE MODE ----------------
     if args.live:
-        if args.final_revenue is None:
-            print("ERROR: --live requires --final-revenue"); return
+        if args.final_revenue is None or args.final_clause is None:
+            print("ERROR: --live requires --final-revenue and --final-clause"); return
 
         commission = 0
         rep_team_name = None
@@ -152,11 +164,13 @@ def main():
         assignment["negotiated"] = True
         assignment["mode"] = "live"
         assignment["negotiated_revenue"] = args.final_revenue
+        assignment["final_clause"] = args.final_clause
         assignment["network_rep_team_id"] = args.network_rep_team
         save_json("local_tv_deals.json", ltv)
 
-        print(f"\n{team_name} ({assignment['market_tier']}): Local TV Deal rate negotiated at ${args.final_revenue:,}/season "
-              f"(base ${base_revenue:,}). Still paid out at the Round 3 split, plus Star Power bonus if earned then.")
+        print(f"\n{team_name} ({assignment['market_tier']}): Local TV Deal rate negotiated at ${args.final_revenue:,}/season, "
+              f"{args.final_clause} clause (base ${base_revenue:,}, {base_clause} clause). Still paid out at the Round 3 "
+              f"split, plus Star Power bonus if earned then. Clause checked once at season end.")
 
         if commission > 0:
             direction = "above" if args.final_revenue > base_revenue else "below"
@@ -175,21 +189,33 @@ def main():
     else:
         if not (args.take_base or args.negotiate):
             print("ERROR: pick one of --take-base or --negotiate (or use --live to record an already-negotiated rate)"); return
+        if args.negotiate_clause and not args.clause_intensity:
+            print("ERROR: --negotiate-clause requires --clause-intensity"); return
 
         avg_star = team_avg_star_power(args.team, players)
         rank = team_standing_rank(args.team, matches, team_ids)
         leverage = compute_leverage(avg_star, standings_rank=rank, n_teams=len(team_ids))
 
+        seed_val = args.seed if args.seed is not None else config.get("season_seed", 0)
+        rng = random.Random(f"{seed_val}:local_tv:{args.team}")
+
         final_revenue, commission = resolve_revenue(base_revenue, take_base=args.take_base, leverage=leverage)
+        final_clause = base_clause
+        if args.negotiate_clause:
+            clause_result = resolve_clause(base_clause, args.clause_intensity, leverage, rng)
+            if clause_result["outcome"] == "walk_away":
+                print(f"\n{team_name} ({assignment['market_tier']}): clause ask WALKED AWAY (revenue side still resolved below).")
+            final_clause = clause_result["final_clause"]
 
         print(f"\n{team_name} ({assignment['market_tier']})  (avg Star Power {avg_star:.0f}, leverage {leverage:.0f})")
-        print(f"  Negotiated rate: ${final_revenue:,}/season (base ${base_revenue:,}). "
+        print(f"  Negotiated rate: ${final_revenue:,}/season, {final_clause} clause (base ${base_revenue:,}, {base_clause} clause). "
               f"{'(no live network rep, so no commission credited)' if commission else ''}")
-        print("  Still paid out at the Round 3 split, plus Star Power bonus if earned then.")
+        print("  Still paid out at the Round 3 split, plus Star Power bonus if earned then. Clause checked once at season end.")
 
         assignment["negotiated"] = True
         assignment["mode"] = "algorithmic"
         assignment["negotiated_revenue"] = final_revenue
+        assignment["final_clause"] = final_clause
         save_json("local_tv_deals.json", ltv)
 
     schedule_path = os.path.join(BASE, "data", "schedule.json")

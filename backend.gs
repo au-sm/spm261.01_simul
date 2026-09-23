@@ -22,8 +22,8 @@
  *                    | ticket_price | rationale | submitted_at
  *   SponsorshipDeals -- team_id | category | brand | final_revenue | final_clause
  *                    | rep_team_id | submitted_at
- *   LocalTVDeals -- team_id | final_revenue | rep_team_id | submitted_at
- *                    (one row per team, ever -- a Local TV rate is negotiated once)
+ *   LocalTVDeals -- team_id | final_revenue | final_clause | rep_team_id | submitted_at
+ *                    (one row per team, ever -- a Local TV Deal is negotiated once)
  *
  * ADMIN EXPORT (?admin_key=...): the scheduled GitHub Actions job (see
  * .github/workflows/auto-resolve.yml) pulls Teams/DraftBoards/Lineups
@@ -92,17 +92,20 @@ var SPONSOR_CATALOG = [
   {category:"Technology",name:"Verizon",base_revenue:1100000,base_clause:"loose",qty:6},
 ];
 
-// Local TV market-tier base rates per team, matches data/local_tv_deals.json.
+// Local TV market-tier base rates + base clauses per team, matches
+// data/local_tv_deals.json (base_clause follows the same higher-value-
+// market = stricter-clause pattern as the Sponsorship catalog above:
+// Major Market -> strict, Mid Market -> standard, Small Market -> loose).
 var LOCAL_TV_BASE = {
-  "0":{tier:"Major Market",base_revenue:1200000}, "1":{tier:"Major Market",base_revenue:1200000},
-  "2":{tier:"Mid Market",base_revenue:700000}, "3":{tier:"Small Market",base_revenue:500000},
-  "4":{tier:"Mid Market",base_revenue:700000}, "5":{tier:"Small Market",base_revenue:500000},
-  "6":{tier:"Small Market",base_revenue:500000}, "7":{tier:"Mid Market",base_revenue:700000},
-  "8":{tier:"Small Market",base_revenue:500000}, "9":{tier:"Major Market",base_revenue:1200000},
-  "10":{tier:"Major Market",base_revenue:1200000}, "11":{tier:"Small Market",base_revenue:500000},
-  "12":{tier:"Major Market",base_revenue:1200000}, "13":{tier:"Mid Market",base_revenue:700000},
-  "14":{tier:"Major Market",base_revenue:1200000}, "15":{tier:"Mid Market",base_revenue:700000},
-  "16":{tier:"Small Market",base_revenue:500000}, "17":{tier:"Mid Market",base_revenue:700000},
+  "0":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "1":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"},
+  "2":{tier:"Mid Market",base_revenue:700000,base_clause:"standard"}, "3":{tier:"Small Market",base_revenue:500000,base_clause:"loose"},
+  "4":{tier:"Mid Market",base_revenue:700000,base_clause:"standard"}, "5":{tier:"Small Market",base_revenue:500000,base_clause:"loose"},
+  "6":{tier:"Small Market",base_revenue:500000,base_clause:"loose"}, "7":{tier:"Mid Market",base_revenue:700000,base_clause:"standard"},
+  "8":{tier:"Small Market",base_revenue:500000,base_clause:"loose"}, "9":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"},
+  "10":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "11":{tier:"Small Market",base_revenue:500000,base_clause:"loose"},
+  "12":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "13":{tier:"Mid Market",base_revenue:700000,base_clause:"standard"},
+  "14":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "15":{tier:"Mid Market",base_revenue:700000,base_clause:"standard"},
+  "16":{tier:"Small Market",base_revenue:500000,base_clause:"loose"}, "17":{tier:"Mid Market",base_revenue:700000,base_clause:"standard"},
 };
 
 function ensureSheets_() {
@@ -140,7 +143,7 @@ function ensureSheets_() {
   var localTv = ss.getSheetByName("LocalTVDeals");
   if (!localTv) {
     localTv = ss.insertSheet("LocalTVDeals");
-    localTv.appendRow(["team_id", "final_revenue", "rep_team_id", "submitted_at"]);
+    localTv.appendRow(["team_id", "final_revenue", "final_clause", "rep_team_id", "submitted_at"]);
   }
 
   // remove the default blank "Sheet1" left by spreadsheet creation, if still present and empty
@@ -228,8 +231,8 @@ function readLocalTVDeals_(sheet) {
   for (var i = 1; i < rows.length; i++) {
     if (rows[i][0] === "" || rows[i][0] == null) continue;
     out.push({
-      team_id: rows[i][0], final_revenue: rows[i][1],
-      rep_team_id: rows[i][2], submitted_at: rows[i][3],
+      team_id: rows[i][0], final_revenue: rows[i][1], final_clause: rows[i][2],
+      rep_team_id: rows[i][3], submitted_at: rows[i][4],
     });
   }
   return out;
@@ -405,12 +408,16 @@ function doPost(e) {
     var already = existingTv.some(function (d) { return String(d.team_id) === String(body.team_id); });
     if (already) return jsonOut_({ ok: false, error: "This team's Local TV rate is already negotiated -- it's a one-time deal." });
 
-    var tvFinalRevenue;
+    var tvFinalRevenue, tvFinalClause;
     if (body.mode === "base") {
       tvFinalRevenue = tvBase.base_revenue;
+      tvFinalClause = tvBase.base_clause;
     } else if (body.mode === "negotiate") {
       tvFinalRevenue = Number(body.final_revenue);
-      if (!tvFinalRevenue) return jsonOut_({ ok: false, error: "Negotiated deals need final_revenue." });
+      tvFinalClause = body.final_clause;
+      if (!tvFinalRevenue || !tvFinalClause) {
+        return jsonOut_({ ok: false, error: "Negotiated deals need both final_revenue and final_clause." });
+      }
     } else {
       return jsonOut_({ ok: false, error: "mode must be 'base' or 'negotiate'" });
     }
@@ -424,9 +431,9 @@ function doPost(e) {
       tvRepTeamId = body.rep_team_id;
     }
 
-    sheets.localTv.appendRow([body.team_id, tvFinalRevenue, tvRepTeamId, now]);
+    sheets.localTv.appendRow([body.team_id, tvFinalRevenue, tvFinalClause, tvRepTeamId, now]);
     return jsonOut_({
-      ok: true, team_id: body.team_id, final_revenue: tvFinalRevenue,
+      ok: true, team_id: body.team_id, final_revenue: tvFinalRevenue, final_clause: tvFinalClause,
       commission: tvRepTeamId ? Math.abs(tvFinalRevenue - tvBase.base_revenue) : 0,
     });
   }

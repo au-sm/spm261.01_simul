@@ -4,11 +4,12 @@ Marketplace, the missing sibling to sponsorship-site/index.html. Same
 purpose: a live status page plus a client-side negotiation simulator
 students can rehearse on before their real negotiation locks a rate in.
 
-Reads data/local_tv_deals.json (market tier + base rate + negotiated
-rate once resolved) and data/league_config.json (team names/owners) --
-always current, never hand-typed. Simulator math mirrors
-engine/negotiation.py's revenue axis exactly (no clause here -- Local
-TV deals don't have one, see the Rulebook's TV / Broadcast Revenue section).
+Reads data/local_tv_deals.json (market tier + base rate/clause +
+negotiated rate/clause once resolved) and data/league_config.json
+(team names/owners) -- always current, never hand-typed. Simulator
+math mirrors engine/negotiation.py's revenue AND clause axes exactly,
+the same two-axis simulator as the Sponsorship Marketplace -- see the
+Rulebook's TV / Broadcast Revenue section.
 
 Run after every resolve_local_tv_pick.py call, then republish.
 """
@@ -31,14 +32,17 @@ def money(n):
     return f"${n:,}"
 
 
-def render(config, ltv, tv_deal_formula):
+def render(config, deals, ltv):
+    tv_deal_formula = deals["tv_deal_formula"]
+    ce = deals["clause_enforcement"]
+    rt = ce["rank_threshold_by_clause"]
     owner_by_id = {t["team_id"]: t.get("owner", "") for t in config["teams"]}
     assignments = ltv["assignments"]
 
     tier_rows = []
     for tier in ltv["market_tiers"]:
         tier_rows.append(
-            f'<tr><td>{tier["tier"]}</td><td class="num">{money(tier["base_revenue"])}</td></tr>'
+            f'<tr><td>{tier["tier"]}</td><td class="num">{money(tier["base_revenue"])}</td><td>{tier["base_clause"]}</td></tr>'
         )
     tier_rows_html = "".join(tier_rows)
 
@@ -49,20 +53,23 @@ def render(config, ltv, tv_deal_formula):
         negotiated = a.get("negotiated")
         if negotiated:
             rate = money(a["negotiated_revenue"])
+            clause = a.get("final_clause", a["base_clause"])
             status_cls = "complete"
             status = a["mode"]
         else:
             rate = f'{money(a["base_revenue"])} (base, not yet negotiated)'
+            clause = a["base_clause"]
             status_cls = "pending"
             status = "pending"
         team_rows.append(
-            f'<tr><td>{name}</td><td>{a["market_tier"]}</td><td class="num">{rate}</td>'
+            f'<tr><td>{name}</td><td>{a["market_tier"]}</td><td class="num">{rate}</td><td>{clause}</td>'
             f'<td class="num status-{status_cls}">{status}</td></tr>'
         )
     team_rows_html = "".join(team_rows)
 
     assignments_json = json.dumps([
-        {"team_id": a["team_id"], "team_name": a["team_name"], "market_tier": a["market_tier"], "base_revenue": a["base_revenue"]}
+        {"team_id": a["team_id"], "team_name": a["team_name"], "market_tier": a["market_tier"],
+         "base_revenue": a["base_revenue"], "base_clause": a["base_clause"]}
         for a in assignments
     ])
 
@@ -164,23 +171,27 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
     <div class="how-it-works">
       <p>Unlike Sponsorship, there's no brand catalog here &mdash; your Local TV Deal is tied to a market tier randomly
       assigned right after Draft Day (evenly split league-wide, drawn from the season seed). That tier sets your PUBLIC
-      base rate:</p>
-      <table><thead><tr><th>Market Tier</th><th class="num">Base Rate</th></tr></thead><tbody>{tier_rows_html}</tbody></table>
+      base rate AND your base clause:</p>
+      <table><thead><tr><th>Market Tier</th><th class="num">Base Rate</th><th>Base Clause</th></tr></thead><tbody>{tier_rows_html}</tbody></table>
       <p>Right after that assignment, you negotiate LIVE against a classmate playing the network rep (rotation:
-      <span class="mono">engine/generate_tv_negotiation_rotation.py</span>). Same revenue mechanic as Sponsorship &mdash;
-      the ONLY axis here, no clause:</p>
+      <span class="mono">engine/generate_tv_negotiation_rotation.py</span>). Exactly like Sponsorship, two separate
+      things are on the table:</p>
       <div class="asks-grid">
         <div class="ask-chip"><b>Revenue</b>Take the market-tier Base exactly (guaranteed), or Negotiate &mdash; lands
         anywhere from &minus;10% to +10% of base, set by your <b>Negotiating Leverage</b> (roster avg. Star Power + a
         standings bonus once the season starts). A weak hand can genuinely land below base.</div>
+        <div class="ask-chip"><b>Clause</b>A separate ask &mdash; push for a looser clause at Modest/Bold/Very Bold
+        intensity, gated by the same leverage. This one CAN walk away if you overreach; the revenue side never does.</div>
         <div class="ask-chip"><b>The commission</b>Land the rate away from base, in EITHER direction, and that gap is
         credited &mdash; immediately, not at the Round 3 split &mdash; as bonus revenue to whichever team played the
         network rep. Above base rewards the negotiating team's win; below base (a good deal for the network) rewards
         the rep instead. Landing exactly at base earns nobody a commission.</div>
       </div>
-      <p style="margin-top:12px;"><b>This negotiation sets the RATE only.</b> The money itself is still paid at the
+      <p style="margin-top:12px;"><b>This negotiation sets the RATE and the CLAUSE.</b> The money itself is still paid at the
       league's Round 3 TV Revenue Day, with the Star Power modifier (+15% if your starting XI is top-3 league-wide then)
-      still applied on top of whatever rate you locked in here.</p>
+      still applied on top of whatever rate you locked in here. The clause is checked once at season end, exactly like a
+      sponsorship clause &mdash; see "What the Clause Actually Means" on the Rulebook's TV / Broadcast Revenue section for
+      the same rank-threshold table Sponsorship uses.</p>
       <p style="margin-top:10px;"><b>The League-Wide (National) TV Deal is separate and fully automatic</b> &mdash; a
       shared formula-only split (base + standings/Star Power bonus) with no live negotiation, since there's no natural
       second party to negotiate a league-wide number against. See the Rulebook's TV / Broadcast Revenue section.</p>
@@ -190,10 +201,10 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
   <section>
     <div class="section-head">
       <h2>Team Status</h2>
-      <span class="section-note">live: rate + status update as negotiations resolve</span>
+      <span class="section-note">live: rate, clause, and status update as negotiations resolve</span>
     </div>
     <table>
-      <thead><tr><th>Team</th><th>Market Tier</th><th class="num">Rate</th><th class="num">Status</th></tr></thead>
+      <thead><tr><th>Team</th><th>Market Tier</th><th class="num">Rate</th><th>Clause</th><th class="num">Status</th></tr></thead>
       <tbody>{team_rows_html}</tbody>
     </table>
   </section>
@@ -201,7 +212,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
   <section>
     <p class="sub-backend-warning" hidden>Backend not configured yet &mdash; submissions are disabled until BACKEND_URL is set in assets/config.js.</p>
     <div class="sub-card">
-      <h2>Lock In Your Local TV Rate</h2>
+      <h2>Lock In Your Local TV Deal</h2>
       <p class="sub-sub">The real thing -- saved live. One-time only, right after Draft Day.</p>
       <div class="sub-grid">
         <div class="sub-field"><label for="tv-team">Team</label><select id="tv-team" class="sub-team-select"></select></div>
@@ -211,14 +222,19 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
       <div class="sub-grid">
         <div class="sub-field"><label for="tv-mode">Result</label>
           <select id="tv-mode">
-            <option value="base">Take Base rate exactly</option>
-            <option value="negotiate">Negotiated a different rate</option>
+            <option value="base">Take Base terms exactly</option>
+            <option value="negotiate">Negotiated different terms</option>
           </select>
         </div>
-        <div class="sub-field" id="tv-revenue-field" hidden><label for="tv-revenue">Final agreed rate ($/season)</label><input type="number" id="tv-revenue" placeholder="e.g. 1320000"></div>
-        <div class="sub-field" id="tv-rep-field" hidden><label for="tv-rep">Network rep (if rate differs from base, either direction)</label><select id="tv-rep" class="sub-team-select"></select></div>
       </div>
-      <button class="sub-btn" id="tv-submit">Submit Local TV Rate</button>
+      <div class="sub-grid" id="tv-negotiate-fields" hidden>
+        <div class="sub-field" id="tv-revenue-field"><label for="tv-revenue">Final agreed rate ($/season)</label><input type="number" id="tv-revenue" placeholder="e.g. 1320000"></div>
+        <div class="sub-field" id="tv-clause-field"><label for="tv-clause">Final agreed clause</label>
+          <select id="tv-clause"><option value="strict">Strict</option><option value="standard">Standard</option><option value="loose">Loose</option><option value="none">None</option></select>
+        </div>
+        <div class="sub-field" id="tv-rep-field"><label for="tv-rep">Network rep (if rate differs from base, either direction)</label><select id="tv-rep" class="sub-team-select"></select></div>
+      </div>
+      <button class="sub-btn" id="tv-submit">Submit Local TV Deal</button>
       <p class="sub-msg" id="tv-msg"></p>
     </div>
   </section>
@@ -245,13 +261,22 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
             <option value="negotiate">Negotiate (&minus;10% to +10%, by leverage)</option>
           </select>
         </div>
+        <div class="field">
+          <label for="sim-clause-ask">Clause</label>
+          <select id="sim-clause-ask">
+            <option value="none">Don't push it (keep base clause)</option>
+            <option value="modest">Ask Modest</option>
+            <option value="bold">Ask Bold</option>
+            <option value="very_bold">Ask Very Bold</option>
+          </select>
+        </div>
       </div>
       <div class="sim-readout">
         <div class="stat">Leverage<br><b id="sim-leverage">0</b></div>
         <div class="stat">Rate Adjustment<br><b id="sim-adjustment">&ndash;</b></div>
       </div>
       <button class="btn" id="sim-go">Make This Ask</button>
-      <div class="sim-result" id="sim-result">Pick a team and your ask, then hit the button.</div>
+      <div class="sim-result" id="sim-result">Pick a team and your asks, then hit the button.</div>
     </div>
   </section>
 </div>
@@ -264,10 +289,13 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
 // the backend; a same-name top-level const here would collide across the
 // two <script> tags and throw.
 const TV_SIM_TEAMS = {assignments_json};
+const REQUIRED_THRESHOLD = {{modest: 20, bold: 50, very_bold: 80}};
+const CLAUSE_UPSIDE = {{modest: 0.10, bold: 0.20, very_bold: 0.30}};
+const CLAUSE_LEVELS = ["strict", "standard", "loose", "none"];
 const REVENUE_RANGE = 0.10;
 
 const teamSel = document.getElementById('sim-team');
-teamSel.innerHTML = TV_SIM_TEAMS.map(t => `<option value="${{t.team_id}}">${{t.team_name}} &mdash; ${{t.market_tier}} ($${{t.base_revenue.toLocaleString()}})</option>`).join('');
+teamSel.innerHTML = TV_SIM_TEAMS.map(t => `<option value="${{t.team_id}}">${{t.team_name}} &mdash; ${{t.market_tier}} ($${{t.base_revenue.toLocaleString()}}, ${{t.base_clause}} clause)</option>`).join('');
 
 function computeLeverage(avgStar) {{
   return Math.max(0, Math.min(100, (avgStar - 50) * 2));
@@ -287,16 +315,18 @@ function updateReadout() {{
   }}
 }}
 
-document.querySelectorAll('#sim-star, #sim-revenue-ask, #sim-team').forEach(el => el.addEventListener('input', updateReadout));
+document.querySelectorAll('#sim-star, #sim-revenue-ask, #sim-clause-ask, #sim-team').forEach(el => el.addEventListener('input', updateReadout));
 updateReadout();
 
 document.getElementById('sim-go').addEventListener('click', () => {{
   const star = parseFloat(document.getElementById('sim-star').value);
   const leverage = computeLeverage(star);
   const revenueAsk = document.getElementById('sim-revenue-ask').value;
+  const clauseAsk = document.getElementById('sim-clause-ask').value;
   const team = TV_SIM_TEAMS.find(t => String(t.team_id) === teamSel.value);
   const resultEl = document.getElementById('sim-result');
 
+  // --- revenue axis ---
   let rate = team.base_revenue, commission = 0;
   if (revenueAsk === 'negotiate') {{
     const adj = -REVENUE_RANGE + (leverage / 100) * (2 * REVENUE_RANGE);
@@ -304,8 +334,35 @@ document.getElementById('sim-go').addEventListener('click', () => {{
     commission = Math.max(0, rate - team.base_revenue);
   }}
 
+  // --- clause axis (independent) ---
+  let clause = team.base_clause;
+  let clauseNote = '';
+  if (clauseAsk !== 'none') {{
+    const threshold = REQUIRED_THRESHOLD[clauseAsk];
+    const gap = leverage - threshold;
+    let outcome, fraction;
+    if (gap >= 15) {{ outcome = 'accepted'; fraction = 1.0; }}
+    else if (gap <= -15) {{ outcome = 'walk_away'; fraction = 0.0; }}
+    else {{
+      const acceptProb = 0.5 + gap / 30.0;
+      if (Math.random() < acceptProb) {{ outcome = 'accepted'; fraction = 1.0; }}
+      else {{ outcome = 'partial'; fraction = 0.5; }}
+    }}
+    if (outcome === 'walk_away') {{
+      clauseNote = ` Clause ask WALKED AWAY (leverage ${{leverage.toFixed(0)}} too far below the ${{threshold}} needed) -- clause stays ${{team.base_clause}}.`;
+    }} else {{
+      const upside = CLAUSE_UPSIDE[clauseAsk] * fraction;
+      if (upside > 0) {{
+        const idx = CLAUSE_LEVELS.indexOf(team.base_clause);
+        const steps = (clauseAsk === 'very_bold' && fraction === 1.0) ? 2 : 1;
+        clause = CLAUSE_LEVELS[Math.min(CLAUSE_LEVELS.length - 1, idx + steps)];
+        clauseNote = outcome === 'accepted' ? ' Clause ask ACCEPTED.' : ' Clause ask PARTIAL (met halfway).';
+      }}
+    }}
+  }}
+
   resultEl.className = 'sim-result ' + (revenueAsk === 'negotiate' && rate < team.base_revenue ? 'walk_away' : 'accepted');
-  let text = `Negotiated rate: $${{rate.toLocaleString()}}/season (base $${{team.base_revenue.toLocaleString()}}). Still paid at the Round 3 split, plus Star Power bonus if earned then.`;
+  let text = `Negotiated terms: rate $${{rate.toLocaleString()}}/season, clause ${{clause}}.${{clauseNote}} Still paid at the Round 3 split, plus Star Power bonus if earned then.`;
   if (commission > 0) {{
     text += ` A live network rep here would earn a $${{commission.toLocaleString()}} commission for their own team, credited now.`;
   }}
@@ -333,7 +390,7 @@ if __name__ == "__main__":
         print("ERROR: data/local_tv_deals.json not found -- run generate_local_tv_deals.py first.")
         raise SystemExit(1)
     ltv = load_json("local_tv_deals.json")
-    html = render(config, ltv, deals["tv_deal_formula"])
+    html = render(config, deals, ltv)
     out_dir = os.path.join(BASE, "tv-site")
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, "index.html")
