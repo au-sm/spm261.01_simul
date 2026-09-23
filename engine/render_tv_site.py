@@ -71,11 +71,13 @@ def render(config, deals, ltv):
         )
     team_rows_html = "".join(team_rows)
 
-    assignments_json = json.dumps([
-        {"team_id": a["team_id"], "team_name": a["team_name"], "market_tier": a["market_tier"],
-         "base_revenue": a["base_revenue"], "base_clause": a["base_clause"]}
-        for a in assignments
-    ])
+    # Practice simulator data: the 5 GENERIC tiers only, never a real team's
+    # assignment. Earlier drew from `assignments` (every real team + its real
+    # confidential base_revenue) -- a student could open this dropdown and
+    # read off any real team's actual price by name, the exact secret the
+    # rest of this page and the Rulebook now go out of their way to hide.
+    # Tier-level data has no team binding at all, so there's nothing to leak.
+    tiers_json = json.dumps(ltv["market_tiers"])
 
     return f'''<!doctype html>
 <html lang="en">
@@ -254,7 +256,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
     <div class="sim">
       <div class="sim-grid">
         <div class="field">
-          <label for="sim-team">Team (sets your market-tier base)</label>
+          <label for="sim-team">Market Tier (practice example, not tied to any real team)</label>
           <select id="sim-team"></select>
         </div>
         <div class="field">
@@ -291,18 +293,21 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
 <footer>{config["league_name"]} &middot; TV rights marketplace &mdash; math matches engine/negotiation.py and engine/resolve_local_tv_pick.py exactly</footer>
 
 <script>
-// TV_SIM_TEAMS, not TEAMS -- assets/submissions.js (loaded below, for the
+// TV_SIM_TIERS, not TEAMS -- assets/submissions.js (loaded below, for the
 // REAL Local TV Rate form) declares its own `let TEAMS` populated live from
 // the backend; a same-name top-level const here would collide across the
 // two <script> tags and throw.
-const TV_SIM_TEAMS = {assignments_json};
+//
+// Generic tiers only, deliberately never a real team's assignment -- see
+// the tiers_json comment in render_tv_site.py's render() for why.
+const TV_SIM_TIERS = {tiers_json};
 const REQUIRED_THRESHOLD = {{modest: 20, bold: 50, very_bold: 80}};
 const CLAUSE_UPSIDE = {{modest: 0.10, bold: 0.20, very_bold: 0.30}};
 const CLAUSE_LEVELS = ["strict", "standard", "loose", "none"];
 const REVENUE_RANGE = 0.10;
 
 const teamSel = document.getElementById('sim-team');
-teamSel.innerHTML = TV_SIM_TEAMS.map(t => `<option value="${{t.team_id}}">${{t.team_name}} &mdash; ${{t.market_tier}} ($${{t.base_revenue.toLocaleString()}}, ${{t.base_clause}} clause)</option>`).join('');
+teamSel.innerHTML = TV_SIM_TIERS.map(t => `<option value="${{t.tier}}">${{t.tier}} ($${{t.base_revenue.toLocaleString()}}, ${{t.base_clause}} clause)</option>`).join('');
 
 function computeLeverage(avgStar) {{
   return Math.max(0, Math.min(100, (avgStar - 50) * 2));
@@ -330,7 +335,7 @@ document.getElementById('sim-go').addEventListener('click', () => {{
   const leverage = computeLeverage(star);
   const revenueAsk = document.getElementById('sim-revenue-ask').value;
   const clauseAsk = document.getElementById('sim-clause-ask').value;
-  const team = TV_SIM_TEAMS.find(t => String(t.team_id) === teamSel.value);
+  const team = TV_SIM_TIERS.find(t => t.tier === teamSel.value);
   const resultEl = document.getElementById('sim-result');
 
   // --- revenue axis ---
