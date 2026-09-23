@@ -22,8 +22,7 @@ or under salary_cap. If a team's whole board is exhausted before their
 roster is full (bad luck -- too many of their targets were taken first),
 fall back to the highest-OVR still-available, affordable player in the
 whole pool -- same "league office auto-fills" philosophy already used
-for a missed Weekly Lineup submission (rulebook Section 4) and a missed
-Trade Day pairing. If even that has no affordable option (shouldn't
+for a missed Weekly Lineup submission and a missed Trade Day pairing. If even that has no affordable option (shouldn't
 happen -- the cheapest 18 players in the pool sum to well under the cap),
 fall back again to the single cheapest still-available player, so the
 draft always completes.

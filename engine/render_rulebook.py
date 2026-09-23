@@ -149,7 +149,7 @@ def render(config, deals, calendar=None):
             <tr><td>Standings Rank</td><td class="num">{WEIGHTS["ranking"]}</td><td>Did your team win?</td><td>1st = {WEIGHTS["ranking"]}, &minus;{RANK_STEP} pt per place down (last of {config["n_teams"]} = {last_ranking_pts})</td></tr>
             <tr><td>Playoff Qualification</td><td class="num">{WEIGHTS["playoffs"]}</td><td>Did you make the playoffs?</td><td>Flat: full {WEIGHTS["playoffs"]} pts for finishing in the top {config["playoff_teams"]}, 0 otherwise &mdash; not tiered, since finishing 1st vs. {config["playoff_teams"]}th is already rewarded by Ranking</td></tr>
             <tr><td>Business Revenue</td><td class="num">{WEIGHTS["revenue"]}</td><td>Did you run it as a business?</td><td>1st = {WEIGHTS["revenue"]}, &minus;{RANK_STEP} pt per place down (last of {config["n_teams"]} = {last_revenue_pts}) &mdash; ticket + sponsorship + national TV + local TV revenue</td></tr>
-            <tr><td>Decision Rationale</td><td class="num">{WEIGHTS["rationale"]}</td><td>Could you explain your calls?</td><td>Season-average rubric score (Section 2), as a % of {WEIGHTS["rationale"]}</td></tr>
+            <tr><td>Decision Rationale</td><td class="num">{WEIGHTS["rationale"]}</td><td>Could you explain your calls?</td><td>Average grade on the written explanation you submit with your Weekly Lineup, as a % of {WEIGHTS["rationale"]}</td></tr>
           </tbody></table>
           <p class="callout">A well-reasoned decision that loses to bad luck scores exactly as well, on Rationale, as one
           that wins. A last-place team still earns {last_ranking_pts} of {WEIGHTS["ranking"]} Ranking points and
@@ -246,13 +246,13 @@ def render(config, deals, calendar=None):
             your remaining cap space &mdash; instant, no live back-and-forth required.</li>
             <li><strong>If your whole board runs out</strong> before your roster is full (bad luck &mdash; too many targets taken
             ahead of you): autopick takes the highest-OVR player still available and affordable &mdash; same "league office
-            auto-fills" fallback used for a missed Weekly Lineup (Section 6) or a missed Trade Day pairing (Section 12).</li>
+            auto-fills" fallback used for a missed Weekly Lineup submission or a missed Trade Day pairing.</li>
           </ol>'''),
 
         ("weekly", "6. Weekly Operations", '''
           <p>Every round, before the deadline, each owner submits a Weekly Lineup &amp; Strategy form: formation, strategy,
-          starting XI by name, a ticket price if home that round, and a 2&ndash;4 sentence rationale (graded &mdash; Section 2).</p>
-          <p><strong>Check that round's Player Condition report first</strong> (Section 4) &mdash; it's published before the
+          starting XI by name, a ticket price if home that round, and a 2&ndash;4 sentence rationale (graded &mdash; see the grading table below).</p>
+          <p><strong>Check that round's Player Condition report first</strong> (see Player Ratings above) &mdash; it's published before the
           deadline specifically so your starting XI and formation choice can react to who's actually in form this week, not
           just who has the highest base rating.</p>
           <p><strong>If you do not submit:</strong> the league office auto-fills your highest-rated available player at each
@@ -277,7 +277,7 @@ def render(config, deals, calendar=None):
           <p>Results are not a coin flip, and not roster OVR alone &mdash; every result traces to the lineup, formation, and
           strategy you actually submitted:</p>
           <ol>
-            <li>Each starter's ATT/DEF is first scaled by their Weekly Player Condition for this round (Section 4), then
+            <li>Each starter's ATT/DEF is first scaled by their Weekly Player Condition for this round (see Player Ratings above), then
             your starting XI's (condition-adjusted) ATT/DEF become one Team Attack and one Team Defense score, weighted by
             formation.</li>
             <li>Your Strategy choice shifts that balance further.</li>

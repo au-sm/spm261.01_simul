@@ -8,7 +8,7 @@ Reads data/local_tv_deals.json (market tier + base rate + negotiated
 rate once resolved) and data/league_config.json (team names/owners) --
 always current, never hand-typed. Simulator math mirrors
 engine/negotiation.py's revenue axis exactly (no clause here -- Local
-TV deals don't have one, see rulebook Section 9).
+TV deals don't have one, see the Rulebook's TV / Broadcast Revenue section).
 
 Run after every resolve_local_tv_pick.py call, then republish.
 """
@@ -183,7 +183,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
       still applied on top of whatever rate you locked in here.</p>
       <p style="margin-top:10px;"><b>The League-Wide (National) TV Deal is separate and fully automatic</b> &mdash; a
       shared formula-only split (base + standings/Star Power bonus) with no live negotiation, since there's no natural
-      second party to negotiate a league-wide number against. See the Rulebook, Section 9.</p>
+      second party to negotiate a league-wide number against. See the Rulebook's TV / Broadcast Revenue section.</p>
     </div>
   </section>
 
