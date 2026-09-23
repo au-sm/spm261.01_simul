@@ -97,13 +97,45 @@ footer{max-width:1100px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
   </div>
 </div>
 <div class="layout">
-  <nav><a href="#overview">Overview</a><a href="#structure">1. League Structure</a><a href="#ratings">2. Player Ratings</a><a href="#draft">3. The Draft</a><a href="#weekly">4. Weekly Operations</a><a href="#formations">5. Formations & Strategy</a><a href="#engine">6. How Match Results Are Determined</a><a href="#tickets">7. Ticket Sales & Attendance</a><a href="#sponsorship">8. Sponsorship Deals & Negotiation</a><a href="#tv">9. TV / Broadcast Revenue</a><a href="#trades">10. Trades & Free Agency</a><a href="#standings">11. Standings</a><a href="#playoffs">12. Playoff Qualification</a><a href="#scorecard">13. The Season Scorecard &mdash; Your Grade</a><a href="#rubric">14. Decision Rationale Rubric</a><a href="#glossary">15. Glossary</a><a href="#calendar">16. Season Calendar</a></nav>
+  <nav><a href="#overview">Overview</a><a href="#scorecard">1. The Season Scorecard &mdash; Your Grade</a><a href="#rubric">2. Decision Rationale Rubric</a><a href="#structure">3. League Structure</a><a href="#ratings">4. Player Ratings</a><a href="#draft">5. The Draft</a><a href="#weekly">6. Weekly Operations</a><a href="#formations">7. Formations & Strategy</a><a href="#engine">8. How Match Results Are Determined</a><a href="#tickets">9. Ticket Sales & Attendance</a><a href="#sponsorship">10. Sponsorship Deals & Negotiation</a><a href="#tv">11. TV / Broadcast Revenue</a><a href="#trades">12. Trades & Free Agency</a><a href="#standings">13. Standings</a><a href="#playoffs">14. Playoff Qualification</a><a href="#glossary">15. Glossary</a><a href="#calendar">16. Season Calendar</a></nav>
   <main><section id="overview"><h2>Overview</h2>
           <p>You are not a player &mdash; you are the <strong>owner and general manager</strong> of a professional soccer club.
           Every decision a real front office makes &mdash; who to draft, how to line up, what to charge for tickets, which sponsor
           to sign, which trades to make, and how far you push for a championship &mdash; is yours to make, in writing, every round.
           Your grade is not just whether you win. It is whether you can run a sports business and explain why you made the calls
-          you made.</p></section><section id="structure"><h2>1. League Structure</h2>
+          you made.</p></section><section id="scorecard"><h2>1. The Season Scorecard &mdash; Your Grade</h2>
+          <p>The exam-replacement grade: 100 points across four components. <strong>Ranking and Revenue are scored
+          relative to the rest of the league</strong> &mdash; 1st place earns full points, and every place below the one
+          above it costs a flat 1 point, not a fraction of the whole component spread evenly down to zero.
+          Finishing last still costs you real points relative to your classmates, but it does not wipe out the entire
+          component the way an even 1st-to-0 spread would.</p>
+          <table><thead><tr><th>Component</th><th class="num">Points</th><th>Question it answers</th><th>How it's scored</th></tr></thead><tbody>
+            <tr><td>Standings Rank</td><td class="num">40</td><td>Did your team win?</td><td>1st = 40, &minus;1 pt per place down (last of 18 = 23)</td></tr>
+            <tr><td>Playoff Qualification</td><td class="num">5</td><td>Did you make the playoffs?</td><td>Flat: full 5 pts for finishing in the top 6, 0 otherwise &mdash; not tiered, since finishing 1st vs. 6th is already rewarded by Ranking</td></tr>
+            <tr><td>Business Revenue</td><td class="num">35</td><td>Did you run it as a business?</td><td>1st = 35, &minus;1 pt per place down (last of 18 = 18) &mdash; ticket + sponsorship + national TV + local TV revenue</td></tr>
+            <tr><td>Decision Rationale</td><td class="num">20</td><td>Could you explain your calls?</td><td>Season-average rubric score (Section 2), as a % of 20</td></tr>
+          </tbody></table>
+          <p class="callout">A well-reasoned decision that loses to bad luck scores exactly as well, on Rationale, as one
+          that wins. A last-place team still earns 23 of 40 Ranking points and
+          18 of 35 Revenue points just for being in the league, and a last-place team
+          that runs a genuinely profitable franchise can still score well on Revenue. There is more than one way to earn
+          a strong grade here.</p>
+          <h3>Worked Example</h3>
+          <p>A team that wins the league (40/40 &mdash; full ranking points), qualifies for the playoffs by finishing top
+          6 (5/5), finishes 3rd in league revenue out of 18 teams (33 pts), and
+          averages a strong rationale score (17.5 of 20) lands at
+          <strong>40 + 5 + 33 + 17.5 = 95.5</strong> out of 100.</p></section><section id="rubric"><h2>2. Decision Rationale Rubric</h2>
+          <p>Every round, your written rationale is scored against 4 criteria, 4 points each (16 possible; Business/Financial
+          Reasoning is excluded on a plain lineup round with no trade/sponsorship attached, graded out of 12 instead). Your
+          season average, as a percentage, becomes the 20-point Rationale component above.</p>
+          <table><thead><tr><th>Criterion</th><th>1 &mdash; Minimal</th><th>2 &mdash; Developing</th><th>3 &mdash; Proficient</th><th>4 &mdash; Exemplary</th></tr></thead>
+          <tbody>
+            <tr><td>Strategic Fit</td><td>Unexplained or contradicts your own analysis</td><td>Stated but the link to the opponent/roster is vague</td><td>Clearly justified by a specific comparison</td><td>Reflects a specific tactical read and anticipates a counter-response</td></tr>
+            <tr><td>Use of Data</td><td>No reference to ratings/stats/standings</td><td>Mentions a stat without connecting it to the decision</td><td>Cites specific ratings or standings/financial data</td><td>Integrates multiple data points into one argument</td></tr>
+            <tr><td>Business/Financial Reasoning</td><td>No cap/budget/revenue consideration</td><td>Acknowledges a cost without weighing it</td><td>Weighs cost against benefit explicitly</td><td>Frames it as a tradeoff among goals and states the priority</td></tr>
+            <tr><td>Adaptability</td><td>No reference to prior results</td><td>Mentions a past result without changing the call</td><td>Explicitly adjusts based on a prior outcome</td><td>Names the signal, the lesson, and the causal link to this round</td></tr>
+          </tbody></table>
+          <p>Full descriptors: <span class="mono">rubric/Decision_Rationale_Rubric.docx</span>.</p></section><section id="structure"><h2>3. League Structure</h2>
           <table><thead><tr><th>Setting</th><th>Value</th></tr></thead><tbody>
             <tr><td>Teams</td><td>18 (one per student &mdash; solo ownership, no co-owners)</td></tr>
             <tr><td>Roster size</td><td>18 players per team</td></tr>
@@ -112,7 +144,7 @@ footer{max-width:1100px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
             <tr><td>Sponsorship</td><td>6 categories, one brand each, mandatory &mdash; sponsors pay you</td></tr>
             <tr><td>Regular season</td><td>Round-robin &mdash; every team plays every other team once</td></tr>
             <tr><td>Playoffs</td><td>Top 6 teams by regular-season standings</td></tr>
-          </tbody></table></section><section id="ratings"><h2>2. Player Ratings</h2>
+          </tbody></table></section><section id="ratings"><h2>4. Player Ratings</h2>
           <p>Every player carries six ratings, 0&ndash;99 (the same convention as most sports video games):</p>
           <table><thead><tr><th>Rating</th><th>What it measures</th></tr></thead><tbody>
             <tr><td class="mono">ATT</td><td>Attack &mdash; finishing and creativity, the biggest input to scoring chances</td></tr>
@@ -149,7 +181,7 @@ footer{max-width:1100px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
           rounds they're still out for &mdash; visible on the dashboard and in the weekly report exactly like ordinary form,
           before you submit. An already-injured player who gets started anyway just keeps counting down; they cannot get
           newly hurt on top of an existing injury. Bench them, or play them at a real, known cost &mdash; that decision, and
-          being able to see it coming, is the point.</p></section><section id="draft"><h2>3. The Draft</h2>
+          being able to see it coming, is the point.</p></section><section id="draft"><h2>5. The Draft</h2>
           <p>Before the season begins, every owner drafts a full roster from the shared player pool. Two hard rules apply:</p>
           <ul>
             <li>Roster size is fixed at 18 players, filling every slot your formation choices require.</li>
@@ -170,16 +202,16 @@ footer{max-width:1100px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
             your remaining cap space &mdash; instant, no live back-and-forth required.</li>
             <li><strong>If your whole board runs out</strong> before your roster is full (bad luck &mdash; too many targets taken
             ahead of you): autopick takes the highest-OVR player still available and affordable &mdash; same "league office
-            auto-fills" fallback used for a missed Weekly Lineup (Section 4) or a missed Trade Day pairing (Section 10).</li>
-          </ol></section><section id="weekly"><h2>4. Weekly Operations</h2>
+            auto-fills" fallback used for a missed Weekly Lineup (Section 6) or a missed Trade Day pairing (Section 12).</li>
+          </ol></section><section id="weekly"><h2>6. Weekly Operations</h2>
           <p>Every round, before the deadline, each owner submits a Weekly Lineup &amp; Strategy form: formation, strategy,
-          starting XI by name, a ticket price if home that round, and a 2&ndash;4 sentence rationale (graded &mdash; Section 14).</p>
-          <p><strong>Check that round's Player Condition report first</strong> (Section 2) &mdash; it's published before the
+          starting XI by name, a ticket price if home that round, and a 2&ndash;4 sentence rationale (graded &mdash; Section 2).</p>
+          <p><strong>Check that round's Player Condition report first</strong> (Section 4) &mdash; it's published before the
           deadline specifically so your starting XI and formation choice can react to who's actually in form this week, not
           just who has the highest base rating.</p>
           <p><strong>If you do not submit:</strong> the league office auto-fills your highest-rated available player at each
           position, Balanced strategy, Standard pricing. Your match is still played and still counts &mdash; you simply
-          forfeit rationale credit, since there is no decision to grade.</p></section><section id="formations"><h2>5. Formations &amp; Strategy</h2>
+          forfeit rationale credit, since there is no decision to grade.</p></section><section id="formations"><h2>7. Formations &amp; Strategy</h2>
           <table><thead><tr><th>Formation</th><th class="num">GK</th><th class="num">DF</th><th class="num">MF</th><th class="num">FW</th></tr></thead><tbody>
             <tr><td class="mono">4-4-2</td><td class="num">1</td><td class="num">4</td><td class="num">4</td><td class="num">2</td></tr>
             <tr><td class="mono">4-3-3</td><td class="num">1</td><td class="num">4</td><td class="num">3</td><td class="num">3</td></tr>
@@ -191,11 +223,11 @@ footer{max-width:1100px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
             <tr><td>Attacking</td><td class="mono">ATT &times;1.08 / DEF &times;0.92</td></tr>
             <tr><td>Balanced</td><td class="mono">no change</td></tr>
             <tr><td>Defensive</td><td class="mono">ATT &times;0.92 / DEF &times;1.08</td></tr>
-          </tbody></table></section><section id="engine"><h2>6. How Match Results Are Determined</h2>
+          </tbody></table></section><section id="engine"><h2>8. How Match Results Are Determined</h2>
           <p>Results are not a coin flip, and not roster OVR alone &mdash; every result traces to the lineup, formation, and
           strategy you actually submitted:</p>
           <ol>
-            <li>Each starter's ATT/DEF is first scaled by their Weekly Player Condition for this round (Section 2), then
+            <li>Each starter's ATT/DEF is first scaled by their Weekly Player Condition for this round (Section 4), then
             your starting XI's (condition-adjusted) ATT/DEF become one Team Attack and one Team Defense score, weighted by
             formation.</li>
             <li>Your Strategy choice shifts that balance further.</li>
@@ -206,7 +238,7 @@ footer{max-width:1100px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
             A stronger team is more likely to win, never guaranteed to.</li>
           </ol>
           <p>Every match's random draw is seeded from the season's fixed seed plus that exact matchup &mdash; any result can
-          be independently re-verified after the fact, and nothing is adjustable after the fact by the league office.</p></section><section id="tickets"><h2>7. Ticket Sales &amp; Attendance</h2>
+          be independently re-verified after the fact, and nothing is adjustable after the fact by the league office.</p></section><section id="tickets"><h2>9. Ticket Sales &amp; Attendance</h2>
           <p>As the home team, you set a ticket price tier. Attendance responds to price AND to your recent form and
           starting-XI Star Power:</p>
           <table><thead><tr><th>Tier</th><th>Price</th><th>Effect</th></tr></thead><tbody>
@@ -215,7 +247,7 @@ footer{max-width:1100px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
             <tr><td>Premium</td><td class="num mono">$50</td><td>Highest per-ticket revenue, but demand drops sharply without form/Star Power to justify it</td></tr>
           </tbody></table>
           <p>There is no universally correct price &mdash; a struggling, low-Star-Power team pricing Premium will earn LESS
-          than pricing Standard or Budget. Read your own team's market every home match.</p></section><section id="sponsorship"><h2>8. Sponsorship Deals &amp; Negotiation</h2>
+          than pricing Standard or Budget. Read your own team's market every home match.</p></section><section id="sponsorship"><h2>10. Sponsorship Deals &amp; Negotiation</h2>
       <p><strong>Sponsors pay you</strong> &mdash; there is no cost to sign anything, matching how real sponsorship deals
       work. Brands are grouped into 6 categories (real clubs carry exactly one jersey sponsor, one kit
       manufacturer, one official airline &mdash; not an unlimited pile of deals), and every team MUST sign
@@ -276,7 +308,7 @@ footer{max-width:1100px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
       real bet that you'll actually contend; a loose clause is the safer, lower-upside insurance policy. Checked exactly
       once, at season end -- never applied twice to the same deal.</p>
       <p>Full live marketplace (open slots, who's signed what) and a negotiation simulator to rehearse your ask before
-      your draft turn: see the separate Sponsorship Marketplace site.</p></section><section id="tv"><h2>9. TV / Broadcast Revenue</h2>
+      your draft turn: see the separate Sponsorship Marketplace site.</p></section><section id="tv"><h2>11. TV / Broadcast Revenue</h2>
           <h3>League-Wide (National) TV Deal</h3>
           <p><strong>Base:</strong> $800,000 per team.</p>
           <p><strong>Standings bonus:</strong> Top team at split time: +1,000,000. 2nd: +600,000. 3rd: +300,000. Bottom 3 teams: +0 (no penalty beyond missing the bonus).</p>
@@ -289,47 +321,19 @@ footer{max-width:1100px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
           <p><strong>Payout timing:</strong> Paid out at the same midseason split point as the national TV deal (after Round 3 of the 17-round regular season) -- one TV Revenue Day covers both national and local money at once.</p>
           <p>Local TV revenue flows into the team's budget like any other revenue; it never raises the salary cap itself.</p>
           <h3>Local TV Rights Negotiation</h3>
-          <p>Right after Draft Day, every team negotiates its Local TV Deal rate live, in class, against a rotating peer playing the network rep (engine/generate_tv_negotiation_rotation.py pairs everyone once, no repeat partners; an odd team count leaves one bye, filled by the instructor). Same revenue mechanic as Sponsorship (engine/negotiation.py): take the market-tier Base rate exactly (guaranteed, zero risk), or Negotiate to land anywhere from -10% to +10% of it, set by your Negotiating Leverage (built from your roster average Star Power, plus a standings bonus once the season starts). The commission: whenever a negotiated rate lands away from base -- in EITHER direction -- that gap is ALSO credited immediately (not at the Round 3 split) as bonus revenue to whichever team played the network rep. Above base rewards the negotiating team's win; below base (a good deal for the network) rewards the rep instead, same size commission, mirrored direction -- same either-direction logic as a sponsorship commission. Landing exactly at base earns nobody a commission. This negotiation sets the RATE only; the money itself is still paid at the Round 3 split above, with the Star Power modifier still applied on top then. The League-Wide (National) TV Deal is not part of this exercise -- it is a shared, formula-only split with no natural second party to negotiate against.</p></section><section id="trades"><h2>10. Trades &amp; Free Agency</h2>
+          <p>Right after Draft Day, every team negotiates its Local TV Deal rate live, in class, against a rotating peer playing the network rep (engine/generate_tv_negotiation_rotation.py pairs everyone once, no repeat partners; an odd team count leaves one bye, filled by the instructor). Same revenue mechanic as Sponsorship (engine/negotiation.py): take the market-tier Base rate exactly (guaranteed, zero risk), or Negotiate to land anywhere from -10% to +10% of it, set by your Negotiating Leverage (built from your roster average Star Power, plus a standings bonus once the season starts). The commission: whenever a negotiated rate lands away from base -- in EITHER direction -- that gap is ALSO credited immediately (not at the Round 3 split) as bonus revenue to whichever team played the network rep. Above base rewards the negotiating team's win; below base (a good deal for the network) rewards the rep instead, same size commission, mirrored direction -- same either-direction logic as a sponsorship commission. Landing exactly at base earns nobody a commission. This negotiation sets the RATE only; the money itself is still paid at the Round 3 split above, with the Star Power modifier still applied on top then. The League-Wide (National) TV Deal is not part of this exercise -- it is a shared, formula-only split with no natural second party to negotiate against.</p></section><section id="trades"><h2>12. Trades &amp; Free Agency</h2>
           <p><strong>Deadline:</strong> Trades may be proposed through Round 6 of the 17-round regular season. No trades are permitted in Rounds 7-17 or at any point after -- this prevents last-minute roster stacking right before the playoff-qualification picture is set, the same reason real leagues carry a trade deadline.</p>
           <p><strong>Salary cap rule:</strong> A trade is only valid if BOTH teams remain at or under salary_cap (see league_config.json) after the trade completes.</p>
           <p><strong>Cash considerations:</strong> Teams may include cash (from their budget, not a salary-cap item) as part of a trade package.</p>
           <p><strong>Approval:</strong> All trades are submitted via the Trade Proposal form and require instructor (league office) approval before taking effect -- this is the checkpoint for grading trade rationale and for vetoing collusive or lopsided trades.</p>
           <h3>Mandatory Mid-Season Trade Day</h3>
-          <p>One mandatory in-class Trade Day, held mid-season (right after the Round 3 TV-revenue split, well ahead of the Round 6 deadline). Every team is paired with exactly one partner from a published rotation (engine/generate_trade_day_rotation.py, same no-repeat pairing method as the Sponsorship Negotiation rotation) and must negotiate and submit ONE completed Trade Proposal by end of class -- real assets, or a good-faith minor swap if the two sides can't agree on more, since grading is on the negotiation and rationale, not on landing a 'good' trade. An odd team count leaves one team unpaired; the instructor fills in as that team's trade partner, the same convention already used for the Sponsorship Negotiation rotation's bye. This is a floor, not a cap: the ordinary voluntary trade window stays open before and after Trade Day, through Round 6.</p></section><section id="standings"><h2>11. Standings</h2>
-          <p>Win = 3 points, draw = 1 point, loss = 0 points. Ties broken first by goal difference, then total goals scored.</p></section><section id="playoffs"><h2>12. Playoff Qualification</h2>
+          <p>One mandatory in-class Trade Day, held mid-season (right after the Round 3 TV-revenue split, well ahead of the Round 6 deadline). Every team is paired with exactly one partner from a published rotation (engine/generate_trade_day_rotation.py, same no-repeat pairing method as the Sponsorship Negotiation rotation) and must negotiate and submit ONE completed Trade Proposal by end of class -- real assets, or a good-faith minor swap if the two sides can't agree on more, since grading is on the negotiation and rationale, not on landing a 'good' trade. An odd team count leaves one team unpaired; the instructor fills in as that team's trade partner, the same convention already used for the Sponsorship Negotiation rotation's bye. This is a floor, not a cap: the ordinary voluntary trade window stays open before and after Trade Day, through Round 6.</p></section><section id="standings"><h2>13. Standings</h2>
+          <p>Win = 3 points, draw = 1 point, loss = 0 points. Ties broken first by goal difference, then total goals scored.</p></section><section id="playoffs"><h2>14. Playoff Qualification</h2>
           <p>No bracket games are played. The top finishers in the final regular-season standings (see the qualification line marked on the dashboard, and the bonus table below) are recognized as Playoff Qualifiers -- a season-ending designation, not a separate elimination tournament.</p>
           <table><thead><tr><th>Stage</th><th class="num">Bonus</th></tr></thead><tbody>
             <tr><td>Finish in the top 6 of the final standings</td><td class="num">$400,000</td></tr>
           </tbody></table>
-          <p>Paid once, at season's end, to every team that finishes inside the qualification line -- not stacked or tiered by seed. 1st place and 6th place both earn this bonus equally; regular-season standings already reward finishing 1st over 6th through the Ranking component of the Season Scorecard.</p></section><section id="scorecard"><h2>13. The Season Scorecard &mdash; Your Grade</h2>
-          <p>The exam-replacement grade: 100 points across four components. <strong>Ranking and Revenue are scored
-          relative to the rest of the league</strong> &mdash; 1st place earns full points, last earns zero, spaced evenly
-          between &mdash; so the standard self-calibrates to however the season actually plays out.</p>
-          <table><thead><tr><th>Component</th><th class="num">Points</th><th>Question it answers</th><th>How it's scored</th></tr></thead><tbody>
-            <tr><td>Standings Rank</td><td class="num">40</td><td>Did your team win?</td><td>Linear by finish: 1st = 40, last = 0</td></tr>
-            <tr><td>Playoff Qualification</td><td class="num">5</td><td>Did you make the playoffs?</td><td>Flat: full 5 pts for finishing in the top 6, 0 otherwise &mdash; not tiered, since finishing 1st vs. 6th is already rewarded by Ranking</td></tr>
-            <tr><td>Business Revenue</td><td class="num">35</td><td>Did you run it as a business?</td><td>Ticket + sponsorship + national TV + local TV revenue, ranked against the league</td></tr>
-            <tr><td>Decision Rationale</td><td class="num">20</td><td>Could you explain your calls?</td><td>Season-average rubric score (Section 14), as a % of 20</td></tr>
-          </tbody></table>
-          <p class="callout">A well-reasoned decision that loses to bad luck scores exactly as well, on Rationale, as one
-          that wins. A last-place team that runs a genuinely profitable franchise can still score well on Revenue. There
-          is more than one way to earn a strong grade here.</p>
-          <h3>Worked Example</h3>
-          <p>A team that wins the league (40/40 &mdash; full ranking points), qualifies for the playoffs by finishing top
-          6 (5/5), finishes 3rd in league revenue out of 18 teams (30.88 pts), and
-          averages a strong rationale score (17.5 of 20) lands at
-          <strong>40 + 5 + 30.88 + 17.5 = 93.38</strong> out of 100.</p></section><section id="rubric"><h2>14. Decision Rationale Rubric</h2>
-          <p>Every round, your written rationale is scored against 4 criteria, 4 points each (16 possible; Business/Financial
-          Reasoning is excluded on a plain lineup round with no trade/sponsorship attached, graded out of 12 instead). Your
-          season average, as a percentage, becomes the 20-point Rationale component above.</p>
-          <table><thead><tr><th>Criterion</th><th>1 &mdash; Minimal</th><th>2 &mdash; Developing</th><th>3 &mdash; Proficient</th><th>4 &mdash; Exemplary</th></tr></thead>
-          <tbody>
-            <tr><td>Strategic Fit</td><td>Unexplained or contradicts your own analysis</td><td>Stated but the link to the opponent/roster is vague</td><td>Clearly justified by a specific comparison</td><td>Reflects a specific tactical read and anticipates a counter-response</td></tr>
-            <tr><td>Use of Data</td><td>No reference to ratings/stats/standings</td><td>Mentions a stat without connecting it to the decision</td><td>Cites specific ratings or standings/financial data</td><td>Integrates multiple data points into one argument</td></tr>
-            <tr><td>Business/Financial Reasoning</td><td>No cap/budget/revenue consideration</td><td>Acknowledges a cost without weighing it</td><td>Weighs cost against benefit explicitly</td><td>Frames it as a tradeoff among goals and states the priority</td></tr>
-            <tr><td>Adaptability</td><td>No reference to prior results</td><td>Mentions a past result without changing the call</td><td>Explicitly adjusts based on a prior outcome</td><td>Names the signal, the lesson, and the causal link to this round</td></tr>
-          </tbody></table>
-          <p>Full descriptors: <span class="mono">rubric/Decision_Rationale_Rubric.docx</span>.</p></section><section id="glossary"><h2>15. Glossary</h2>
+          <p>Paid once, at season's end, to every team that finishes inside the qualification line -- not stacked or tiered by seed. 1st place and 6th place both earn this bonus equally; regular-season standings already reward finishing 1st over 6th through the Ranking component of the Season Scorecard.</p></section><section id="glossary"><h2>15. Glossary</h2>
           <table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody>
             <tr><td class="mono">OVR</td><td>Overall rating &mdash; a quick-reference blend of ATT/DEF/PAC/PHY</td></tr>
             <tr><td class="mono">ATT / DEF / PAC / PHY</td><td>Attack / Defense / Pace / Physical &mdash; the four core skill ratings</td></tr>

@@ -61,16 +61,18 @@ def load_rationale_scores():
     return by_team
 
 
+RANK_STEP = 1  # points lost per rank below 1st -- see linear_rank_points()
+
+
 def linear_rank_points(ranked_team_ids, max_points):
     """ranked_team_ids: best-first list of team_ids (ties broken by caller).
-    1st place gets max_points, last place gets 0, evenly spaced between."""
-    n = len(ranked_team_ids)
-    if n <= 1:
-        return {tid: max_points for tid in ranked_team_ids}
-    return {
-        tid: round(max_points * (n - 1 - i) / (n - 1), 2)
-        for i, tid in enumerate(ranked_team_ids)
-    }
+    1st place gets max_points; every place below the one above it costs
+    exactly RANK_STEP point, not a fraction of max_points spread evenly
+    across the whole field. Deliberately does NOT force last place down to
+    zero -- last place still loses relative to everyone else (that's the
+    point of ranking it at all), but isn't wiped out for simply finishing
+    18th out of 18 in one component of a four-part grade."""
+    return {tid: max_points - RANK_STEP * i for i, tid in enumerate(ranked_team_ids)}
 
 
 def compute_scorecards():

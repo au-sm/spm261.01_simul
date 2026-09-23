@@ -16,7 +16,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from scorecard import WEIGHTS, linear_rank_points
+from scorecard import WEIGHTS, RANK_STEP, linear_rank_points
 from player_condition import (
     TIERS as CONDITION_TIERS, INJURED_MULTIPLIER, INJURY_CHANCE_PER_START, INJURY_DURATION_RANGE,
 )
@@ -114,20 +114,22 @@ def render(config, deals, calendar=None):
           <p><strong>Season ends:</strong> {calendar["season_end"]} (Round {total_rounds} of {total_rounds})</p>
           <table><thead><tr><th>Date</th><th class="num">Round(s)</th></tr></thead><tbody>{cal_rows}</tbody></table>'''
 
-    # Section 2's condition-tier table, pulled from player_condition.py's
+    # Section 4's condition-tier table, pulled from player_condition.py's
     # TIERS so it can't drift from what the engine actually uses.
     condition_tier_rows = "".join(
         f'<tr><td>{label}</td><td class="num">{mult:.2f}x</td><td class="num">{weight}%</td></tr>'
         for label, mult, weight in CONDITION_TIERS
     )
 
-    # Worked example for Section 13 -- recomputed from the live WEIGHTS/n_teams
+    # Worked example for Section 1 -- recomputed from the live WEIGHTS/n_teams
     # so this can never drift the way the old hardcoded "30 + 25 + 22.4 + 17.5"
     # text did when the weights or team count changed.
     dummy_ranked = list(range(config["n_teams"]))
     worked_revenue_pts = linear_rank_points(dummy_ranked, WEIGHTS["revenue"])[dummy_ranked[2]]  # 3rd place
     worked_rationale_pts = round(0.875 * WEIGHTS["rationale"], 2)  # illustrative strong-but-not-perfect score
     worked_total = round(WEIGHTS["ranking"] + WEIGHTS["playoffs"] + worked_revenue_pts + worked_rationale_pts, 2)
+    last_ranking_pts = linear_rank_points(dummy_ranked, WEIGHTS["ranking"])[dummy_ranked[-1]]
+    last_revenue_pts = linear_rank_points(dummy_ranked, WEIGHTS["revenue"])[dummy_ranked[-1]]
 
     sections = [
         ("overview", "Overview", f'''
@@ -137,7 +139,43 @@ def render(config, deals, calendar=None):
           Your grade is not just whether you win. It is whether you can run a sports business and explain why you made the calls
           you made.</p>'''),
 
-        ("structure", "1. League Structure", f'''
+        ("scorecard", "1. The Season Scorecard &mdash; Your Grade", f'''
+          <p>The exam-replacement grade: 100 points across four components. <strong>Ranking and Revenue are scored
+          relative to the rest of the league</strong> &mdash; 1st place earns full points, and every place below the one
+          above it costs a flat {RANK_STEP} point, not a fraction of the whole component spread evenly down to zero.
+          Finishing last still costs you real points relative to your classmates, but it does not wipe out the entire
+          component the way an even 1st-to-0 spread would.</p>
+          <table><thead><tr><th>Component</th><th class="num">Points</th><th>Question it answers</th><th>How it's scored</th></tr></thead><tbody>
+            <tr><td>Standings Rank</td><td class="num">{WEIGHTS["ranking"]}</td><td>Did your team win?</td><td>1st = {WEIGHTS["ranking"]}, &minus;{RANK_STEP} pt per place down (last of {config["n_teams"]} = {last_ranking_pts})</td></tr>
+            <tr><td>Playoff Qualification</td><td class="num">{WEIGHTS["playoffs"]}</td><td>Did you make the playoffs?</td><td>Flat: full {WEIGHTS["playoffs"]} pts for finishing in the top {config["playoff_teams"]}, 0 otherwise &mdash; not tiered, since finishing 1st vs. {config["playoff_teams"]}th is already rewarded by Ranking</td></tr>
+            <tr><td>Business Revenue</td><td class="num">{WEIGHTS["revenue"]}</td><td>Did you run it as a business?</td><td>1st = {WEIGHTS["revenue"]}, &minus;{RANK_STEP} pt per place down (last of {config["n_teams"]} = {last_revenue_pts}) &mdash; ticket + sponsorship + national TV + local TV revenue</td></tr>
+            <tr><td>Decision Rationale</td><td class="num">{WEIGHTS["rationale"]}</td><td>Could you explain your calls?</td><td>Season-average rubric score (Section 2), as a % of {WEIGHTS["rationale"]}</td></tr>
+          </tbody></table>
+          <p class="callout">A well-reasoned decision that loses to bad luck scores exactly as well, on Rationale, as one
+          that wins. A last-place team still earns {last_ranking_pts} of {WEIGHTS["ranking"]} Ranking points and
+          {last_revenue_pts} of {WEIGHTS["revenue"]} Revenue points just for being in the league, and a last-place team
+          that runs a genuinely profitable franchise can still score well on Revenue. There is more than one way to earn
+          a strong grade here.</p>
+          <h3>Worked Example</h3>
+          <p>A team that wins the league ({WEIGHTS["ranking"]}/{WEIGHTS["ranking"]} &mdash; full ranking points), qualifies for the playoffs by finishing top
+          {config["playoff_teams"]} ({WEIGHTS["playoffs"]}/{WEIGHTS["playoffs"]}), finishes 3rd in league revenue out of {config["n_teams"]} teams ({worked_revenue_pts} pts), and
+          averages a strong rationale score ({worked_rationale_pts} of {WEIGHTS["rationale"]}) lands at
+          <strong>{WEIGHTS["ranking"]} + {WEIGHTS["playoffs"]} + {worked_revenue_pts} + {worked_rationale_pts} = {worked_total}</strong> out of 100.</p>'''),
+
+        ("rubric", "2. Decision Rationale Rubric", '''
+          <p>Every round, your written rationale is scored against 4 criteria, 4 points each (16 possible; Business/Financial
+          Reasoning is excluded on a plain lineup round with no trade/sponsorship attached, graded out of 12 instead). Your
+          season average, as a percentage, becomes the 20-point Rationale component above.</p>
+          <table><thead><tr><th>Criterion</th><th>1 &mdash; Minimal</th><th>2 &mdash; Developing</th><th>3 &mdash; Proficient</th><th>4 &mdash; Exemplary</th></tr></thead>
+          <tbody>
+            <tr><td>Strategic Fit</td><td>Unexplained or contradicts your own analysis</td><td>Stated but the link to the opponent/roster is vague</td><td>Clearly justified by a specific comparison</td><td>Reflects a specific tactical read and anticipates a counter-response</td></tr>
+            <tr><td>Use of Data</td><td>No reference to ratings/stats/standings</td><td>Mentions a stat without connecting it to the decision</td><td>Cites specific ratings or standings/financial data</td><td>Integrates multiple data points into one argument</td></tr>
+            <tr><td>Business/Financial Reasoning</td><td>No cap/budget/revenue consideration</td><td>Acknowledges a cost without weighing it</td><td>Weighs cost against benefit explicitly</td><td>Frames it as a tradeoff among goals and states the priority</td></tr>
+            <tr><td>Adaptability</td><td>No reference to prior results</td><td>Mentions a past result without changing the call</td><td>Explicitly adjusts based on a prior outcome</td><td>Names the signal, the lesson, and the causal link to this round</td></tr>
+          </tbody></table>
+          <p>Full descriptors: <span class="mono">rubric/Decision_Rationale_Rubric.docx</span>.</p>'''),
+
+        ("structure", "3. League Structure", f'''
           <table><thead><tr><th>Setting</th><th>Value</th></tr></thead><tbody>
             <tr><td>Teams</td><td>{config["n_teams"]} (one per student &mdash; solo ownership, no co-owners)</td></tr>
             <tr><td>Roster size</td><td>{config["roster_size"]} players per team</td></tr>
@@ -148,7 +186,7 @@ def render(config, deals, calendar=None):
             <tr><td>Playoffs</td><td>Top {config["playoff_teams"]} teams by regular-season standings</td></tr>
           </tbody></table>'''),
 
-        ("ratings", "2. Player Ratings", f'''
+        ("ratings", "4. Player Ratings", f'''
           <p>Every player carries six ratings, 0&ndash;99 (the same convention as most sports video games):</p>
           <table><thead><tr><th>Rating</th><th>What it measures</th></tr></thead><tbody>
             <tr><td class="mono">ATT</td><td>Attack &mdash; finishing and creativity, the biggest input to scoring chances</td></tr>
@@ -187,7 +225,7 @@ def render(config, deals, calendar=None):
           newly hurt on top of an existing injury. Bench them, or play them at a real, known cost &mdash; that decision, and
           being able to see it coming, is the point.</p>'''),
 
-        ("draft", "3. The Draft", f'''
+        ("draft", "5. The Draft", f'''
           <p>Before the season begins, every owner drafts a full roster from the shared player pool. Two hard rules apply:</p>
           <ul>
             <li>Roster size is fixed at {config["roster_size"]} players, filling every slot your formation choices require.</li>
@@ -208,20 +246,20 @@ def render(config, deals, calendar=None):
             your remaining cap space &mdash; instant, no live back-and-forth required.</li>
             <li><strong>If your whole board runs out</strong> before your roster is full (bad luck &mdash; too many targets taken
             ahead of you): autopick takes the highest-OVR player still available and affordable &mdash; same "league office
-            auto-fills" fallback used for a missed Weekly Lineup (Section 4) or a missed Trade Day pairing (Section 10).</li>
+            auto-fills" fallback used for a missed Weekly Lineup (Section 6) or a missed Trade Day pairing (Section 12).</li>
           </ol>'''),
 
-        ("weekly", "4. Weekly Operations", '''
+        ("weekly", "6. Weekly Operations", '''
           <p>Every round, before the deadline, each owner submits a Weekly Lineup &amp; Strategy form: formation, strategy,
-          starting XI by name, a ticket price if home that round, and a 2&ndash;4 sentence rationale (graded &mdash; Section 14).</p>
-          <p><strong>Check that round's Player Condition report first</strong> (Section 2) &mdash; it's published before the
+          starting XI by name, a ticket price if home that round, and a 2&ndash;4 sentence rationale (graded &mdash; Section 2).</p>
+          <p><strong>Check that round's Player Condition report first</strong> (Section 4) &mdash; it's published before the
           deadline specifically so your starting XI and formation choice can react to who's actually in form this week, not
           just who has the highest base rating.</p>
           <p><strong>If you do not submit:</strong> the league office auto-fills your highest-rated available player at each
           position, Balanced strategy, Standard pricing. Your match is still played and still counts &mdash; you simply
           forfeit rationale credit, since there is no decision to grade.</p>'''),
 
-        ("formations", "5. Formations &amp; Strategy", '''
+        ("formations", "7. Formations &amp; Strategy", '''
           <table><thead><tr><th>Formation</th><th class="num">GK</th><th class="num">DF</th><th class="num">MF</th><th class="num">FW</th></tr></thead><tbody>
             <tr><td class="mono">4-4-2</td><td class="num">1</td><td class="num">4</td><td class="num">4</td><td class="num">2</td></tr>
             <tr><td class="mono">4-3-3</td><td class="num">1</td><td class="num">4</td><td class="num">3</td><td class="num">3</td></tr>
@@ -235,11 +273,11 @@ def render(config, deals, calendar=None):
             <tr><td>Defensive</td><td class="mono">ATT &times;0.92 / DEF &times;1.08</td></tr>
           </tbody></table>'''),
 
-        ("engine", "6. How Match Results Are Determined", '''
+        ("engine", "8. How Match Results Are Determined", '''
           <p>Results are not a coin flip, and not roster OVR alone &mdash; every result traces to the lineup, formation, and
           strategy you actually submitted:</p>
           <ol>
-            <li>Each starter's ATT/DEF is first scaled by their Weekly Player Condition for this round (Section 2), then
+            <li>Each starter's ATT/DEF is first scaled by their Weekly Player Condition for this round (Section 4), then
             your starting XI's (condition-adjusted) ATT/DEF become one Team Attack and one Team Defense score, weighted by
             formation.</li>
             <li>Your Strategy choice shifts that balance further.</li>
@@ -252,7 +290,7 @@ def render(config, deals, calendar=None):
           <p>Every match's random draw is seeded from the season's fixed seed plus that exact matchup &mdash; any result can
           be independently re-verified after the fact, and nothing is adjustable after the fact by the league office.</p>'''),
 
-        ("tickets", "7. Ticket Sales &amp; Attendance", '''
+        ("tickets", "9. Ticket Sales &amp; Attendance", '''
           <p>As the home team, you set a ticket price tier. Attendance responds to price AND to your recent form and
           starting-XI Star Power:</p>
           <table><thead><tr><th>Tier</th><th>Price</th><th>Effect</th></tr></thead><tbody>
@@ -263,9 +301,9 @@ def render(config, deals, calendar=None):
           <p>There is no universally correct price &mdash; a struggling, low-Star-Power team pricing Premium will earn LESS
           than pricing Standard or Budget. Read your own team's market every home match.</p>'''),
 
-        ("sponsorship", "8. Sponsorship Deals &amp; Negotiation", sponsor_html),
+        ("sponsorship", "10. Sponsorship Deals &amp; Negotiation", sponsor_html),
 
-        ("tv", "9. TV / Broadcast Revenue", f'''
+        ("tv", "11. TV / Broadcast Revenue", f'''
           <h3>League-Wide (National) TV Deal</h3>
           <p><strong>Base:</strong> {money(tv["base_payment_per_team"])} per team.</p>
           <p><strong>Standings bonus:</strong> {tv["standings_bonus"]}</p>
@@ -280,7 +318,7 @@ def render(config, deals, calendar=None):
           <h3>Local TV Rights Negotiation</h3>
           <p>{ltv["negotiation"]}</p>'''),
 
-        ("trades", "10. Trades &amp; Free Agency", f'''
+        ("trades", "12. Trades &amp; Free Agency", f'''
           <p><strong>Deadline:</strong> {tr["deadline"]}</p>
           <p><strong>Salary cap rule:</strong> {tr["salary_cap"]}</p>
           <p><strong>Cash considerations:</strong> {tr["cash_considerations"]}</p>
@@ -288,47 +326,15 @@ def render(config, deals, calendar=None):
           <h3>Mandatory Mid-Season Trade Day</h3>
           <p>{tr["mid_season_trade_day"]}</p>'''),
 
-        ("standings", "11. Standings", '''
+        ("standings", "13. Standings", '''
           <p>Win = 3 points, draw = 1 point, loss = 0 points. Ties broken first by goal difference, then total goals scored.</p>'''),
 
-        ("playoffs", "12. Playoff Qualification", f'''
+        ("playoffs", "14. Playoff Qualification", f'''
           <p>{po["format"]}</p>
           <table><thead><tr><th>Stage</th><th class="num">Bonus</th></tr></thead><tbody>
             <tr><td>Finish in the top {config["playoff_teams"]} of the final standings</td><td class="num">{money(qualification_bonus)}</td></tr>
           </tbody></table>
           <p>{po["bonus_notes"]}</p>'''),
-
-        ("scorecard", "13. The Season Scorecard &mdash; Your Grade", f'''
-          <p>The exam-replacement grade: 100 points across four components. <strong>Ranking and Revenue are scored
-          relative to the rest of the league</strong> &mdash; 1st place earns full points, last earns zero, spaced evenly
-          between &mdash; so the standard self-calibrates to however the season actually plays out.</p>
-          <table><thead><tr><th>Component</th><th class="num">Points</th><th>Question it answers</th><th>How it's scored</th></tr></thead><tbody>
-            <tr><td>Standings Rank</td><td class="num">{WEIGHTS["ranking"]}</td><td>Did your team win?</td><td>Linear by finish: 1st = {WEIGHTS["ranking"]}, last = 0</td></tr>
-            <tr><td>Playoff Qualification</td><td class="num">{WEIGHTS["playoffs"]}</td><td>Did you make the playoffs?</td><td>Flat: full {WEIGHTS["playoffs"]} pts for finishing in the top {config["playoff_teams"]}, 0 otherwise &mdash; not tiered, since finishing 1st vs. {config["playoff_teams"]}th is already rewarded by Ranking</td></tr>
-            <tr><td>Business Revenue</td><td class="num">{WEIGHTS["revenue"]}</td><td>Did you run it as a business?</td><td>Ticket + sponsorship + national TV + local TV revenue, ranked against the league</td></tr>
-            <tr><td>Decision Rationale</td><td class="num">{WEIGHTS["rationale"]}</td><td>Could you explain your calls?</td><td>Season-average rubric score (Section 14), as a % of {WEIGHTS["rationale"]}</td></tr>
-          </tbody></table>
-          <p class="callout">A well-reasoned decision that loses to bad luck scores exactly as well, on Rationale, as one
-          that wins. A last-place team that runs a genuinely profitable franchise can still score well on Revenue. There
-          is more than one way to earn a strong grade here.</p>
-          <h3>Worked Example</h3>
-          <p>A team that wins the league ({WEIGHTS["ranking"]}/{WEIGHTS["ranking"]} &mdash; full ranking points), qualifies for the playoffs by finishing top
-          {config["playoff_teams"]} ({WEIGHTS["playoffs"]}/{WEIGHTS["playoffs"]}), finishes 3rd in league revenue out of {config["n_teams"]} teams ({worked_revenue_pts} pts), and
-          averages a strong rationale score ({worked_rationale_pts} of {WEIGHTS["rationale"]}) lands at
-          <strong>{WEIGHTS["ranking"]} + {WEIGHTS["playoffs"]} + {worked_revenue_pts} + {worked_rationale_pts} = {worked_total}</strong> out of 100.</p>'''),
-
-        ("rubric", "14. Decision Rationale Rubric", '''
-          <p>Every round, your written rationale is scored against 4 criteria, 4 points each (16 possible; Business/Financial
-          Reasoning is excluded on a plain lineup round with no trade/sponsorship attached, graded out of 12 instead). Your
-          season average, as a percentage, becomes the 20-point Rationale component above.</p>
-          <table><thead><tr><th>Criterion</th><th>1 &mdash; Minimal</th><th>2 &mdash; Developing</th><th>3 &mdash; Proficient</th><th>4 &mdash; Exemplary</th></tr></thead>
-          <tbody>
-            <tr><td>Strategic Fit</td><td>Unexplained or contradicts your own analysis</td><td>Stated but the link to the opponent/roster is vague</td><td>Clearly justified by a specific comparison</td><td>Reflects a specific tactical read and anticipates a counter-response</td></tr>
-            <tr><td>Use of Data</td><td>No reference to ratings/stats/standings</td><td>Mentions a stat without connecting it to the decision</td><td>Cites specific ratings or standings/financial data</td><td>Integrates multiple data points into one argument</td></tr>
-            <tr><td>Business/Financial Reasoning</td><td>No cap/budget/revenue consideration</td><td>Acknowledges a cost without weighing it</td><td>Weighs cost against benefit explicitly</td><td>Frames it as a tradeoff among goals and states the priority</td></tr>
-            <tr><td>Adaptability</td><td>No reference to prior results</td><td>Mentions a past result without changing the call</td><td>Explicitly adjusts based on a prior outcome</td><td>Names the signal, the lesson, and the causal link to this round</td></tr>
-          </tbody></table>
-          <p>Full descriptors: <span class="mono">rubric/Decision_Rationale_Rubric.docx</span>.</p>'''),
 
         ("glossary", "15. Glossary", '''
           <table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody>
