@@ -71,13 +71,13 @@ def render(config, deals, ltv):
         )
     team_rows_html = "".join(team_rows)
 
-    # Practice simulator data: the 5 GENERIC tiers only, never a real team's
-    # assignment. Earlier drew from `assignments` (every real team + its real
-    # confidential base_revenue) -- a student could open this dropdown and
-    # read off any real team's actual price by name, the exact secret the
-    # rest of this page and the Rulebook now go out of their way to hide.
-    # Tier-level data has no team binding at all, so there's nothing to leak.
-    tiers_json = json.dumps(ltv["market_tiers"])
+    # Practice simulator no longer draws from real catalog data at all --
+    # first it leaked real teams' prices by name (assignments), then even
+    # the fixed-up generic-tier version leaked real tier prices, which
+    # combine with the Team Status table's still-public tier NAME per team
+    # to reconstruct the exact same leak. The only version with no leak
+    # vector left is one that never embeds a real number anywhere: the
+    # simulator now takes a student-entered hypothetical base price/clause.
 
     return f'''<!doctype html>
 <html lang="en">
@@ -254,10 +254,21 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
       <span class="section-note">a rehearsal &mdash; the real negotiation still happens live, right after Draft Day</span>
     </div>
     <div class="sim">
+      <p class="sim-note">Practice the math with a hypothetical rate -- real market-tier base rates aren't posted
+      publicly anywhere on this site; your network rep tells you yours face to face.</p>
       <div class="sim-grid">
         <div class="field">
-          <label for="sim-team">Market Tier (practice example, not tied to any real team)</label>
-          <select id="sim-team"></select>
+          <label for="sim-base">Hypothetical Base Rate ($/season)</label>
+          <input type="number" id="sim-base" value="1000000" step="50000" min="0">
+        </div>
+        <div class="field">
+          <label for="sim-base-clause">Hypothetical Base Clause</label>
+          <select id="sim-base-clause">
+            <option value="strict">Strict</option>
+            <option value="standard" selected>Standard</option>
+            <option value="loose">Loose</option>
+            <option value="none">None</option>
+          </select>
         </div>
         <div class="field">
           <label for="sim-star">Your Roster Avg. Star Power: <span id="sim-star-v">65</span></label>
@@ -285,7 +296,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
         <div class="stat">Rate Adjustment<br><b id="sim-adjustment">&ndash;</b></div>
       </div>
       <button class="btn" id="sim-go">Make This Ask</button>
-      <div class="sim-result" id="sim-result">Pick a team and your asks, then hit the button.</div>
+      <div class="sim-result" id="sim-result">Enter a hypothetical base rate and your asks, then hit the button.</div>
     </div>
   </section>
 </div>
@@ -293,21 +304,10 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
 <footer>{config["league_name"]} &middot; TV rights marketplace &mdash; math matches engine/negotiation.py and engine/resolve_local_tv_pick.py exactly</footer>
 
 <script>
-// TV_SIM_TIERS, not TEAMS -- assets/submissions.js (loaded below, for the
-// REAL Local TV Rate form) declares its own `let TEAMS` populated live from
-// the backend; a same-name top-level const here would collide across the
-// two <script> tags and throw.
-//
-// Generic tiers only, deliberately never a real team's assignment -- see
-// the tiers_json comment in render_tv_site.py's render() for why.
-const TV_SIM_TIERS = {tiers_json};
 const REQUIRED_THRESHOLD = {{modest: 20, bold: 50, very_bold: 80}};
 const CLAUSE_UPSIDE = {{modest: 0.10, bold: 0.20, very_bold: 0.30}};
 const CLAUSE_LEVELS = ["strict", "standard", "loose", "none"];
 const REVENUE_RANGE = 0.10;
-
-const teamSel = document.getElementById('sim-team');
-teamSel.innerHTML = TV_SIM_TIERS.map(t => `<option value="${{t.tier}}">${{t.tier}} ($${{t.base_revenue.toLocaleString()}}, ${{t.base_clause}} clause)</option>`).join('');
 
 function computeLeverage(avgStar) {{
   return Math.max(0, Math.min(100, (avgStar - 50) * 2));
@@ -327,7 +327,7 @@ function updateReadout() {{
   }}
 }}
 
-document.querySelectorAll('#sim-star, #sim-revenue-ask, #sim-clause-ask, #sim-team').forEach(el => el.addEventListener('input', updateReadout));
+document.querySelectorAll('#sim-star, #sim-revenue-ask, #sim-clause-ask').forEach(el => el.addEventListener('input', updateReadout));
 updateReadout();
 
 document.getElementById('sim-go').addEventListener('click', () => {{
@@ -335,19 +335,20 @@ document.getElementById('sim-go').addEventListener('click', () => {{
   const leverage = computeLeverage(star);
   const revenueAsk = document.getElementById('sim-revenue-ask').value;
   const clauseAsk = document.getElementById('sim-clause-ask').value;
-  const team = TV_SIM_TIERS.find(t => t.tier === teamSel.value);
+  const baseRevenue = parseFloat(document.getElementById('sim-base').value) || 0;
+  const baseClause = document.getElementById('sim-base-clause').value;
   const resultEl = document.getElementById('sim-result');
 
   // --- revenue axis ---
-  let rate = team.base_revenue, commission = 0;
+  let rate = baseRevenue, commission = 0;
   if (revenueAsk === 'negotiate') {{
     const adj = -REVENUE_RANGE + (leverage / 100) * (2 * REVENUE_RANGE);
-    rate = Math.round(team.base_revenue * (1 + adj));
-    commission = Math.max(0, rate - team.base_revenue);
+    rate = Math.round(baseRevenue * (1 + adj));
+    commission = Math.max(0, rate - baseRevenue);
   }}
 
   // --- clause axis (independent) ---
-  let clause = team.base_clause;
+  let clause = baseClause;
   let clauseNote = '';
   if (clauseAsk !== 'none') {{
     const threshold = REQUIRED_THRESHOLD[clauseAsk];
@@ -361,11 +362,11 @@ document.getElementById('sim-go').addEventListener('click', () => {{
       else {{ outcome = 'partial'; fraction = 0.5; }}
     }}
     if (outcome === 'walk_away') {{
-      clauseNote = ` Clause ask WALKED AWAY (leverage ${{leverage.toFixed(0)}} too far below the ${{threshold}} needed) -- clause stays ${{team.base_clause}}.`;
+      clauseNote = ` Clause ask WALKED AWAY (leverage ${{leverage.toFixed(0)}} too far below the ${{threshold}} needed) -- clause stays ${{baseClause}}.`;
     }} else {{
       const upside = CLAUSE_UPSIDE[clauseAsk] * fraction;
       if (upside > 0) {{
-        const idx = CLAUSE_LEVELS.indexOf(team.base_clause);
+        const idx = CLAUSE_LEVELS.indexOf(baseClause);
         const steps = (clauseAsk === 'very_bold' && fraction === 1.0) ? 2 : 1;
         clause = CLAUSE_LEVELS[Math.min(CLAUSE_LEVELS.length - 1, idx + steps)];
         clauseNote = outcome === 'accepted' ? ' Clause ask ACCEPTED.' : ' Clause ask PARTIAL (met halfway).';
@@ -373,7 +374,7 @@ document.getElementById('sim-go').addEventListener('click', () => {{
     }}
   }}
 
-  resultEl.className = 'sim-result ' + (revenueAsk === 'negotiate' && rate < team.base_revenue ? 'walk_away' : 'accepted');
+  resultEl.className = 'sim-result ' + (revenueAsk === 'negotiate' && rate < baseRevenue ? 'walk_away' : 'accepted');
   let text = `Negotiated terms: rate $${{rate.toLocaleString()}}/season, clause ${{clause}}.${{clauseNote}} Still paid at the Round 3 split, plus Star Power bonus if earned then.`;
   if (commission > 0) {{
     text += ` A live network rep here would earn a $${{commission.toLocaleString()}} commission for their own team, credited now.`;

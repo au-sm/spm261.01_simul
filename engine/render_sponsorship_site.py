@@ -51,7 +51,6 @@ def render(config, deals, finances):
         ]
 
     category_sections = []
-    all_brands_for_sim = []
     for cat in deals["sponsorship_categories"]:
         cards = []
         for b in cat["brands"]:
@@ -69,7 +68,6 @@ def render(config, deals, finances):
               </div>
               <p class="owners"><b>Signed by:</b> {owners_html}</p>
             </article>''')
-            all_brands_for_sim.append({**b, "category": cat["category"]})
         category_sections.append(f'''
         <div class="category-block">
           <h3 class="category-title">{cat["category"]}</h3>
@@ -90,7 +88,6 @@ def render(config, deals, finances):
         )
     team_rows_html = "".join(team_rows)
 
-    sponsor_pool_json = json.dumps(all_brands_for_sim)
 
     return f'''<!doctype html>
 <html lang="en">
@@ -296,10 +293,21 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
       <span class="section-note">a rehearsal &mdash; the real pick still happens live, on your draft turn</span>
     </div>
     <div class="sim">
+      <p class="sim-note">Practice the math with a hypothetical price -- real brand prices aren't posted publicly
+      anywhere on this site; your sponsor rep tells you yours face to face.</p>
       <div class="sim-grid">
         <div class="field">
-          <label for="sim-sponsor">Brand</label>
-          <select id="sim-sponsor"></select>
+          <label for="sim-base">Hypothetical Base Revenue ($/season)</label>
+          <input type="number" id="sim-base" value="1000000" step="50000" min="0">
+        </div>
+        <div class="field">
+          <label for="sim-base-clause">Hypothetical Base Clause</label>
+          <select id="sim-base-clause">
+            <option value="strict">Strict</option>
+            <option value="standard" selected>Standard</option>
+            <option value="loose">Loose</option>
+            <option value="none">None</option>
+          </select>
         </div>
         <div class="field">
           <label for="sim-star">Your Roster Avg. Star Power: <span id="sim-star-v">65</span></label>
@@ -327,7 +335,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
         <div class="stat">Revenue Adjustment<br><b id="sim-adjustment">&ndash;</b></div>
       </div>
       <button class="btn" id="sim-go">Make This Ask</button>
-      <div class="sim-result" id="sim-result">Pick a brand and your asks, then hit the button.</div>
+      <div class="sim-result" id="sim-result">Enter a hypothetical base price and your asks, then hit the button.</div>
     </div>
   </section>
 </div>
@@ -335,14 +343,10 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
 <footer>{config["league_name"]} &middot; sponsorship marketplace &mdash; math matches engine/negotiation.py exactly</footer>
 
 <script>
-const SPONSORS = {sponsor_pool_json};
 const REQUIRED_THRESHOLD = {{modest: 20, bold: 50, very_bold: 80}};
 const CLAUSE_UPSIDE = {{modest: 0.10, bold: 0.20, very_bold: 0.30}};
 const CLAUSE_LEVELS = ["strict", "standard", "loose", "none"];
 const REVENUE_RANGE = 0.10;
-
-const sponsorSel = document.getElementById('sim-sponsor');
-sponsorSel.innerHTML = SPONSORS.map(s => `<option value="${{s.name}}">${{s.category}}: ${{s.name}} &mdash; $${{s.base_revenue.toLocaleString()}}</option>`).join('');
 
 function computeLeverage(avgStar) {{
   return Math.max(0, Math.min(100, (avgStar - 50) * 2));
@@ -370,19 +374,20 @@ document.getElementById('sim-go').addEventListener('click', () => {{
   const leverage = computeLeverage(star);
   const revenueAsk = document.getElementById('sim-revenue-ask').value;
   const clauseAsk = document.getElementById('sim-clause-ask').value;
-  const sponsor = SPONSORS.find(s => s.name === sponsorSel.value);
+  const baseRevenue = parseFloat(document.getElementById('sim-base').value) || 0;
+  const baseClause = document.getElementById('sim-base-clause').value;
   const resultEl = document.getElementById('sim-result');
 
   // --- revenue axis ---
-  let revenue = sponsor.base_revenue, commission = 0;
+  let revenue = baseRevenue, commission = 0;
   if (revenueAsk === 'negotiate') {{
     const adj = -REVENUE_RANGE + (leverage / 100) * (2 * REVENUE_RANGE);
-    revenue = Math.round(sponsor.base_revenue * (1 + adj));
-    commission = Math.max(0, revenue - sponsor.base_revenue);
+    revenue = Math.round(baseRevenue * (1 + adj));
+    commission = Math.max(0, revenue - baseRevenue);
   }}
 
   // --- clause axis (independent) ---
-  let clause = sponsor.base_clause;
+  let clause = baseClause;
   let clauseNote = '';
   if (clauseAsk !== 'none') {{
     const threshold = REQUIRED_THRESHOLD[clauseAsk];
@@ -396,11 +401,11 @@ document.getElementById('sim-go').addEventListener('click', () => {{
       else {{ outcome = 'partial'; fraction = 0.5; }}
     }}
     if (outcome === 'walk_away') {{
-      clauseNote = ` Clause ask WALKED AWAY (leverage ${{leverage.toFixed(0)}} too far below the ${{threshold}} needed) -- clause stays ${{sponsor.base_clause}}.`;
+      clauseNote = ` Clause ask WALKED AWAY (leverage ${{leverage.toFixed(0)}} too far below the ${{threshold}} needed) -- clause stays ${{baseClause}}.`;
     }} else {{
       const upside = CLAUSE_UPSIDE[clauseAsk] * fraction;
       if (upside > 0) {{
-        const idx = CLAUSE_LEVELS.indexOf(sponsor.base_clause);
+        const idx = CLAUSE_LEVELS.indexOf(baseClause);
         const steps = (clauseAsk === 'very_bold' && fraction === 1.0) ? 2 : 1;
         clause = CLAUSE_LEVELS[Math.min(CLAUSE_LEVELS.length - 1, idx + steps)];
         clauseNote = outcome === 'accepted' ? ' Clause ask ACCEPTED.' : ' Clause ask PARTIAL (met halfway).';
@@ -408,7 +413,7 @@ document.getElementById('sim-go').addEventListener('click', () => {{
     }}
   }}
 
-  resultEl.className = 'sim-result ' + (revenueAsk === 'negotiate' && revenue < sponsor.base_revenue ? 'walk_away' : 'accepted');
+  resultEl.className = 'sim-result ' + (revenueAsk === 'negotiate' && revenue < baseRevenue ? 'walk_away' : 'accepted');
   let text = `Final terms: revenue $${{revenue.toLocaleString()}}/season, clause ${{clause}}.${{clauseNote}}`;
   if (commission > 0) {{
     text += ` A live sponsor rep playing ${{sponsor.name}} here would earn a $${{commission.toLocaleString()}} commission for their own team.`;
