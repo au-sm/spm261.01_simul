@@ -324,7 +324,8 @@ def render(config, deals, calendar=None):
           clause than your market tier's base clause, at Modest / Bold / Very Bold intensity, gated by your same
           Negotiating Leverage number. Ask beyond what your leverage supports and the deal walks away on the clause
           specifically &mdash; that costs you nothing on the revenue side, and you can simply not push the clause
-          further. See "What the Clause Actually Means" above (Section 10) for the rank-threshold table &mdash; the
+          further. See "What the Clause Actually Means" in the Sponsorship Deals &amp; Negotiation section above for
+          the rank-threshold table &mdash; the
           same thresholds and the same {int(ce["penalty_pct"]*100)}% penalty apply to a Local TV Deal's clause, checked
           once at season end off your one final rank.</p>'''),
 
