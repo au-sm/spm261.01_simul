@@ -35,8 +35,8 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 MARKET_TIERS = [
     {"tier": "Major Market", "base_revenue": 1200000, "base_clause": "strict"},
-    {"tier": "Mid Market", "base_revenue": 700000, "base_clause": "standard"},
-    {"tier": "Small Market", "base_revenue": 500000, "base_clause": "loose"},
+    {"tier": "Mid Market", "base_revenue": 900000, "base_clause": "standard"},
+    {"tier": "Small Market", "base_revenue": 700000, "base_clause": "loose"},
 ]
 
 STAR_POWER_MODIFIER = {

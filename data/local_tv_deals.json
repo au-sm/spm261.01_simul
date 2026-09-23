@@ -8,12 +8,12 @@
     },
     {
       "tier": "Mid Market",
-      "base_revenue": 700000,
+      "base_revenue": 900000,
       "base_clause": "standard"
     },
     {
       "tier": "Small Market",
-      "base_revenue": 500000,
+      "base_revenue": 700000,
       "base_clause": "loose"
     }
   ],
@@ -41,49 +41,49 @@
       "team_id": 2,
       "team_name": "Team 3",
       "market_tier": "Mid Market",
-      "base_revenue": 700000,
+      "base_revenue": 900000,
       "base_clause": "standard"
     },
     {
       "team_id": 3,
       "team_name": "Team 4",
       "market_tier": "Small Market",
-      "base_revenue": 500000,
+      "base_revenue": 700000,
       "base_clause": "loose"
     },
     {
       "team_id": 4,
       "team_name": "Team 5",
       "market_tier": "Mid Market",
-      "base_revenue": 700000,
+      "base_revenue": 900000,
       "base_clause": "standard"
     },
     {
       "team_id": 5,
       "team_name": "Team 6",
       "market_tier": "Small Market",
-      "base_revenue": 500000,
+      "base_revenue": 700000,
       "base_clause": "loose"
     },
     {
       "team_id": 6,
       "team_name": "Team 7",
       "market_tier": "Small Market",
-      "base_revenue": 500000,
+      "base_revenue": 700000,
       "base_clause": "loose"
     },
     {
       "team_id": 7,
       "team_name": "Team 8",
       "market_tier": "Mid Market",
-      "base_revenue": 700000,
+      "base_revenue": 900000,
       "base_clause": "standard"
     },
     {
       "team_id": 8,
       "team_name": "Team 9",
       "market_tier": "Small Market",
-      "base_revenue": 500000,
+      "base_revenue": 700000,
       "base_clause": "loose"
     },
     {
@@ -104,7 +104,7 @@
       "team_id": 11,
       "team_name": "Team 12",
       "market_tier": "Small Market",
-      "base_revenue": 500000,
+      "base_revenue": 700000,
       "base_clause": "loose"
     },
     {
@@ -118,7 +118,7 @@
       "team_id": 13,
       "team_name": "Team 14",
       "market_tier": "Mid Market",
-      "base_revenue": 700000,
+      "base_revenue": 900000,
       "base_clause": "standard"
     },
     {
@@ -132,21 +132,21 @@
       "team_id": 15,
       "team_name": "Team 16",
       "market_tier": "Mid Market",
-      "base_revenue": 700000,
+      "base_revenue": 900000,
       "base_clause": "standard"
     },
     {
       "team_id": 16,
       "team_name": "Team 17",
       "market_tier": "Small Market",
-      "base_revenue": 500000,
+      "base_revenue": 700000,
       "base_clause": "loose"
     },
     {
       "team_id": 17,
       "team_name": "Team 18",
       "market_tier": "Mid Market",
-      "base_revenue": 700000,
+      "base_revenue": 900000,
       "base_clause": "standard"
     }
   ]

@@ -98,14 +98,14 @@ var SPONSOR_CATALOG = [
 // Major Market -> strict, Mid Market -> standard, Small Market -> loose).
 var LOCAL_TV_BASE = {
   "0":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "1":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"},
-  "2":{tier:"Mid Market",base_revenue:700000,base_clause:"standard"}, "3":{tier:"Small Market",base_revenue:500000,base_clause:"loose"},
-  "4":{tier:"Mid Market",base_revenue:700000,base_clause:"standard"}, "5":{tier:"Small Market",base_revenue:500000,base_clause:"loose"},
-  "6":{tier:"Small Market",base_revenue:500000,base_clause:"loose"}, "7":{tier:"Mid Market",base_revenue:700000,base_clause:"standard"},
-  "8":{tier:"Small Market",base_revenue:500000,base_clause:"loose"}, "9":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"},
-  "10":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "11":{tier:"Small Market",base_revenue:500000,base_clause:"loose"},
-  "12":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "13":{tier:"Mid Market",base_revenue:700000,base_clause:"standard"},
-  "14":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "15":{tier:"Mid Market",base_revenue:700000,base_clause:"standard"},
-  "16":{tier:"Small Market",base_revenue:500000,base_clause:"loose"}, "17":{tier:"Mid Market",base_revenue:700000,base_clause:"standard"},
+  "2":{tier:"Mid Market",base_revenue:900000,base_clause:"standard"}, "3":{tier:"Small Market",base_revenue:700000,base_clause:"loose"},
+  "4":{tier:"Mid Market",base_revenue:900000,base_clause:"standard"}, "5":{tier:"Small Market",base_revenue:700000,base_clause:"loose"},
+  "6":{tier:"Small Market",base_revenue:700000,base_clause:"loose"}, "7":{tier:"Mid Market",base_revenue:900000,base_clause:"standard"},
+  "8":{tier:"Small Market",base_revenue:700000,base_clause:"loose"}, "9":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"},
+  "10":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "11":{tier:"Small Market",base_revenue:700000,base_clause:"loose"},
+  "12":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "13":{tier:"Mid Market",base_revenue:900000,base_clause:"standard"},
+  "14":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "15":{tier:"Mid Market",base_revenue:900000,base_clause:"standard"},
+  "16":{tier:"Small Market",base_revenue:700000,base_clause:"loose"}, "17":{tier:"Mid Market",base_revenue:900000,base_clause:"standard"},
 };
 
 function ensureSheets_() {
