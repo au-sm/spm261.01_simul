@@ -140,7 +140,7 @@ def render(config, deals, calendar=None):
           you made.</p>'''),
 
         ("scorecard", "1. The Season Scorecard &mdash; Your Grade", f'''
-          <p>The exam-replacement grade: 100 points across four components. <strong>Ranking and Revenue are scored
+          <p>100 points across four components. <strong>Ranking and Revenue are scored
           relative to the rest of the league</strong> &mdash; 1st place earns full points, and every place below the one
           above it costs a flat {RANK_STEP} point, not a fraction of the whole component spread evenly down to zero.
           Finishing last still costs you real points relative to your classmates, but it does not wipe out the entire

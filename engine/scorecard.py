@@ -1,5 +1,5 @@
 """
-Season Scorecard -- the exam-replacement grade for the SM Owners League.
+Season Scorecard -- the season-long scorecard for the SM Owners League.
 
 100 points, four components, each answering a different question about
 how the season went for that owner:
