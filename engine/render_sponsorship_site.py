@@ -177,6 +177,7 @@ input[type=range]{{accent-color:var(--accent);}}
 .sim-readout{{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:14px;font-family:"IBM Plex Mono",monospace;font-size:13px;}}
 .sim-readout .stat{{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:8px 14px;}}
 .sim-readout .stat b{{display:block;font-size:20px;font-family:"Big Shoulders Display",sans-serif;}}
+.stat-formula{{font-size:10.5px;color:var(--muted);font-weight:400;margin-top:4px;max-width:36ch;line-height:1.4;}}
 .btn{{font-family:"Big Shoulders Display",sans-serif;font-weight:800;font-size:16px;letter-spacing:.03em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);border:none;border-radius:4px;padding:12px 28px;cursor:pointer;}}
 .btn:hover{{filter:brightness(1.08);}}
 .sim-result{{margin-top:16px;padding:14px 16px;border-radius:3px;background:var(--paper);border:1px solid var(--line);font-family:"IBM Plex Mono",monospace;font-size:13px;min-height:1.4em;}}
@@ -331,7 +332,11 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
         </div>
       </div>
       <div class="sim-readout">
-        <div class="stat">Leverage<br><b id="sim-leverage">0</b></div>
+        <div class="stat">Leverage<br><b id="sim-leverage">0</b>
+          <div class="stat-formula">= (avg Star Power &minus; 50) &times; 2, clamped 0&ndash;100. Once the season starts,
+          live negotiation also adds a standings bonus (+15 top third / +7 mid table / +0 bottom third) this
+          rehearsal tool doesn't model.</div>
+        </div>
         <div class="stat">Revenue Adjustment<br><b id="sim-adjustment">&ndash;</b></div>
       </div>
       <button class="btn" id="sim-go">Make This Ask</button>
