@@ -42,27 +42,31 @@ def render(config, deals, ltv):
     tier_rows = []
     for tier in ltv["market_tiers"]:
         tier_rows.append(
-            f'<tr><td>{tier["tier"]}</td><td class="num">{money(tier["base_revenue"])}</td><td>{tier["base_clause"]}</td></tr>'
+            f'<tr><td>{tier["tier"]}</td><td>{tier["base_clause"]}</td></tr>'
         )
     tier_rows_html = "".join(tier_rows)
 
+    # Deliberately no revenue/rate column here, for a pending OR an already-
+    # negotiated team alike -- mirrors the Sponsorship Marketplace's Team
+    # Progress table, which never reveals a dollar figure either. Real price
+    # numbers stay off every public page; only tier, clause, and status are
+    # shown. (The practice simulator further down is the one deliberate,
+    # already-established exception -- it's a rehearsal tool, not a leak.)
     team_rows = []
     for a in sorted(assignments, key=lambda a: a["team_id"]):
         owner = owner_by_id.get(a["team_id"], "")
         name = a["team_name"] + (f" ({owner})" if owner else "")
         negotiated = a.get("negotiated")
         if negotiated:
-            rate = money(a["negotiated_revenue"])
             clause = a.get("final_clause", a["base_clause"])
             status_cls = "complete"
             status = a["mode"]
         else:
-            rate = f'{money(a["base_revenue"])} (base, not yet negotiated)'
             clause = a["base_clause"]
             status_cls = "pending"
             status = "pending"
         team_rows.append(
-            f'<tr><td>{name}</td><td>{a["market_tier"]}</td><td class="num">{rate}</td><td>{clause}</td>'
+            f'<tr><td>{name}</td><td>{a["market_tier"]}</td><td>{clause}</td>'
             f'<td class="num status-{status_cls}">{status}</td></tr>'
         )
     team_rows_html = "".join(team_rows)
@@ -170,9 +174,12 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
     <div class="section-head"><h2>How It Works</h2></div>
     <div class="how-it-works">
       <p>Unlike Sponsorship, there's no brand catalog here &mdash; your Local TV Deal is tied to a market tier randomly
-      assigned right after Draft Day (evenly split league-wide, drawn from the season seed). That tier sets your PUBLIC
-      base rate AND your base clause:</p>
-      <table><thead><tr><th>Market Tier</th><th class="num">Base Rate</th><th>Base Clause</th></tr></thead><tbody>{tier_rows_html}</tbody></table>
+      assigned right after Draft Day (evenly split across all five tiers league-wide, drawn from the season seed). That
+      tier sets your base clause:</p>
+      <table><thead><tr><th>Market Tier</th><th>Base Clause</th></tr></thead><tbody>{tier_rows_html}</tbody></table>
+      <p><b>Your market tier's actual base rate is not posted publicly anywhere on this site.</b> Your network rep tells
+      you the number face to face when you sit down to negotiate &mdash; the same convention Sponsorship uses for its own
+      brand base revenue.</p>
       <p>Right after that assignment, you negotiate LIVE against a classmate playing the network rep (rotation:
       <span class="mono">engine/generate_tv_negotiation_rotation.py</span>). Exactly like Sponsorship, two separate
       things are on the table:</p>
@@ -204,7 +211,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
       <span class="section-note">live: rate, clause, and status update as negotiations resolve</span>
     </div>
     <table>
-      <thead><tr><th>Team</th><th>Market Tier</th><th class="num">Rate</th><th>Clause</th><th class="num">Status</th></tr></thead>
+      <thead><tr><th>Team</th><th>Market Tier</th><th>Clause</th><th class="num">Status</th></tr></thead>
       <tbody>{team_rows_html}</tbody>
     </table>
   </section>

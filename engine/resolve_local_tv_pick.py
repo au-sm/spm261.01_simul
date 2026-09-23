@@ -32,11 +32,11 @@ data/local_tv_deals.json, not data/team_finances.json.
 
 LIVE MODE (the normal path for the in-class negotiation exercise):
     python3 engine/resolve_local_tv_pick.py --team 3 \\
-        --live --final-revenue 990000 --final-clause standard \\
+        --live --final-revenue 935000 --final-clause standard \\
         --network-rep-team 17
 
-  Team 3 is Mid Market ($900,000 base, standard clause), so the
-  live-negotiated $990,000 rate credits a $90,000 commission to
+  Team 3 is Mid Market ($850,000 base, standard clause), so the
+  live-negotiated $935,000 rate credits an $85,000 commission to
   Team 17, whoever played the network rep in that negotiation --
   booked immediately (the commission is a reward for negotiating
   skill, not TV money itself, so it doesn't wait for the Round 3

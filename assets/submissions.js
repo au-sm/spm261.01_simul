@@ -224,7 +224,7 @@ function initTvForm() {
     if (!base) { tierNote.textContent = ''; return; }
     tierNote.textContent = already
       ? `This team's Local TV Deal is already negotiated -- it's a one-time deal, resubmitting will be rejected.`
-      : `Market tier: ${base.tier} -- Base rate: $${base.base_revenue.toLocaleString()}/season, ${base.base_clause} clause`;
+      : `Market tier: ${base.tier} -- ${base.base_clause} clause. Base rate is not posted here -- your network rep tells you the number face to face.`;
   }
   function updateModeFields() {
     negotiateFields.hidden = modeSel.value !== 'negotiate';
@@ -244,9 +244,13 @@ function initTvForm() {
       if (!revenue) { msg.textContent = 'Enter the final agreed rate.'; msg.className = 'sub-msg'; return; }
       body.final_revenue = revenue;
       body.final_clause = clause;
-      if (revenue !== (LOCAL_TV_BASE[teamSel.value]?.base_revenue || 0)) {
-        body.rep_team_id = repSel.value;
-      }
+      // LOCAL_TV_BASE no longer carries base_revenue client-side (the
+      // backend deliberately strips it from ?catalog=1), so there's no
+      // way to tell locally whether this lands exactly on base. Always
+      // attach rep_team_id in negotiate mode -- backend.gs only actually
+      // uses it (and only requires it) when the final rate truly differs
+      // from the server-side base, so sending it when unneeded is harmless.
+      body.rep_team_id = repSel.value;
     }
 
     btn.disabled = true;
@@ -321,7 +325,6 @@ function initSponsorshipForm() {
   btn.addEventListener('click', async () => {
     const pin = pinInput.value.trim();
     if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'sub-msg'; return; }
-    const brand = SPONSOR_CATALOG.find(b => b.name === brandSel.value);
     const body = { type: 'sponsorship_deal', team_id: teamSel.value, pin, brand: brandSel.value, mode: modeSel.value };
     if (modeSel.value === 'negotiate') {
       const revenue = parseInt(document.getElementById('sp-revenue').value, 10);
@@ -329,7 +332,12 @@ function initSponsorshipForm() {
       if (!revenue) { msg.textContent = 'Enter the final agreed revenue.'; msg.className = 'sub-msg'; return; }
       body.final_revenue = revenue;
       body.final_clause = clause;
-      if (brand && revenue !== brand.base_revenue) body.rep_team_id = repSel.value;
+      // SPONSOR_CATALOG no longer carries base_revenue client-side (the
+      // backend deliberately strips it from ?catalog=1). Always attach
+      // rep_team_id in negotiate mode -- backend.gs only actually uses it
+      // (and only requires it) when the final revenue truly differs from
+      // the server-side base, so sending it when unneeded is harmless.
+      body.rep_team_id = repSel.value;
     }
 
     btn.disabled = true;

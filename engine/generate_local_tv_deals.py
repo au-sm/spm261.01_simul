@@ -10,7 +10,7 @@ Run ONCE, right after Draft Day, same timing rule as
 generate_schedule.py -- market tier is a fixed, season-long assignment
 (like a real regional broadcast contract), not renegotiated mid-season.
 
-Every team gets exactly one of three market tiers, split as evenly as
+Every team gets exactly one of five market tiers, split as evenly as
 possible across the league and drawn reproducibly from season_seed (same
 principle as match simulation: any assignment can be independently
 re-verified after the fact). The dollar amount is paid out at the same
@@ -35,8 +35,10 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 MARKET_TIERS = [
     {"tier": "Major Market", "base_revenue": 1200000, "base_clause": "strict"},
-    {"tier": "Mid Market", "base_revenue": 900000, "base_clause": "standard"},
-    {"tier": "Small Market", "base_revenue": 700000, "base_clause": "loose"},
+    {"tier": "Large Market", "base_revenue": 1000000, "base_clause": "strict"},
+    {"tier": "Mid Market", "base_revenue": 850000, "base_clause": "standard"},
+    {"tier": "Small Market", "base_revenue": 700000, "base_clause": "standard"},
+    {"tier": "Micro Market", "base_revenue": 550000, "base_clause": "loose"},
 ]
 
 STAR_POWER_MODIFIER = {
@@ -52,8 +54,9 @@ STAR_POWER_MODIFIER = {
 
 def assign_tiers(n_teams, season_seed, team_names=None):
     team_names = team_names or [f"Team {i + 1}" for i in range(n_teams)]
-    base, remainder = divmod(n_teams, 3)
-    sizes = [base + (1 if i < remainder else 0) for i in range(3)]  # Major, Mid, Small
+    n_tiers = len(MARKET_TIERS)
+    base, remainder = divmod(n_teams, n_tiers)
+    sizes = [base + (1 if i < remainder else 0) for i in range(n_tiers)]  # one size per MARKET_TIERS entry, in order
 
     pool = []
     for tier, size in zip(MARKET_TIERS, sizes):

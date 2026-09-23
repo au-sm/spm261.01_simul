@@ -95,17 +95,17 @@ var SPONSOR_CATALOG = [
 // Local TV market-tier base rates + base clauses per team, matches
 // data/local_tv_deals.json (base_clause follows the same higher-value-
 // market = stricter-clause pattern as the Sponsorship catalog above:
-// Major Market -> strict, Mid Market -> standard, Small Market -> loose).
+// Major/Large Market -> strict, Mid/Small Market -> standard, Micro Market -> loose).
 var LOCAL_TV_BASE = {
-  "0":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "1":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"},
-  "2":{tier:"Mid Market",base_revenue:900000,base_clause:"standard"}, "3":{tier:"Small Market",base_revenue:700000,base_clause:"loose"},
-  "4":{tier:"Mid Market",base_revenue:900000,base_clause:"standard"}, "5":{tier:"Small Market",base_revenue:700000,base_clause:"loose"},
-  "6":{tier:"Small Market",base_revenue:700000,base_clause:"loose"}, "7":{tier:"Mid Market",base_revenue:900000,base_clause:"standard"},
-  "8":{tier:"Small Market",base_revenue:700000,base_clause:"loose"}, "9":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"},
-  "10":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "11":{tier:"Small Market",base_revenue:700000,base_clause:"loose"},
-  "12":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "13":{tier:"Mid Market",base_revenue:900000,base_clause:"standard"},
-  "14":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "15":{tier:"Mid Market",base_revenue:900000,base_clause:"standard"},
-  "16":{tier:"Small Market",base_revenue:700000,base_clause:"loose"}, "17":{tier:"Mid Market",base_revenue:900000,base_clause:"standard"},
+  "0":{tier:"Large Market",base_revenue:1000000,base_clause:"strict"}, "1":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"},
+  "2":{tier:"Mid Market",base_revenue:850000,base_clause:"standard"}, "3":{tier:"Small Market",base_revenue:700000,base_clause:"standard"},
+  "4":{tier:"Mid Market",base_revenue:850000,base_clause:"standard"}, "5":{tier:"Micro Market",base_revenue:550000,base_clause:"loose"},
+  "6":{tier:"Micro Market",base_revenue:550000,base_clause:"loose"}, "7":{tier:"Mid Market",base_revenue:850000,base_clause:"standard"},
+  "8":{tier:"Small Market",base_revenue:700000,base_clause:"standard"}, "9":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"},
+  "10":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "11":{tier:"Small Market",base_revenue:700000,base_clause:"standard"},
+  "12":{tier:"Large Market",base_revenue:1000000,base_clause:"strict"}, "13":{tier:"Large Market",base_revenue:1000000,base_clause:"strict"},
+  "14":{tier:"Major Market",base_revenue:1200000,base_clause:"strict"}, "15":{tier:"Mid Market",base_revenue:850000,base_clause:"standard"},
+  "16":{tier:"Micro Market",base_revenue:550000,base_clause:"loose"}, "17":{tier:"Large Market",base_revenue:1000000,base_clause:"strict"},
 };
 
 function ensureSheets_() {
@@ -254,12 +254,23 @@ function doGet(e) {
   }
 
   // public, non-admin reads used by the Sponsorship and TV Rights pages
-  // to show live slot availability without needing the admin key
+  // to show live slot availability without needing the admin key.
+  // base_revenue is deliberately stripped from both catalogs below --
+  // real price numbers must never leave the server to an unauthenticated
+  // client, even inside a JSON response nobody's UI happens to display.
+  // The full SPONSOR_CATALOG / LOCAL_TV_BASE constants (with base_revenue)
+  // stay in memory here and are used directly by doPost's own handlers.
   if (params.catalog === "1") {
     return jsonOut_({
       ok: true,
-      sponsor_catalog: SPONSOR_CATALOG,
-      local_tv_base: LOCAL_TV_BASE,
+      sponsor_catalog: SPONSOR_CATALOG.map(function (b) {
+        return { name: b.name, category: b.category, base_clause: b.base_clause, qty: b.qty }; // no base_revenue -- not public
+      }),
+      local_tv_base: Object.keys(LOCAL_TV_BASE).reduce(function (out, teamId) {
+        var t = LOCAL_TV_BASE[teamId];
+        out[teamId] = { tier: t.tier, base_clause: t.base_clause }; // no base_revenue -- not public
+        return out;
+      }, {}),
       sponsorship_deals: readSponsorshipDeals_(sheets.sponsorships).map(function (d) {
         return { team_id: d.team_id, category: d.category, brand: d.brand }; // no revenue/clause -- not other teams' business
       }),
@@ -387,7 +398,11 @@ function doPost(e) {
     var repTeamId = null;
     if (finalRevenue !== brand.base_revenue) {
       if (body.rep_team_id === undefined || body.rep_team_id === null || body.rep_team_id === "") {
-        return jsonOut_({ ok: false, error: "Revenue different from base ($" + brand.base_revenue + ") requires rep_team_id to credit the commission." });
+        // Deliberately does not echo brand.base_revenue back here -- an
+        // error message is still a response to an unauthenticated client,
+        // and a team could otherwise learn a brand's exact base price just
+        // by submitting a mismatched revenue with no rep_team_id.
+        return jsonOut_({ ok: false, error: "Revenue different from base requires rep_team_id to credit the commission." });
       }
       repTeamId = body.rep_team_id;
     }
@@ -426,7 +441,9 @@ function doPost(e) {
     var tvRepTeamId = null;
     if (tvFinalRevenue !== tvBase.base_revenue) {
       if (body.rep_team_id === undefined || body.rep_team_id === null || body.rep_team_id === "") {
-        return jsonOut_({ ok: false, error: "Rate different from base ($" + tvBase.base_revenue + ") requires rep_team_id to credit the commission." });
+        // Same reasoning as the sponsorship_deal handler above -- don't
+        // echo tvBase.base_revenue back in an error message either.
+        return jsonOut_({ ok: false, error: "Rate different from base requires rep_team_id to credit the commission." });
       }
       tvRepTeamId = body.rep_team_id;
     }

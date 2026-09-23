@@ -34,7 +34,7 @@ def money(n):
     return f"${n:,}"
 
 
-def render(config, deals, calendar=None):
+def render(config, deals, calendar=None, ltv_deals=None):
     tv = deals["tv_deal_formula"]
     ltv = deals["local_tv_deal_formula"]
     tr = deals["trade_rules"]
@@ -47,13 +47,24 @@ def render(config, deals, calendar=None):
     category_blocks = ""
     for cat in deals["sponsorship_categories"]:
         rows = "".join(
-            f'<tr><td>{b["name"]}</td><td class="num">{money(b["base_revenue"])}</td><td>{b["base_clause"]}</td><td class="num">{b["qty"]}</td></tr>'
+            f'<tr><td>{b["name"]}</td><td>{b["base_clause"]}</td><td class="num">{b["qty"]}</td></tr>'
             for b in cat["brands"]
         )
         category_blocks += f'''
       <h3>{cat["category"]}</h3>
-      <table><thead><tr><th>Brand</th><th class="num">Base Revenue</th><th>Base Clause</th><th class="num">League-wide Slots</th></tr></thead>
+      <table><thead><tr><th>Brand</th><th>Base Clause</th><th class="num">League-wide Slots</th></tr></thead>
       <tbody>{rows}</tbody></table>'''
+
+    # Local TV market-tier table -- tier name + clause only, no dollar
+    # figure, same treatment as the sponsorship brand table above. Real
+    # base rates are never posted publicly; a network rep tells each team
+    # theirs face to face.
+    ltv_tier_rows_html = ""
+    if ltv_deals:
+        ltv_tier_rows_html = "".join(
+            f'<tr><td>{tier["tier"]}</td><td>{tier["base_clause"]}</td></tr>'
+            for tier in ltv_deals["market_tiers"]
+        )
 
     sponsor_html = f'''
       <p><strong>Sponsors pay you</strong> &mdash; there is no cost to sign anything, matching how real sponsorship deals
@@ -314,6 +325,7 @@ def render(config, deals, calendar=None):
           <h3>Local TV Deals</h3>
           <p>{ltv["description"]}</p>
           <p><strong>Market tiers:</strong> {ltv["market_tiers"]}</p>
+          {f'<table><thead><tr><th>Market Tier</th><th>Base Clause</th></tr></thead><tbody>{ltv_tier_rows_html}</tbody></table>' if ltv_tier_rows_html else ''}
           <p><strong>Star Power modifier:</strong> {ltv["star_power_modifier"]}</p>
           <p><strong>Payout timing:</strong> {ltv["payout_timing"]}</p>
           <p>{ltv["salary_cap_note"]}</p>
@@ -450,7 +462,9 @@ if __name__ == "__main__":
     deals = load_json("deals.json")
     cal_path = os.path.join(BASE, "data", "season_calendar.json")
     calendar = load_json("season_calendar.json") if os.path.exists(cal_path) else None
-    html = render(config, deals, calendar)
+    ltv_path = os.path.join(BASE, "data", "local_tv_deals.json")
+    ltv_deals = load_json("local_tv_deals.json") if os.path.exists(ltv_path) else None
+    html = render(config, deals, calendar, ltv_deals)
     out_path = os.path.join(BASE, "rulebook", "index.html")
     with open(out_path, "w") as f:
         f.write(html)
