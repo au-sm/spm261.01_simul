@@ -7,7 +7,23 @@ generate_negotiation_rotation.py does: pairing every team with exactly
 one partner, no repeats, is the same combinatorial problem as
 scheduling a round-robin round. Unlike the Sponsorship Negotiation
 rotation (6 rounds, one per category), a team only has ONE Local TV
-Deal, so this needs just the FIRST round of that schedule.
+Deal, so this needs just ONE round of that schedule -- but NOT round 0.
+
+The Sponsorship Negotiation rotation (generate_negotiation_rotation.py)
+also builds its schedule from round_robin_schedule(list(range(n_teams)))
+with no seed/offset, and consumes rounds 0..n_categories-1 (rounds
+0-5 for the current 6 sponsorship categories). Since that schedule is
+fully deterministic, TV's own round 0 would be IDENTICAL to
+Sponsorship's round 0 pairing -- every student would get the exact
+same partner for both exercises, defeating the point of practicing
+negotiation against a different classmate. Round-robin guarantees
+each pair of teams meets in exactly ONE round across the whole
+schedule, so picking any round AT OR AFTER n_categories is
+mathematically guaranteed to share zero pairs with any Sponsorship
+round -- this uses round `n_categories` (the one immediately after
+Sponsorship's last used round) for that reason, read live from
+data/deals.json's sponsorship_categories so it can never silently
+drift back into a collision if the category count ever changes.
 
 WITHIN each pair, both students negotiate back to back, swapping who
 plays team owner and who plays "network rep":
@@ -33,14 +49,28 @@ from simulate import round_robin_schedule
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def build_rotation(n_teams, market_tiers_by_team, team_names=None):
+def build_rotation(n_teams, market_tiers_by_team, team_names=None, sponsorship_rounds_used=6):
     """market_tiers_by_team: dict team_id -> market_tier string, from
     data/local_tv_deals.json, shown alongside each pairing so students
-    know what's actually on the table before they negotiate."""
+    know what's actually on the table before they negotiate.
+
+    sponsorship_rounds_used: how many rounds of the SAME underlying
+    round_robin_schedule() the Sponsorship Negotiation rotation already
+    consumed (its round count = its number of categories -- 6 by
+    default, see module docstring). This picks the round right after
+    that block, which round-robin's one-meeting-per-pair guarantee
+    ensures shares zero partners with any Sponsorship round."""
     team_names = team_names or [f"Team {i+1}" for i in range(n_teams)]
     team_ids = list(range(n_teams))
     schedule = round_robin_schedule(team_ids)
-    pairs = schedule[0]
+    if len(schedule) <= sponsorship_rounds_used:
+        raise ValueError(
+            f"round_robin_schedule only produced {len(schedule)} rounds, but round "
+            f"{sponsorship_rounds_used} (right after the {sponsorship_rounds_used} rounds "
+            f"Sponsorship already uses) is needed to avoid repeating a Sponsorship partner -- "
+            f"too few teams for both rotations to stay partner-disjoint."
+        )
+    pairs = schedule[sponsorship_rounds_used]
     paired_ids = {tid for pair in pairs for tid in pair}
     bye = [tid for tid in team_ids if tid not in paired_ids]
 
@@ -73,7 +103,11 @@ if __name__ == "__main__":
             ltv = json.load(f)
         market_tiers_by_team = {a["team_id"]: a["market_tier"] for a in ltv["assignments"]}
 
-    rotation = build_rotation(args.n_teams, market_tiers_by_team, team_names)
+    with open(os.path.join(BASE, "data", "deals.json")) as f:
+        deals = json.load(f)
+    sponsorship_rounds_used = len(deals["sponsorship_categories"])
+
+    rotation = build_rotation(args.n_teams, market_tiers_by_team, team_names, sponsorship_rounds_used)
 
     print("=== Local TV Rights Negotiation ===")
     for p in rotation["pairs"]:
