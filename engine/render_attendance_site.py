@@ -20,7 +20,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from site_nav import NAV_CSS, render_nav
+from site_nav import GH_BASE, NAV_CSS, render_nav
 from attendance import CAPACITY, PRICE_TIERS, PRICE_EFFECT, BASE_RATE, FORM_WEIGHT, STAR_WEIGHT, MIN_RATE, MAX_RATE
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -109,6 +109,9 @@ section{{margin-bottom:36px;}}
 .how-it-works{{background:var(--surface);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow);padding:18px 22px;}}
 .how-it-works ul{{margin:8px 0 0;padding-left:20px;}}
 .how-it-works li{{margin-bottom:6px;}}
+.ticket-cta{{background:var(--paper);border:1px solid var(--accent);border-radius:4px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:0 0 16px;}}
+.ticket-cta-btn{{flex-shrink:0;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);border-radius:3px;padding:8px 14px;text-decoration:none;white-space:nowrap;}}
+.ticket-cta-btn:hover{{opacity:.85;}}
 .asks-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:14px;}}
 .ask-chip{{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:8px 12px;font-size:13px;}}
 .ask-chip b{{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;}}
@@ -149,7 +152,10 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
   <section>
     <div class="section-head"><h2>How It Works</h2></div>
     <div class="how-it-works">
-      <p>Every home match, you choose a ticket price tier on the Weekly Lineup form. Revenue = attendance &times; price
+      <p class="ticket-cta">There's no ticket-price control on this page &mdash; you set it every round on the
+      <a href="{GH_BASE}/dashboard/"><strong>Weekly Lineup form on the Dashboard</strong></a>, right alongside your
+      formation and strategy. <a href="{GH_BASE}/dashboard/" class="ticket-cta-btn">Go to Dashboard &rarr;</a></p>
+      <p>Every home match, you choose a ticket price tier there. Revenue = attendance &times; price
       &mdash; the classic price-elasticity tradeoff: Premium pays more per fan but empties seats; Budget fills the
       building but caps the per-ticket upside. Stadium capacity is <b>{CAPACITY:,}</b>.</p>
       <table><thead><tr><th>Tier</th><th class="num">Price</th><th class="num">Attendance Effect</th></tr></thead><tbody>{tier_rows}</tbody></table>
