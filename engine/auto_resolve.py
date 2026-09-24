@@ -63,6 +63,7 @@ def regenerate_all_pages():
     run(["python3", "engine/render_attendance_site.py"])
     run(["python3", "engine/render_matchday_replay.py"])
     run(["python3", "engine/render_draftboard_site.py"])
+    run(["python3", "engine/render_schedule_site.py"])
     run(["python3", "engine/render_scouting_site.py"])
     run(["python3", "engine/generate_players_json.py"])
     # dashboard has no __main__ CLI entry -- render inline exactly like every
@@ -103,6 +104,7 @@ print("dashboard OK")
         "attendance-site/index.html": "attendance/index.html",
         "matchday-replay/index.html": "matchday-replay/index.html",
         "draftboard-site/index.html": "draftboard/index.html",
+        "schedule-site/index.html": "schedule/index.html",
         "scouting-site/index.html": "scouting/index.html",
     }
     for src, dst in mapping.items():

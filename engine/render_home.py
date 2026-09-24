@@ -34,6 +34,7 @@ def money(n):
 CARD_COPY = {
     "dashboard": ("Dashboard", "Standings, rosters, salary caps, this week's Player Condition report, and every real submission tool — rename your team, submit your Draft Board, and turn in your weekly lineup."),
     "draftboard": ("Draft Board", "The full undrafted player pool — search, filter, and sort all 399 players before you rank your own board."),
+    "schedule": ("Schedule", "Every round's fixtures and date in one place — see what's already final and what's still coming up."),
     "scouting": ("Scouting Report", "Every team's roster-based Attack/Defense profile, plus their formation and strategy history once they've played — the real inputs for your weekly call."),
     "budget": ("Budget Dashboard", "Draft money left, and cash on hand from ticket, sponsorship, and TV revenue — one team's whole financial picture."),
     "rulebook": ("Rulebook", "Every rule, every formula, every point your grade is built from — start here if you're new."),
