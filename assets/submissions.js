@@ -13,6 +13,7 @@ let SPONSOR_CATALOG = [];
 let LOCAL_TV_BASE = {};
 let EXISTING_SPONSORSHIP_DEALS = []; // {team_id, category, brand} -- no revenue, not other teams' business
 let EXISTING_LOCAL_TV_DEALS = []; // {team_id} -- just "has negotiated"
+let EXISTING_TRADE_PROPOSALS = []; // full proposal objects, status: pending/accepted/rejected -- public, same as deal data
 
 async function loadPlayers() {
   const res = await fetch('../players.json');
@@ -38,6 +39,7 @@ async function loadCatalog() {
     LOCAL_TV_BASE = data.local_tv_base;
     EXISTING_SPONSORSHIP_DEALS = data.sponsorship_deals;
     EXISTING_LOCAL_TV_DEALS = data.local_tv_deals;
+    EXISTING_TRADE_PROPOSALS = data.trade_proposals || [];
   }
 }
 
@@ -448,4 +450,246 @@ function initLineupForm() {
     }
     btn.disabled = false;
   });
+}
+
+// ---------------- Trade Center: Propose a Trade ----------------
+// A trade only ever completes with BOTH teams' consent -- this form just
+// sends the OFFER (status "pending" in the TradeProposals sheet); nothing
+// moves until the receiving team accepts it in initTradeRespondForm()
+// below. Roster ownership and the salary cap are re-checked for real by
+// engine/resolve_trade.py once accepted -- this form can only check what
+// the client already knows (roster membership, matching counts), so a
+// proposal that looks fine here can still come back voided later (shown
+// in the trade log) if something about the rosters changed in between.
+let tradeGivePicks = []; // players from your own roster, up to 3
+let tradeWantPicks = []; // players from the partner's roster, up to 3
+
+function tradeTeamRoster(teamId) {
+  return PLAYERS.filter(p => String(p.team_id) === String(teamId));
+}
+
+function renderTradeSide(listId, picks, countLabelId) {
+  const list = document.getElementById(listId);
+  if (picks.length === 0) {
+    list.innerHTML = '<li class="sub-empty">None selected yet -- search below and add players.</li>';
+  } else {
+    list.innerHTML = picks.map((p, i) => `
+      <li>
+        <span class="sub-pos sub-pos-${p.position}">${p.position}</span>
+        <span class="sub-name">${p.name}</span>
+        <span class="sub-ovr">OVR ${p.ovr} &middot; $${p.salary.toLocaleString()}</span>
+        <button type="button" class="sub-remove" data-list="${listId}" data-i="${i}">remove</button>
+      </li>`).join('');
+  }
+  document.getElementById(countLabelId).textContent = `${picks.length}/3 selected`;
+}
+
+function renderTradeSearch(resultsId, searchId, posFilterId, rosterFn, picks, listId, countLabelId) {
+  const q = document.getElementById(searchId).value.trim().toLowerCase();
+  const posFilter = document.getElementById(posFilterId).value;
+  const results = document.getElementById(resultsId);
+  const roster = rosterFn();
+  const pickedIds = new Set(picks.map(p => p.id));
+  const matches = roster.filter(p =>
+    (posFilter === 'ALL' || p.position === posFilter) &&
+    (!q || p.name.toLowerCase().includes(q)) &&
+    !pickedIds.has(p.id)
+  ).sort((a, b) => b.ovr - a.ovr).slice(0, 30);
+
+  results.innerHTML = roster.length === 0
+    ? '<li class="sub-empty">No roster yet -- this team has not been drafted.</li>'
+    : matches.map(p => `
+      <li>
+        <span class="sub-pos sub-pos-${p.position}">${p.position}</span>
+        <span class="sub-name">${p.name}</span>
+        <span class="sub-ovr">OVR ${p.ovr} &middot; $${p.salary.toLocaleString()}</span>
+        <button type="button" class="sub-add" data-id="${p.id}" ${picks.length >= 3 ? 'disabled' : ''}>add</button>
+      </li>`).join('');
+
+  results.querySelectorAll('.sub-add').forEach(b => b.addEventListener('click', () => {
+    if (picks.length >= 3) return;
+    const player = roster.find(p => p.id === parseInt(b.dataset.id, 10));
+    if (player) picks.push(player);
+    renderTradeSide(listId, picks, countLabelId);
+    renderTradeSearch(resultsId, searchId, posFilterId, rosterFn, picks, listId, countLabelId);
+  }));
+}
+
+function initTradeProposeForm() {
+  const teamSel = document.getElementById('tp-team');
+  const partnerSel = document.getElementById('tp-partner');
+  const pinInput = document.getElementById('tp-pin');
+  const btn = document.getElementById('tp-submit');
+  const msg = document.getElementById('tp-msg');
+
+  function refreshGive() {
+    renderTradeSide('tp-give-list', tradeGivePicks, 'tp-give-count');
+    renderTradeSearch('tp-give-results', 'tp-give-search', 'tp-give-pos', () => tradeTeamRoster(teamSel.value), tradeGivePicks, 'tp-give-list', 'tp-give-count');
+  }
+  function refreshWant() {
+    renderTradeSide('tp-want-list', tradeWantPicks, 'tp-want-count');
+    renderTradeSearch('tp-want-results', 'tp-want-search', 'tp-want-pos', () => tradeTeamRoster(partnerSel.value), tradeWantPicks, 'tp-want-list', 'tp-want-count');
+  }
+  function resetAndRebuild() {
+    tradeGivePicks = [];
+    tradeWantPicks = [];
+    document.getElementById('tp-give-search').value = '';
+    document.getElementById('tp-want-search').value = '';
+    refreshGive();
+    refreshWant();
+  }
+
+  teamSel.addEventListener('change', resetAndRebuild);
+  partnerSel.addEventListener('change', resetAndRebuild);
+  document.getElementById('tp-give-search').addEventListener('input', refreshGive);
+  document.getElementById('tp-give-pos').addEventListener('change', refreshGive);
+  document.getElementById('tp-want-search').addEventListener('input', refreshWant);
+  document.getElementById('tp-want-pos').addEventListener('change', refreshWant);
+
+  // event delegation on the (stable) parent <ul> elements -- survives
+  // innerHTML rebuilds in renderTradeSide, unlike binding on the buttons
+  // themselves would.
+  document.getElementById('tp-give-list').addEventListener('click', (e) => {
+    const b = e.target.closest('.sub-remove');
+    if (!b) return;
+    tradeGivePicks.splice(parseInt(b.dataset.i, 10), 1);
+    refreshGive();
+  });
+  document.getElementById('tp-want-list').addEventListener('click', (e) => {
+    const b = e.target.closest('.sub-remove');
+    if (!b) return;
+    tradeWantPicks.splice(parseInt(b.dataset.i, 10), 1);
+    refreshWant();
+  });
+
+  resetAndRebuild();
+
+  btn.addEventListener('click', async () => {
+    const pin = pinInput.value.trim();
+    if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'sub-msg'; return; }
+    if (teamSel.value === partnerSel.value) { msg.textContent = 'Pick a different team to trade with.'; msg.className = 'sub-msg'; return; }
+    if (tradeGivePicks.length === 0) { msg.textContent = 'Select at least one player to give up.'; msg.className = 'sub-msg'; return; }
+    if (tradeGivePicks.length !== tradeWantPicks.length) {
+      msg.textContent = `You're offering ${tradeGivePicks.length} player(s) for ${tradeWantPicks.length} -- both sides must match: 1-for-1, 2-for-2, or 3-for-3.`;
+      msg.className = 'sub-msg';
+      return;
+    }
+    const rationale = document.getElementById('tp-rationale').value.trim();
+    if (!rationale) { msg.textContent = 'Add a short rationale for this trade (this is graded).'; msg.className = 'sub-msg'; return; }
+
+    const body = {
+      type: 'trade_proposal', team_id: teamSel.value, pin,
+      receiver_team_id: partnerSel.value,
+      players_out: tradeGivePicks.map(p => ({ id: p.id, name: p.name })),
+      players_in: tradeWantPicks.map(p => ({ id: p.id, name: p.name })),
+      cash_from_proposer: parseInt(document.getElementById('tp-cash-give').value, 10) || 0,
+      cash_from_receiver: parseInt(document.getElementById('tp-cash-want').value, 10) || 0,
+      rationale,
+    };
+
+    btn.disabled = true;
+    msg.textContent = 'Submitting...';
+    msg.className = 'sub-msg';
+    try {
+      const result = await postSubmission(body);
+      if (result.ok) {
+        msg.textContent = 'Trade proposed -- it now sits pending until the other team accepts or declines it below.';
+        msg.className = 'sub-msg ok';
+        pinInput.value = '';
+        await loadCatalog();
+        renderTradeLog();
+        renderTradeInbox();
+      } else {
+        msg.textContent = result.error || 'Something went wrong.';
+        msg.className = 'sub-msg';
+      }
+    } catch (e) {
+      msg.textContent = 'Could not reach the server -- check your connection and try again.';
+      msg.className = 'sub-msg';
+    }
+    btn.disabled = false;
+  });
+}
+
+// ---------------- Trade Center: Respond to a Trade ----------------
+function renderTradeInbox() {
+  const teamSel = document.getElementById('tr-team');
+  const list = document.getElementById('tr-inbox');
+  if (!teamSel || !list) return;
+  const pending = EXISTING_TRADE_PROPOSALS.filter(p => String(p.receiver_team_id) === teamSel.value && p.status === 'pending');
+  if (pending.length === 0) {
+    list.innerHTML = '<li class="sub-empty">No pending trade offers for this team.</li>';
+    return;
+  }
+  const teamName = id => (TEAMS.find(t => String(t.id) === String(id)) || {}).name || `Team ${id}`;
+  list.innerHTML = pending.map(p => `
+    <li class="sub-trade-offer">
+      <p><b>${teamName(p.proposer_team_id)}</b> offers: ${p.players_out.map(pl => pl.name).join(', ')}${p.cash_from_proposer ? ` + $${Number(p.cash_from_proposer).toLocaleString()}` : ''}
+      &nbsp;&rarr;&nbsp; for &nbsp;&rarr;&nbsp;
+      ${p.players_in.map(pl => pl.name).join(', ')}${p.cash_from_receiver ? ` + $${Number(p.cash_from_receiver).toLocaleString()}` : ''}</p>
+      <p class="sub-trade-rationale">&ldquo;${p.rationale}&rdquo;</p>
+      <button type="button" class="sub-btn sub-trade-accept" data-id="${p.proposal_id}">Accept</button>
+      <button type="button" class="sub-btn sub-trade-decline" data-id="${p.proposal_id}">Decline</button>
+    </li>`).join('');
+
+  list.querySelectorAll('.sub-trade-accept, .sub-trade-decline').forEach(b => b.addEventListener('click', async () => {
+    const pinInput = document.getElementById('tr-pin');
+    const msg = document.getElementById('tr-msg');
+    const pin = pinInput.value.trim();
+    if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN first.'; msg.className = 'sub-msg'; return; }
+    const decision = b.classList.contains('sub-trade-accept') ? 'accept' : 'reject';
+    list.querySelectorAll('button').forEach(x => x.disabled = true);
+    msg.textContent = 'Submitting...';
+    msg.className = 'sub-msg';
+    try {
+      const result = await postSubmission({ type: 'trade_response', team_id: teamSel.value, pin, proposal_id: b.dataset.id, decision });
+      if (result.ok) {
+        msg.textContent = decision === 'accept'
+          ? 'Accepted -- this trade will apply automatically once the next league-office check confirms rosters and cap room (usually within the hour).'
+          : 'Declined.';
+        msg.className = 'sub-msg ok';
+        pinInput.value = '';
+        await loadCatalog();
+        renderTradeInbox();
+        renderTradeLog();
+      } else {
+        msg.textContent = result.error || 'Something went wrong.';
+        msg.className = 'sub-msg';
+        list.querySelectorAll('button').forEach(x => x.disabled = false);
+      }
+    } catch (e) {
+      msg.textContent = 'Could not reach the server -- check your connection and try again.';
+      msg.className = 'sub-msg';
+      list.querySelectorAll('button').forEach(x => x.disabled = false);
+    }
+  }));
+}
+
+function initTradeRespondForm() {
+  const teamSel = document.getElementById('tr-team');
+  teamSel.addEventListener('change', renderTradeInbox);
+  renderTradeInbox();
+}
+
+// ---------------- Trade Center: live pending/responded log ----------------
+// Final APPLIED/VOIDED outcomes (after engine/resolve_trade.py's own
+// roster + salary-cap re-check) are server-rendered separately, straight
+// from data/trades.json, by engine/render_trade_site.py -- this table is
+// only the live pending/accepted/declined status straight from the Sheet.
+function renderTradeLog() {
+  const el = document.getElementById('tp-live-log');
+  if (!el) return;
+  const teamName = id => (TEAMS.find(t => String(t.id) === String(id)) || {}).name || `Team ${id}`;
+  const rows = EXISTING_TRADE_PROPOSALS.slice().reverse();
+  if (rows.length === 0) {
+    el.innerHTML = '<tr><td colspan="4" class="sub-empty">No trades proposed yet.</td></tr>';
+    return;
+  }
+  el.innerHTML = rows.map(p => `
+    <tr>
+      <td>${teamName(p.proposer_team_id)} &rarr; ${teamName(p.receiver_team_id)}</td>
+      <td>${p.players_out.map(pl => pl.name).join(', ')} for ${p.players_in.map(pl => pl.name).join(', ')}</td>
+      <td><span class="sub-status sub-status-${p.status}">${p.status}</span></td>
+      <td>${(p.timestamp || '').slice(0, 10)}</td>
+    </tr>`).join('');
 }

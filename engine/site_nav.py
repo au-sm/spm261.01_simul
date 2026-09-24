@@ -27,6 +27,7 @@ PAGES = [
     ("budget", "Budget Dashboard", f"{GH_BASE}/budget/"),
     ("rulebook", "Rulebook", f"{GH_BASE}/rulebook/"),
     ("sponsorship", "Sponsorship Marketplace", f"{GH_BASE}/sponsorship/"),
+    ("trade", "Trade Center", f"{GH_BASE}/trade/"),
     ("tv", "TV Rights Marketplace", f"{GH_BASE}/tv/"),
     ("attendance", "Attendance &amp; Ticket Sales", f"{GH_BASE}/attendance/"),
     ("walkthrough", "Match Engine Walkthrough", f"{GH_BASE}/walkthrough/"),

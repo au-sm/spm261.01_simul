@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trade Center</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/submissions.css">
+<style>
+:root{
+  --paper:#eef2ea; --ink:#16201a; --muted:#5b6b5e; --line:#d6decd;
+  --accent:#b8811f; --accent-ink:#3a2a08; --pitch:#2f5233; --pitch-ink:#eef2ea;
+  --navy:#223a5e; --navy-ink:#eef2ea; --surface:#f7f9f4;
+  --win:#2f7a4f; --loss:#b4472f; --draw:#a5791f;
+  --shadow: 0 1px 2px rgba(22,32,26,.06), 0 4px 14px rgba(22,32,26,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
+    --accent:#d9a44a; --accent-ink:#1c1404; --pitch:#4c7a52; --pitch-ink:#0d130e;
+    --navy:#4a6693; --navy-ink:#0d130e; --surface:#171d17;
+    --win:#4fae76; --loss:#e07a5c; --draw:#d1a13e;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+    --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
+    --accent:#d9a44a; --accent-ink:#1c1404; --pitch:#4c7a52; --pitch-ink:#0d130e;
+    --navy:#4a6693; --navy-ink:#0d130e; --surface:#171d17;
+    --win:#4fae76; --loss:#e07a5c; --draw:#d1a13e;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;line-height:1.5;}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;}
+h1,h2,h3{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase;letter-spacing:.02em;text-wrap:balance;margin:0;}
+.num{font-variant-numeric:tabular-nums;text-align:right;}
+
+.masthead{background:var(--pitch);color:var(--pitch-ink);padding:28px clamp(16px,4vw,48px);}
+.masthead-inner{max-width:1180px;margin:0 auto;}
+.masthead h1{font-size:clamp(26px,4vw,38px);font-weight:800;}
+.masthead p{font-family:"IBM Plex Mono",monospace;font-size:12.5px;opacity:.85;margin:6px 0 0;letter-spacing:.03em;}
+
+.wrap{max-width:1180px;margin:0 auto;padding:28px clamp(16px,4vw,48px) 70px;}
+section{margin-bottom:36px;}
+.section-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:16px;}
+.section-head h2{font-size:21px;}
+.section-note{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);}
+
+.how-it-works{background:var(--surface);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow);padding:18px 22px;}
+.how-it-works p{margin:0 0 10px;}
+.how-it-works p:last-child{margin-bottom:0;}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--surface);border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow);}
+thead th{background:var(--navy);color:var(--navy-ink);text-align:left;padding:9px 10px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;}
+thead th.num{text-align:right;}
+tbody td{padding:7px 10px;border-top:1px solid var(--line);vertical-align:top;}
+.trade-arrow{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);text-transform:uppercase;}
+.trade-detail{font-size:12.5px;color:var(--muted);max-width:320px;}
+
+footer{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:var(--muted);font-size:12px;font-family:"IBM Plex Mono",monospace;}
+
+/* explicit overrides throughout -- some host pages already style bare
+   nav{} / nav a{} for their own in-page section nav, so .sm-nav can't
+   rely on defaults not leaking in from those lower-specificity rules */
+.sm-nav{position:sticky;top:0;z-index:100;background:var(--ink);display:flex;flex-direction:row;
+  align-items:center;flex-wrap:wrap;gap:clamp(10px,2vw,28px);padding:10px clamp(14px,4vw,32px);
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;
+  border:none;box-shadow:0 2px 8px rgba(0,0,0,.18);}
+.sm-nav .sm-brand{color:var(--paper);font-weight:600;letter-spacing:.04em;margin-right:auto;white-space:nowrap;}
+.sm-nav a{color:color-mix(in srgb, var(--paper) 65%, transparent);text-decoration:none;letter-spacing:.02em;
+  padding:3px 0;border-bottom:2px solid transparent;white-space:nowrap;font-size:12.5px;}
+.sm-nav a:hover{color:var(--paper);}
+.sm-nav a.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+</style>
+</head>
+<body>
+<nav class="sm-nav">
+    <span class="sm-brand">SPM261.01 SOCCER LEAGUE</span>
+    <a href="https://au-sm.github.io/spm261.01_simul/" target="_blank" rel="noopener">Home</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/dashboard/" target="_blank" rel="noopener">Dashboard</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/draftboard/" target="_blank" rel="noopener">Draft Board</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/schedule/" target="_blank" rel="noopener">Schedule</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/scouting/" target="_blank" rel="noopener">Scouting Report</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/budget/" target="_blank" rel="noopener">Budget Dashboard</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/rulebook/" target="_blank" rel="noopener">Rulebook</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/sponsorship/" target="_blank" rel="noopener">Sponsorship Marketplace</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/trade/" target="_blank" rel="noopener" class="active">Trade Center</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/tv/" target="_blank" rel="noopener">TV Rights Marketplace</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/attendance/" target="_blank" rel="noopener">Attendance &amp; Ticket Sales</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/walkthrough/" target="_blank" rel="noopener">Match Engine Walkthrough</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/matchday-replay/" target="_blank" rel="noopener">Matchday Replay</a>
+  </nav>
+<div class="masthead">
+  <div class="masthead-inner">
+    <h1>Trade Center</h1>
+    <p>SPM261.01 Soccer League &middot; propose a trade, respond to one sent to you, deadline before Round 7</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section>
+    <div class="section-head"><h2>How It Works</h2></div>
+    <div class="how-it-works">
+      <p><b>Deadline.</b> Trades must be fully agreed to (both teams accepted) before Round 7 -- Round 6 is the last round a trade can still land. No trades take effect in Rounds 7-17 or at any point after -- this prevents last-minute roster stacking right before the playoff-qualification picture is set, the same reason real leagues carry a trade deadline.</p>
+      <p><b>How many players.</b> Every trade must send the SAME number of players back each way -- 1-for-1, 2-for-2, or 3-for-3 only, never an uneven count like 1-for-2. On top of that, a team may trade away at most 3 players total, combining every trade it makes, before the Round 6 deadline -- once a team has moved 3 players, it's done trading for the season, win or lose on those swaps.</p>
+      <p><b>Voluntary.</b> Trading is entirely optional. No team is required to make a trade, and nobody has to accept an offer just because it's sent -- if the two sides can't agree on fair value, the simplest right answer is to not trade.</p>
+      <p><b>Salary cap.</b> A trade is only valid if BOTH teams remain at or under salary_cap (see league_config.json) after the trade completes.</p>
+      <p><b>Cash considerations.</b> Either side may add cash (from its budget, not a salary-cap item) on top of the player swap to make up for a value gap -- paying extra cash to land a clearly better player than what you're giving up is a normal, allowed trade structure, the same way real clubs attach cash to a deal.</p>
+      <p><b>Approval.</b> A trade only takes effect once BOTH teams agree to it: the proposing team submits a Trade Proposal, and it sits pending until the receiving team accepts or declines it on the Trade Center page. Accepting applies it immediately (once it clears the roster/cap checks below); declining ends it with no changes to either roster.</p>
+      <p><b>Trade Day.</b> One in-class Trade Day, scheduled mid-season (see the Season Calendar) as the suggested window to negotiate face to face -- not a forced transaction. Every team is paired with exactly one partner from a published rotation (engine/generate_trade_day_rotation.py, same no-repeat pairing method as the Sponsorship Negotiation rotation) to talk through a possible trade that class period; an odd team count leaves one team unpaired, and the instructor fills in as that team's partner, the same convention already used for the Sponsorship Negotiation rotation's bye. Whether that conversation turns into an actual submitted Trade Proposal is up to the two teams -- Trade Day is a floor for negotiation, not a cap: the ordinary voluntary trade window stays open before and after it, through Round 6.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Players Traded This Season</h2><span class="section-note">3-player season limit, per team</span></div>
+    <table>
+      <thead><tr><th>Team</th><th class="num">Traded so far</th></tr></thead>
+      <tbody><tr><td>Team 1</td><td class="num">0/3 players traded</td></tr><tr><td>Team 2</td><td class="num">0/3 players traded</td></tr><tr><td>Team 3</td><td class="num">0/3 players traded</td></tr><tr><td>Team 4</td><td class="num">0/3 players traded</td></tr><tr><td>Team 5</td><td class="num">0/3 players traded</td></tr><tr><td>Team 6</td><td class="num">0/3 players traded</td></tr><tr><td>Team 7</td><td class="num">0/3 players traded</td></tr><tr><td>Team 8</td><td class="num">0/3 players traded</td></tr><tr><td>Team 9</td><td class="num">0/3 players traded</td></tr><tr><td>Team 10</td><td class="num">0/3 players traded</td></tr><tr><td>Team 11</td><td class="num">0/3 players traded</td></tr><tr><td>Team 12</td><td class="num">0/3 players traded</td></tr><tr><td>Team 13</td><td class="num">0/3 players traded</td></tr><tr><td>Team 14</td><td class="num">0/3 players traded</td></tr><tr><td>Team 15</td><td class="num">0/3 players traded</td></tr><tr><td>Team 16</td><td class="num">0/3 players traded</td></tr><tr><td>Team 17</td><td class="num">0/3 players traded</td></tr><tr><td>Team 18</td><td class="num">0/3 players traded</td></tr></tbody>
+    </table>
+  </section>
+
+  <section>
+    <p class="sub-backend-warning" hidden>Backend not configured yet &mdash; submissions are disabled until BACKEND_URL is set in assets/config.js.</p>
+    <div class="sub-card">
+      <h2>Propose a Trade</h2>
+      <p class="sub-sub">Pick who you're giving and who you want back -- both sides must be the same count (1-3 players). Add cash on either side to bridge a value gap. Nothing moves until the other team accepts.</p>
+      <div class="sub-grid">
+        <div class="sub-field"><label for="tp-team">Your Team</label><select id="tp-team" class="sub-team-select"></select></div>
+        <div class="sub-field"><label for="tp-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="tp-pin" class="sub-pin" placeholder="4-digit PIN"></div>
+        <div class="sub-field"><label for="tp-partner">Trade Partner</label><select id="tp-partner" class="sub-team-select"></select></div>
+      </div>
+
+      <h3 style="font-size:14px;margin:18px 0 8px;">You Give Up</h3>
+      <div class="sub-search-row">
+        <input type="text" id="tp-give-search" placeholder="Search your roster by name...">
+        <select id="tp-give-pos">
+          <option value="ALL">All positions</option>
+          <option value="GK">GK</option><option value="DF">DF</option>
+          <option value="MF">MF</option><option value="FW">FW</option>
+        </select>
+      </div>
+      <ul class="sub-results" id="tp-give-results"></ul>
+      <p class="sub-count-note" id="tp-give-count"></p>
+      <ul class="sub-board" id="tp-give-list"></ul>
+      <div class="sub-field" style="max-width:280px;margin-top:10px;"><label for="tp-cash-give">Cash you add ($, optional)</label><input type="number" id="tp-cash-give" placeholder="0" min="0"></div>
+
+      <h3 style="font-size:14px;margin:22px 0 8px;">You Want Back</h3>
+      <div class="sub-search-row">
+        <input type="text" id="tp-want-search" placeholder="Search the partner's roster by name...">
+        <select id="tp-want-pos">
+          <option value="ALL">All positions</option>
+          <option value="GK">GK</option><option value="DF">DF</option>
+          <option value="MF">MF</option><option value="FW">FW</option>
+        </select>
+      </div>
+      <ul class="sub-results" id="tp-want-results"></ul>
+      <p class="sub-count-note" id="tp-want-count"></p>
+      <ul class="sub-board" id="tp-want-list"></ul>
+      <div class="sub-field" style="max-width:280px;margin-top:10px;"><label for="tp-cash-want">Cash you want back ($, optional)</label><input type="number" id="tp-cash-want" placeholder="0" min="0"></div>
+
+      <div class="sub-field" style="margin-top:16px;"><label for="tp-rationale">Rationale (2-4 sentences -- graded)</label><textarea id="tp-rationale" rows="3"></textarea></div>
+      <button class="sub-btn" id="tp-submit" style="margin-top:10px;">Send Trade Proposal</button>
+      <p class="sub-msg" id="tp-msg"></p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sub-card">
+      <h2>Respond to a Trade</h2>
+      <p class="sub-sub">Pick your team to see any trades sent to you, then accept or decline.</p>
+      <div class="sub-grid">
+        <div class="sub-field"><label for="tr-team">Your Team</label><select id="tr-team" class="sub-team-select"></select></div>
+        <div class="sub-field"><label for="tr-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="tr-pin" class="sub-pin" placeholder="4-digit PIN"></div>
+      </div>
+      <ul class="sub-board" id="tr-inbox" style="margin-top:10px;"></ul>
+      <p class="sub-msg" id="tr-msg"></p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Live Proposals</h2><span class="section-note">pending / accepted / declined -- updates as teams respond</span></div>
+    <table>
+      <thead><tr><th>Teams</th><th>Trade</th><th>Status</th><th>Proposed</th></tr></thead>
+      <tbody id="tp-live-log"><tr><td colspan="4" class="sub-empty">Loading...</td></tr></tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Final Trade Log</h2><span class="section-note">applied or voided, after roster/cap re-check -- the official record</span></div>
+    <table>
+      <thead><tr><th>Teams</th><th>Trade</th><th>Result</th><th>Detail</th><th>Date</th></tr></thead>
+      <tbody><tr><td colspan="5" class="sub-empty">No trades have been finalized yet.</td></tr></tbody>
+    </table>
+  </section>
+</div>
+
+<footer>SPM261.01 Soccer League &middot; Trade Center &mdash; roster and salary-cap checks match engine/resolve_trade.py exactly</footer>
+
+<script src="../assets/config.js"></script>
+<script src="../assets/submissions.js"></script>
+<script>
+(async function initTradeCenter() {
+  await Promise.all([loadPlayers(), loadTeams(), loadCatalog()]);
+  populateTeamSelects();
+  initTradeProposeForm();
+  initTradeRespondForm();
+  renderTradeLog();
+})();
+</script>
+</body>
+</html>

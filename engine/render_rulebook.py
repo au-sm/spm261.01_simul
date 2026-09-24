@@ -20,7 +20,7 @@ from scorecard import WEIGHTS, RANK_STEP, linear_rank_points
 from player_condition import (
     TIERS as CONDITION_TIERS, INJURED_MULTIPLIER, INJURY_CHANCE_PER_START, INJURY_DURATION_RANGE,
 )
-from site_nav import NAV_CSS, render_nav
+from site_nav import NAV_CSS, PAGES, render_nav
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -38,6 +38,7 @@ def render(config, deals, calendar=None, ltv_deals=None):
     tv = deals["tv_deal_formula"]
     ltv = deals["local_tv_deal_formula"]
     tr = deals["trade_rules"]
+    trade_center_url = dict((k, u) for k, _, u in PAGES)["trade"]
     po = deals["playoffs"]
     qualification_bonus = po["qualification_bonus"]
     ce = deals["clause_enforcement"]
@@ -343,11 +344,14 @@ def render(config, deals, calendar=None, ltv_deals=None):
 
         ("trades", "12. Trades &amp; Free Agency", f'''
           <p><strong>Deadline:</strong> {tr["deadline"]}</p>
+          <p><strong>How many players:</strong> {tr["player_limits"]}</p>
+          <p><strong>Voluntary:</strong> {tr["voluntary"]}</p>
           <p><strong>Salary cap rule:</strong> {tr["salary_cap"]}</p>
           <p><strong>Cash considerations:</strong> {tr["cash_considerations"]}</p>
           <p><strong>Approval:</strong> {tr["approval"]}</p>
-          <h3>Mandatory Mid-Season Trade Day</h3>
-          <p>{tr["mid_season_trade_day"]}</p>'''),
+          <h3>Trade Day</h3>
+          <p>{tr["mid_season_trade_day"]}</p>
+          <p>Propose and respond to real trades on the <a href="{trade_center_url}">Trade Center</a> page.</p>'''),
 
         ("standings", "13. Standings", '''
           <p>Win = 3 points, draw = 1 point, loss = 0 points. Ties broken first by goal difference, then total goals scored.</p>'''),

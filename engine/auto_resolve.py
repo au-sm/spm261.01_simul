@@ -64,6 +64,7 @@ def regenerate_all_pages():
     run(["python3", "engine/render_matchday_replay.py"])
     run(["python3", "engine/render_draftboard_site.py"])
     run(["python3", "engine/render_schedule_site.py"])
+    run(["python3", "engine/render_trade_site.py"])
     run(["python3", "engine/render_scouting_site.py"])
     run(["python3", "engine/generate_players_json.py"])
     # dashboard has no __main__ CLI entry -- render inline exactly like every
@@ -105,6 +106,7 @@ print("dashboard OK")
         "matchday-replay/index.html": "matchday-replay/index.html",
         "draftboard-site/index.html": "draftboard/index.html",
         "schedule-site/index.html": "schedule/index.html",
+        "trade-site/index.html": "trade/index.html",
         "scouting-site/index.html": "scouting/index.html",
     }
     for src, dst in mapping.items():
@@ -220,6 +222,38 @@ def resolve_local_tv_deals(sheet_local_tv_deals):
     return actions
 
 
+def resolve_trades(trade_proposals):
+    """Writes the current trade_proposals export to a temp file and lets
+    resolve_trade.py do the real work (roster ownership, the salary cap,
+    the 3-player season limit, and the Round 6 deadline -- see that
+    script's own docstring for why none of that can happen in
+    backend.gs). Runs unconditionally every cycle, same as sponsorship/
+    local TV, since it needs to catch newly-accepted trades AND
+    re-check anything still sitting accepted-but-unapplied against
+    today's deadline."""
+    if not trade_proposals:
+        return []
+    proposals_path = os.path.join(BASE, "_pulled_trade_proposals.json")
+    with open(proposals_path, "w") as f:
+        json.dump(trade_proposals, f)
+
+    trades_path = os.path.join(BASE, "data", "trades.json")
+    before = load_json("trades.json") if os.path.exists(trades_path) else {"applied": [], "voided": []}
+    before_ids = {t["proposal_id"] for t in before.get("applied", [])} | {t["proposal_id"] for t in before.get("voided", [])}
+
+    run(["python3", "engine/resolve_trade.py", "--proposals-file", proposals_path])
+
+    after = load_json("trades.json")
+    actions = []
+    for t in after.get("applied", []):
+        if t["proposal_id"] not in before_ids:
+            actions.append(f"trade applied: team {t['proposer_team_id']} <-> team {t['receiver_team_id']}")
+    for t in after.get("voided", []):
+        if t["proposal_id"] not in before_ids:
+            actions.append(f"trade voided: {t.get('void_reason', '')}")
+    return actions
+
+
 def main():
     print(f"auto_resolve.py run at {datetime.datetime.utcnow().isoformat()}Z")
     export = pull_submissions.fetch_admin_export()
@@ -272,6 +306,7 @@ def main():
         if config["phase"] != "pre-draft":
             actions.extend(resolve_sponsorship_deals(export.get("sponsorship_deals", [])))
             actions.extend(resolve_local_tv_deals(export.get("local_tv_deals", [])))
+            actions.extend(resolve_trades(export.get("trade_proposals", [])))
 
         if actions:
             regenerate_all_pages()

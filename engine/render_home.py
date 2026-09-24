@@ -39,6 +39,7 @@ CARD_COPY = {
     "budget": ("Budget Dashboard", "Draft money left, and cash on hand from ticket, sponsorship, and TV revenue — one team's whole financial picture."),
     "rulebook": ("Rulebook", "Every rule, every formula, every point your grade is built from — start here if you're new."),
     "sponsorship": ("Sponsorship Marketplace", "Open brand slots, live deal status, a negotiation simulator, and the real form to sign your sponsor."),
+    "trade": ("Trade Center", "Propose a trade, respond to one sent to you, and see the full trade log -- real roster swaps, real cap checks, real cash considerations."),
     "tv": ("TV Rights Marketplace", "Your market tier, your Local TV base rate, a negotiation simulator, and the real form to lock in your rate."),
     "attendance": ("Attendance &amp; Ticket Sales", "Ticket revenue by team, the attendance formula explained, and a pricing simulator for your next home match."),
     "replay": ("Matchday Replay", "A 90-minute match compressed into a 30-second animated replay — real formation shape, real goal minutes, real final score."),

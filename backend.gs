@@ -146,11 +146,19 @@ function ensureSheets_() {
     localTv.appendRow(["team_id", "final_revenue", "final_clause", "rep_team_id", "submitted_at"]);
   }
 
+  var trades = ss.getSheetByName("TradeProposals");
+  if (!trades) {
+    trades = ss.insertSheet("TradeProposals");
+    trades.appendRow(["proposal_id", "timestamp", "proposer_team_id", "receiver_team_id",
+                       "players_out_json", "players_in_json", "cash_from_proposer", "cash_from_receiver",
+                       "rationale", "status", "responded_at"]);
+  }
+
   // remove the default blank "Sheet1" left by spreadsheet creation, if still present and empty
   var sheet1 = ss.getSheetByName("Sheet1");
   if (sheet1 && sheet1.getLastRow() === 0) ss.deleteSheet(sheet1);
 
-  return { teams: teams, boards: boards, lineups: lineups, sponsorships: sponsorships, localTv: localTv };
+  return { teams: teams, boards: boards, lineups: lineups, sponsorships: sponsorships, localTv: localTv, trades: trades };
 }
 
 function readTeams_(teamsSheet) {
@@ -238,6 +246,42 @@ function readLocalTVDeals_(sheet) {
   return out;
 }
 
+function readTradeProposals_(sheet) {
+  var rows = sheet.getDataRange().getValues();
+  var out = [];
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i][0] === "" || rows[i][0] == null) continue;
+    var playersOut, playersIn;
+    try { playersOut = JSON.parse(rows[i][4]); } catch (e) { playersOut = []; }
+    try { playersIn = JSON.parse(rows[i][5]); } catch (e) { playersIn = []; }
+    out.push({
+      proposal_id: rows[i][0], timestamp: rows[i][1],
+      proposer_team_id: rows[i][2], receiver_team_id: rows[i][3],
+      players_out: playersOut, players_in: playersIn,
+      cash_from_proposer: rows[i][6], cash_from_receiver: rows[i][7],
+      rationale: rows[i][8], status: rows[i][9], responded_at: rows[i][10],
+    });
+  }
+  return out;
+}
+
+// Sum of players this team has already committed to give away across
+// every trade that isn't yet a settled decline -- pending AND accepted
+// both count, since an accepted trade is expected to apply. This is a
+// courtesy pre-check only (rejects an obviously-over-the-limit proposal
+// immediately instead of making a student wait for the next cron cycle);
+// engine/resolve_trade.py is the real, final authority on the 3-player
+// season limit once a trade is actually accepted.
+function committedOutgoingCount_(trades, teamId) {
+  var total = 0;
+  trades.forEach(function (t) {
+    if (t.status !== "pending" && t.status !== "accepted") return;
+    if (String(t.proposer_team_id) === String(teamId)) total += (t.players_out || []).length;
+    if (String(t.receiver_team_id) === String(teamId)) total += (t.players_in || []).length;
+  });
+  return total;
+}
+
 function doGet(e) {
   var sheets = ensureSheets_();
   var params = (e && e.parameter) || {};
@@ -250,6 +294,7 @@ function doGet(e) {
       lineups: readLineups_(sheets.lineups),
       sponsorship_deals: readSponsorshipDeals_(sheets.sponsorships),
       local_tv_deals: readLocalTVDeals_(sheets.localTv),
+      trade_proposals: readTradeProposals_(sheets.trades),
     });
   }
 
@@ -277,6 +322,12 @@ function doGet(e) {
       local_tv_deals: readLocalTVDeals_(sheets.localTv).map(function (d) {
         return { team_id: d.team_id }; // just "has this team negotiated yet"
       }),
+      // Trade proposals are shown in full (unlike the sponsor/TV catalogs
+      // above) -- a trade is inherently a public fact about two named
+      // teams' rosters, same as the standings or the match log, and the
+      // Trade Center page needs the receiving team to actually see what
+      // it's being offered.
+      trade_proposals: readTradeProposals_(sheets.trades),
     });
   }
 
@@ -453,6 +504,79 @@ function doPost(e) {
       ok: true, team_id: body.team_id, final_revenue: tvFinalRevenue, final_clause: tvFinalClause,
       commission: tvRepTeamId ? Math.abs(tvFinalRevenue - tvBase.base_revenue) : 0,
     });
+  }
+
+  // NOTE ON TRADE VALIDATION: this Apps Script has NO roster data at all
+  // (rosters live in data/players.csv on the engine side, never synced
+  // here), so it can only check what it actually has -- team existence,
+  // matching player counts, and (as a courtesy, not the final word) the
+  // 3-player season limit counted off this sheet's own rows. Real roster
+  // ownership and the salary cap are re-checked for real by
+  // engine/resolve_trade.py once a trade is accepted -- see that
+  // script's docstring. A proposal that looks fine here can still come
+  // back VOIDED later (shown in the Trade Center's Final Trade Log) if
+  // something about the rosters changed in between.
+  if (body.type === "trade_proposal") {
+    var receiverId = body.receiver_team_id;
+    if (String(receiverId) === String(body.team_id)) {
+      return jsonOut_({ ok: false, error: "Pick a different team to trade with." });
+    }
+    var receiverExists = teams.some(function (t) { return String(t.id) === String(receiverId); });
+    if (!receiverExists) return jsonOut_({ ok: false, error: "Unknown receiving team." });
+
+    var playersOut = body.players_out;
+    var playersIn = body.players_in;
+    if (!Array.isArray(playersOut) || !Array.isArray(playersIn) ||
+        playersOut.length === 0 || playersOut.length !== playersIn.length || playersOut.length > 3) {
+      return jsonOut_({ ok: false, error: "Both sides of a trade must send the same number of players -- 1-for-1, 2-for-2, or 3-for-3 only." });
+    }
+    var rationale = String(body.rationale || "").trim();
+    if (!rationale) return jsonOut_({ ok: false, error: "A short rationale is required." });
+
+    var existingTrades = readTradeProposals_(sheets.trades);
+    var proposerCommitted = committedOutgoingCount_(existingTrades, body.team_id);
+    var receiverCommitted = committedOutgoingCount_(existingTrades, receiverId);
+    if (proposerCommitted + playersOut.length > 3) {
+      return jsonOut_({ ok: false, error: "This would put your team over the 3-player season trade limit (" + proposerCommitted + " already committed)." });
+    }
+    if (receiverCommitted + playersIn.length > 3) {
+      return jsonOut_({ ok: false, error: "This would put the receiving team over the 3-player season trade limit (" + receiverCommitted + " already committed)." });
+    }
+
+    var proposalId = Utilities.getUuid();
+    sheets.trades.appendRow([
+      proposalId, now, body.team_id, receiverId,
+      JSON.stringify(playersOut), JSON.stringify(playersIn),
+      Number(body.cash_from_proposer) || 0, Number(body.cash_from_receiver) || 0,
+      rationale, "pending", "",
+    ]);
+    return jsonOut_({ ok: true, proposal_id: proposalId, status: "pending" });
+  }
+
+  if (body.type === "trade_response") {
+    var tradeRows = sheets.trades.getDataRange().getValues();
+    var targetRow = -1;
+    for (var ti = 1; ti < tradeRows.length; ti++) {
+      if (String(tradeRows[ti][0]) === String(body.proposal_id)) { targetRow = ti + 1; break; }
+    }
+    if (targetRow < 0) return jsonOut_({ ok: false, error: "Unknown trade proposal." });
+
+    var rowReceiverId = tradeRows[targetRow - 1][3];
+    if (String(rowReceiverId) !== String(body.team_id)) {
+      return jsonOut_({ ok: false, error: "Only the receiving team can respond to this trade." });
+    }
+    var currentStatus = tradeRows[targetRow - 1][9];
+    if (currentStatus !== "pending") {
+      return jsonOut_({ ok: false, error: "This trade has already been " + currentStatus + " -- it can't be responded to again." });
+    }
+    if (body.decision !== "accept" && body.decision !== "reject") {
+      return jsonOut_({ ok: false, error: "decision must be 'accept' or 'reject'" });
+    }
+
+    var newStatus = body.decision === "accept" ? "accepted" : "rejected";
+    sheets.trades.getRange(targetRow, 10).setValue(newStatus);   // column J = status
+    sheets.trades.getRange(targetRow, 11).setValue(now);         // column K = responded_at
+    return jsonOut_({ ok: true, proposal_id: body.proposal_id, status: newStatus });
   }
 
   return jsonOut_({ ok: false, error: "unknown submission type: " + body.type });
