@@ -1,8 +1,8 @@
 {
-  "_notes": "Rebuilt 2026-09-25 -- match days moved from Mon/Wed to Tue/Thu (instructor confirmed that's the ACTUAL class meeting schedule, not Mon/Wed). Draft Day stays Tue Oct 6, 2026 (already fell on a class day). Round 1 is the first class after Draft Day (Thu Oct 8, easing-in single round), then straight Tue/Thu doubleheaders (2 rounds per match day) for the rest of the 17-round round-robin -- same structure as before, just shifted onto the real class days. Since match day and class day are now the SAME day (no separate 'react day' gap the way Mon-match/Tue-class used to work), Trade Day is simply the next class session after the Round 3 match day resolves (Tue Oct 13 -> Thu Oct 15). TV Revenue Day is still the Round 3 split (now lands on the 2026-10-13 match day). Trade deadline stays Round 6 (round-based, unaffected by the day-of-week shift) -- see deals.json -> trade_rules.",
+  "_notes": "Tue/Thu schedule, Draft Day Oct 6. Oct 13 is skipped entirely -- an exam falls that day, so the Round 2-3 match day that would normally land there is pushed to the next class session (Thu Oct 15) instead, and every match day after that shifts back by one class session accordingly. Kept identical in structure to Section 2s calendar (same draft day, same skip, same dates through the rounds they share -- Section 2 just continues 2 more match days beyond this one to cover its extra 4 rounds).",
   "draft_day": "2026-10-06",
-  "match_days": "Tuesday and Thursday -- the actual class meeting days. Doubleheaders (2 rounds resolved per match day) except Round 1, which is a single easing-in round the first class after Draft Day.",
-  "trade_day": "2026-10-15",
+  "match_days": "Tuesday and Thursday -- the actual class meeting days. Doubleheaders (2 rounds resolved per match day) except Round 1, which is a single easing-in round the first class after Draft Day. Oct 13 is skipped (exam day).",
+  "trade_day": "2026-10-20",
   "match_day_schedule": [
     {
       "date": "2026-10-08",
@@ -11,61 +11,61 @@
       ]
     },
     {
-      "date": "2026-10-13",
+      "date": "2026-10-15",
       "rounds": [
         2,
         3
       ]
     },
     {
-      "date": "2026-10-15",
+      "date": "2026-10-20",
       "rounds": [
         4,
         5
       ]
     },
     {
-      "date": "2026-10-20",
+      "date": "2026-10-22",
       "rounds": [
         6,
         7
       ]
     },
     {
-      "date": "2026-10-22",
+      "date": "2026-10-27",
       "rounds": [
         8,
         9
       ]
     },
     {
-      "date": "2026-10-27",
+      "date": "2026-10-29",
       "rounds": [
         10,
         11
       ]
     },
     {
-      "date": "2026-10-29",
+      "date": "2026-11-03",
       "rounds": [
         12,
         13
       ]
     },
     {
-      "date": "2026-11-03",
+      "date": "2026-11-05",
       "rounds": [
         14,
         15
       ]
     },
     {
-      "date": "2026-11-05",
+      "date": "2026-11-10",
       "rounds": [
         16,
         17
       ]
     }
   ],
-  "season_end": "2026-11-05"
+  "season_end": "2026-11-10"
 }
