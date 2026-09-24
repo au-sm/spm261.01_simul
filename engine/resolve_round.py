@@ -145,6 +145,19 @@ def main():
     finances = load_json("team_finances.json")["teams"]
     players = render_dashboard.load_players()
 
+    # HARD GUARD: once a round is resolved, it is permanent -- never
+    # re-simulate it, even if this script is invoked again for the same
+    # round (a manual re-run, a bug elsewhere in the automation, anything).
+    # Re-simulating could produce a DIFFERENT result if a lineup changed
+    # in the Sheet since the first resolve, silently rewriting a result
+    # students already saw. auto_resolve.py's own round-tracking already
+    # prevents this in the normal automated path, but this check makes it
+    # true regardless of how the script gets invoked.
+    if any(m["round"] == args.round and m.get("stage", "regular") == "regular" for m in matches):
+        print(f"ERROR: Round {args.round} has already been resolved and is permanent -- refusing to re-simulate it. "
+              f"If this round's results are genuinely wrong, that requires a deliberate manual data fix, not a re-run of this script.")
+        return
+
     season_seed = config.get("season_seed", 2026)
     team_by_name = {t["name"]: t["team_id"] for t in config["teams"]}
     injuries = load_json_or_default("player_injuries.json", {})
