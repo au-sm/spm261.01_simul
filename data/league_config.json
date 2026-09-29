@@ -14,22 +14,22 @@
   "teams": [
     {
       "team_id": 0,
-      "name": "Team 1",
+      "name": "Knights FC",
       "owner": "Bianca Biagini"
     },
     {
       "team_id": 1,
-      "name": "Team 2",
+      "name": "Knight Knight",
       "owner": "Carlos Brito-Mezon"
     },
     {
       "team_id": 2,
-      "name": "Team 3",
+      "name": "Pink Venom",
       "owner": "Allison Dieckmann"
     },
     {
       "team_id": 3,
-      "name": "Team 4",
+      "name": "jake dunphy fc",
       "owner": "Jake Dunphy"
     },
     {
@@ -44,62 +44,62 @@
     },
     {
       "team_id": 6,
-      "name": "Team 7",
+      "name": "JSN FC",
       "owner": "Denim Horsford"
     },
     {
       "team_id": 7,
-      "name": "Team 8",
+      "name": "Wildcats",
       "owner": "Max Lebisky"
     },
     {
       "team_id": 8,
-      "name": "Team 9",
+      "name": "Pitch Perfect",
       "owner": "Jordan Long"
     },
     {
       "team_id": 9,
-      "name": "Team 10",
+      "name": "Knight United",
       "owner": "Parker Miles"
     },
     {
       "team_id": 10,
-      "name": "Team 11",
+      "name": "Kyles team",
       "owner": "Kyle Miller"
     },
     {
       "team_id": 11,
-      "name": "Team 12",
+      "name": "team twelve",
       "owner": "Maggie O'Shea"
     },
     {
       "team_id": 12,
-      "name": "Team 13",
+      "name": "New Jersey FC",
       "owner": "Sawyer Ostroff"
     },
     {
       "team_id": 13,
-      "name": "Team 14",
+      "name": "arcadiaballerz",
       "owner": "Anthony Pope"
     },
     {
       "team_id": 14,
-      "name": "Team 15",
+      "name": "Jovanni's Team",
       "owner": "Jovanni Romeo"
     },
     {
       "team_id": 15,
-      "name": "Team 16",
+      "name": "The Jersey Kickers",
       "owner": "Mason Walls"
     },
     {
       "team_id": 16,
-      "name": "Team 17",
+      "name": "Peaches United",
       "owner": "Sydney Weathers"
     },
     {
       "team_id": 17,
-      "name": "Team 18",
+      "name": "Montreal FC",
       "owner": "Andre Yared"
     }
   ],
