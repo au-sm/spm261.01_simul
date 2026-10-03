@@ -313,7 +313,12 @@ def render(config, deals, calendar=None, ltv_deals=None):
             <tr><td>Premium</td><td class="num mono">$50</td><td>Highest per-ticket revenue, but demand drops sharply without form/Star Power to justify it</td></tr>
           </tbody></table>
           <p>There is no universally correct price &mdash; a struggling, low-Star-Power team pricing Premium will earn LESS
-          than pricing Standard or Budget. Read your own team's market every home match.</p>'''),
+          than pricing Standard or Budget. Read your own team's market every home match.</p>
+          <p><strong>Away gate share:</strong> the away team does not set a price, but it still earns a cut of that match's
+          gate &mdash; 5% to 15% of the home side's ticket revenue, scaled by the AWAY team's own recent form and
+          starting-XI Star Power (a hot, star-studded traveling team draws more visiting-fan interest). A winless,
+          zero-Star-Power away team earns the 5% floor; a team on a hot streak with strong starters earns up to the 15%
+          ceiling. The home side still keeps the large majority of its own gate either way.</p>'''),
 
         ("sponsorship", "10. Sponsorship Deals &amp; Negotiation", sponsor_html),
 

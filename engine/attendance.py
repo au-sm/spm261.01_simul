@@ -23,6 +23,25 @@ recent_win_rate: win rate over the team's last 3 played matches (0.5 --
 i.e. a neutral debut -- if fewer than 3 have been played yet).
 avg_star_power: the team's STARTING XI average Star Power for that match
 (not the whole roster) -- fans come to see who's actually playing.
+
+AWAY GATE SHARE: the away team does not set a price (only the home team
+does), but it still draws some of the live gate -- traveling fans, the
+visiting team's own following -- scaled by the AWAY team's own recent
+form and star power, not the home team's. This is a cut OF the home
+gate (the home side's price tier still determines how big the total pie
+is), not a separate revenue stream:
+
+  away_share_rate = AWAY_SHARE_MIN
+                     + (recent_win_rate - 0.5) * 2 * AWAY_FORM_WEIGHT
+                     + (avg_star_power - 50) / 50 * AWAY_STAR_WEIGHT
+  clamped to [AWAY_SHARE_MIN, AWAY_SHARE_MAX]
+  away_revenue = home_gate_revenue * away_share_rate
+  home_revenue = home_gate_revenue - away_revenue
+
+A winless, zero-star-power away team earns the floor (5%); a team on a
+hot streak full of star players earns the ceiling (15%). Home still
+keeps the large majority of its own gate either way -- this models
+"a popular visiting team bumps the gate a little," not an even split.
 """
 
 CAPACITY = 20000
@@ -39,6 +58,19 @@ STAR_WEIGHT = 0.15   # +/- 15 points of attendance at the extremes of star power
 # and erases the price-elasticity lesson the whole mechanic exists to teach.
 MIN_RATE = 0.05
 MAX_RATE = 1.00
+
+# Away gate share: a cut OF the home gate, scaled by the away team's own
+# recent form and star power (see module docstring). Kept deliberately
+# modest -- the home side hosted the match and set the price, so it keeps
+# the large majority of its own gate regardless of who's visiting.
+# A neutral away team (0.5 win rate, 50 star power) sits at the MIDPOINT
+# of the range (10%); form and star power then swing it down toward
+# AWAY_SHARE_MIN or up toward AWAY_SHARE_MAX at the extremes.
+AWAY_SHARE_MIN = 0.05
+AWAY_SHARE_MAX = 0.15
+AWAY_SHARE_MID = (AWAY_SHARE_MIN + AWAY_SHARE_MAX) / 2
+AWAY_FORM_WEIGHT = 0.08   # +/- 0.08 swing at the extremes of win rate
+AWAY_STAR_WEIGHT = 0.02   # +/- 0.02 swing at the extremes of star power
 
 
 def recent_win_rate(team_id, matches, upto_round, window=3):
@@ -78,4 +110,26 @@ def compute_attendance(price_tier, recent_win_rate_val, avg_star_power, capacity
         "attendance_rate": round(rate, 3),
         "attendance": attendance,
         "revenue": revenue,
+    }
+
+
+def compute_away_share(home_gate_revenue, away_recent_win_rate_val, away_avg_star_power):
+    """Splits a home match's gate revenue into (home_revenue, away_revenue,
+    detail_dict). The away team's cut is based on ITS OWN recent form and
+    starting-XI star power, not the home team's -- see module docstring
+    for the formula. home_gate_revenue is whatever compute_attendance()
+    already produced for the home side; this just divides that pie, it
+    does not change how big the pie is."""
+    rate = (
+        AWAY_SHARE_MID
+        + (away_recent_win_rate_val - 0.5) * 2 * AWAY_FORM_WEIGHT
+        + (away_avg_star_power - 50) / 50 * AWAY_STAR_WEIGHT
+    )
+    rate = max(AWAY_SHARE_MIN, min(AWAY_SHARE_MAX, rate))
+    away_revenue = round(home_gate_revenue * rate)
+    home_revenue = home_gate_revenue - away_revenue
+    return home_revenue, away_revenue, {
+        "away_share_rate": round(rate, 3),
+        "home_revenue": home_revenue,
+        "away_revenue": away_revenue,
     }

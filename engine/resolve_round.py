@@ -35,7 +35,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from simulate import simulate_match, FORMATIONS
-from attendance import compute_attendance, recent_win_rate
+from attendance import compute_attendance, compute_away_share, recent_win_rate
 from player_condition import conditions_for_round, roll_new_injuries
 from match_summary import generate_summary
 import render_dashboard
@@ -258,15 +258,26 @@ def main():
         }
         matches.append(record)
 
-        # ticket revenue -- home side only, this round's price tier
+        # ticket revenue -- home side sets the price tier and draws the gate,
+        # but the away team earns a cut of it based on the AWAY team's own
+        # recent form and star power (traveling fans, the visiting team's
+        # own following) -- see attendance.compute_away_share().
         price_tier = h_info["ticket_price"]
+        finances.setdefault(str(h_id), {"ticket_revenue": 0, "sponsorship_revenue": 0, "tv_revenue": 0})
+        finances.setdefault(str(a_id), {"ticket_revenue": 0, "sponsorship_revenue": 0, "tv_revenue": 0})
         if price_tier:
             form = recent_win_rate(h_id, matches, upto_round=args.round)
             star = avg_star_power(h_lineup)
             att = compute_attendance(price_tier, form, star)
-            finances.setdefault(str(h_id), {"ticket_revenue": 0, "sponsorship_revenue": 0, "tv_revenue": 0})
-            finances[str(h_id)]["ticket_revenue"] += att["revenue"]
-            gate_note = f" | gate: {att['attendance']:,} @ {price_tier} = ${att['revenue']:,}"
+
+            away_form = recent_win_rate(a_id, matches, upto_round=args.round)
+            away_star = avg_star_power(a_lineup)
+            home_rev, away_rev, split = compute_away_share(att["revenue"], away_form, away_star)
+
+            finances[str(h_id)]["ticket_revenue"] += home_rev
+            finances[str(a_id)]["ticket_revenue"] += away_rev
+            gate_note = (f" | gate: {att['attendance']:,} @ {price_tier} = ${att['revenue']:,}"
+                         f" (home ${home_rev:,} / away ${away_rev:,} @ {split['away_share_rate']*100:.1f}%)")
         else:
             gate_note = " | no ticket price submitted -- no gate revenue booked"
 
