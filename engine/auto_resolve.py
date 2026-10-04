@@ -285,7 +285,19 @@ def main():
             else:
                 print(f"NOOP: today ({today}) is before draft day ({calendar['draft_day']})")
 
-        if config["phase"] in ("draft", "season"):
+        # Match results stay hidden until the instructor explicitly asks for a
+        # simulation: scheduled runs never resolve rounds. A manual run with
+        # RESOLVE_ROUNDS=1 resolves exactly the next round, regardless of date.
+        manual = os.environ.get("RESOLVE_ROUNDS") == "1"
+        if config["phase"] in ("draft", "season") and manual:
+            next_round = config.get("current_round", 0) + 1
+            if next_round <= total_rounds(calendar):
+                actions.append(resolve_round_now(next_round, team_name_by_id, team_pin_by_id, export["lineups"]))
+                config = load_json("league_config.json")
+        elif config["phase"] in ("draft", "season"):
+            print("Round resolution is manual-only: skipping (set RESOLVE_ROUNDS=1).")
+
+        if False:
             rounds_total = total_rounds(calendar)
             # loop in case more than one due round is unresolved (a missed
             # scheduled run, or a doubleheader match day)

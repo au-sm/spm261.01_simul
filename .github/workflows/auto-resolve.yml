@@ -5,7 +5,12 @@ on:
     # every 30 minutes -- deliberately NOT on :00/:30 to avoid piling onto
     # the same instant every other "every 30 min" job on GitHub hits
     - cron: "7,37 * * * *"
-  workflow_dispatch: {} # manual "Run workflow" button, for testing or an on-demand trigger
+  workflow_dispatch:
+    inputs:
+      resolve_rounds:
+        description: "Simulate the next round now (instructor request only)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -23,6 +28,7 @@ jobs:
       - name: Run auto_resolve.py
         env:
           ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
+          RESOLVE_ROUNDS: ${{ inputs.resolve_rounds && '1' || '0' }}
         run: python3 engine/auto_resolve.py
 
       - name: Commit and push if anything changed
