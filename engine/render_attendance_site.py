@@ -169,7 +169,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
       </div>
       <p style="margin-top:12px;">These three add together on top of the {int(BASE_RATE*100)}% base, then the result is
       clamped between {int(MIN_RATE*100)}% and {int(MAX_RATE*100)}% before being applied to capacity. The floor is
-      deliberately low: Premium pricing on a team with no form and no Star Power is allowed to crater &mdash; a generous
+      deliberately low: Premium pricing on a team with no form and no Star Power is allowed to drop sharply &mdash; a generous
       floor would quietly rescue Premium and erase the whole price-elasticity lesson.</p>
     </div>
   </section>
