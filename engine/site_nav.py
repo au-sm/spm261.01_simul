@@ -24,6 +24,7 @@ PAGES = [
     ("draftboard", "Draft Board", f"{GH_BASE}/draftboard/"),
     ("schedule", "Schedule", f"{GH_BASE}/schedule/"),
     ("scouting", "Scouting Report", f"{GH_BASE}/scouting/"),
+    ("playerstats", "Player Stats", f"{GH_BASE}/player-stats/"),
     ("budget", "Budget Dashboard", f"{GH_BASE}/budget/"),
     ("rulebook", "Rulebook", f"{GH_BASE}/rulebook/"),
     ("sponsorship", "Sponsorship Marketplace", f"{GH_BASE}/sponsorship/"),

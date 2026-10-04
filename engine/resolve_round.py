@@ -255,6 +255,8 @@ def main():
             "home_strategy": h_info["strategy"], "away_strategy": a_info["strategy"],
             "home_submitted": h_info["submitted"], "away_submitted": a_info["submitted"],
             "goal_events": result["goal_events"],
+            "home_starters": flatten_lineup(h_lineup),
+            "away_starters": flatten_lineup(a_lineup),
         }
         matches.append(record)
 

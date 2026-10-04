@@ -66,6 +66,7 @@ def regenerate_all_pages():
     run(["python3", "engine/render_schedule_site.py"])
     run(["python3", "engine/render_trade_site.py"])
     run(["python3", "engine/render_scouting_site.py"])
+    run(["python3", "engine/render_player_stats.py"])
     run(["python3", "engine/generate_players_json.py"])
     # dashboard has no __main__ CLI entry -- render inline exactly like every
     # manual regenerate this project has done all along
@@ -108,6 +109,7 @@ print("dashboard OK")
         "schedule-site/index.html": "schedule/index.html",
         "trade-site/index.html": "trade/index.html",
         "scouting-site/index.html": "scouting/index.html",
+        "player-stats-site/index.html": "player-stats/index.html",
     }
     for src, dst in mapping.items():
         src_path = os.path.join(BASE, src)
