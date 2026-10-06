@@ -29,8 +29,8 @@ h1,h2,h3{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase
 .sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:30px 0 12px;border-bottom:2px solid var(--led);padding-bottom:6px;}
 .sec-h h2{font-size:26px;} .sec-h span{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);}
 
-.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;}
-.tile{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:10px;background:linear-gradient(180deg,#121a15,#0d130f);
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(360px,100%),1fr));gap:12px;}
+.tile{display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:1fr auto;align-items:start;gap:10px;background:linear-gradient(180deg,#121a15,#0d130f);
   border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 8px 24px rgba(0,0,0,.35);}
 .side{min-width:0;} .side.right{text-align:right;}
 .side b{display:block;font-family:"Big Shoulders Display",sans-serif;font-weight:800;font-size:21px;line-height:1.05;text-transform:uppercase;overflow-wrap:anywhere;}
@@ -71,9 +71,17 @@ h1,h2,h3{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase
 .pdate{margin:0 0 6px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);}
 .res{width:100%;border-collapse:collapse;background:var(--board2);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:14px;}
 .res td{padding:8px 10px;border-top:1px solid var(--line);} .res tr:first-child td{border-top:0;}
-.res td.r{text-align:right;width:44%;} .res td.l{width:44%;} .res td.c{text-align:center;}
+.res td.r{text-align:right;} .res td.c{text-align:center;}
 .res td.win{color:var(--win);font-weight:600;}
 .mini{display:inline-block;min-width:54px;padding:2px 8px;border-radius:5px;background:#050806;color:var(--led);font:700 16px "Big Shoulders Display",sans-serif;letter-spacing:.06em;}
+.gate{grid-column:1/-1;margin-top:4px;padding-top:9px;border-top:1px dashed var(--line);display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);}
+.gate .g-k{letter-spacing:.12em;text-transform:uppercase;font-size:9.5px;color:var(--led);}
+.gate b{color:var(--txt);} .gate .g-s{display:flex;gap:12px;flex-wrap:wrap;margin-left:auto;} .gate .g-s b{color:var(--win);}
+.gate.none{font-size:11px;}
+.res thead th{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:7px 10px;background:#050806;}
+.res th.r{text-align:right;} .res th.l{text-align:left;} .res td.g,.res th.g{text-align:right;white-space:nowrap;}
+.gt{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--win);} .gt.none{color:var(--muted);}
+.res td.r{width:36%;} .res td.l{width:36%;}
 .empty{background:var(--board2);border:1px dashed var(--line);border-radius:10px;padding:18px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:13px;}
 footer{max-width:1240px;margin:0 auto;padding:0 clamp(14px,4vw,44px) 40px;color:var(--muted);font-size:12px;font-family:"IBM Plex Mono",monospace;}
 footer a{color:var(--led);}
@@ -116,7 +124,7 @@ footer a{color:var(--led);}
   </nav>
 <div class="wrap">
   <div class="mast">
-    <div><h1>Scoreboard</h1><p>SPM261.01 Soccer League &middot; every game outcome, updated automatically after each round &middot; last updated Oct 6, 2026 3:34 PM</p></div>
+    <div><h1>Scoreboard</h1><p>SPM261.01 Soccer League &middot; every game outcome, updated automatically after each round &middot; last updated Oct 6, 2026 3:45 PM</p></div>
     <div class="kpis">
       <div class="kpi"><span>Games played</span><b>0 / 153</b></div>
       <div class="kpi"><span>Total goals</span><b>0</b></div>

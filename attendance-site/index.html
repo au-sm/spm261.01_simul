@@ -75,6 +75,18 @@ input[type=range]{accent-color:var(--accent);}
 .pitch-meter-fill{height:100%;background:var(--accent);transition:width .15s ease;}
 .pitch-meter-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;color:var(--ink);mix-blend-mode:difference;}
 
+.pm-scroll{overflow-x:auto;margin-bottom:10px;}
+.pm{min-width:640px;} .pm td,.pm th{white-space:nowrap;}
+.pm td.pm-team{font-weight:600;}
+.pm td small{display:inline-block;margin-left:4px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--muted);}
+.pm td.pm-H{background:color-mix(in srgb,var(--win) 9%,transparent);}
+.pm td.pm-top{background:color-mix(in srgb,var(--accent) 28%,transparent);font-weight:700;}
+.pm td.pm-total{font-weight:700;background:color-mix(in srgb,var(--navy) 10%,transparent);}
+.pm-none{color:var(--muted);}
+.pm-legend{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);margin:4px 0 0;}
+.empty-note{background:var(--surface);border:1px dashed var(--line);border-radius:4px;padding:14px 16px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:13px;}
+td small{color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:10.5px;}
+
 footer{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:var(--muted);font-size:12px;font-family:"IBM Plex Mono",monospace;}
 
 /* explicit overrides throughout -- some host pages already style bare
@@ -154,6 +166,16 @@ footer{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
       <tbody><tr><td>Knights FC (Bianca Biagini)</td><td class="num">$0</td></tr><tr><td>Knight Knight (Carlos Brito-Mezon)</td><td class="num">$0</td></tr><tr><td>Pink Venom (Allison Dieckmann)</td><td class="num">$0</td></tr><tr><td>jake dunphy fc (Jake Dunphy)</td><td class="num">$0</td></tr><tr><td>Team 5 (Jayden Geerders)</td><td class="num">$0</td></tr><tr><td>Oceanic FC (Yonelisa Hamusten)</td><td class="num">$0</td></tr><tr><td>JSN FC (Denim Horsford)</td><td class="num">$0</td></tr><tr><td>Wildcats (Max Lebisky)</td><td class="num">$0</td></tr><tr><td>Pitch Perfect (Jordan Long)</td><td class="num">$0</td></tr><tr><td>Knight United (Parker Miles)</td><td class="num">$0</td></tr><tr><td>Kyles team (Kyle Miller)</td><td class="num">$0</td></tr><tr><td>team twelve (Maggie O'Shea)</td><td class="num">$0</td></tr><tr><td>New Jersey FC (Sawyer Ostroff)</td><td class="num">$0</td></tr><tr><td>arcadiaballerz (Anthony Pope)</td><td class="num">$0</td></tr><tr><td>Jovanni's Team (Jovanni Romeo)</td><td class="num">$0</td></tr><tr><td>The Jersey Kickers (Mason Walls)</td><td class="num">$0</td></tr><tr><td>Peaches United (Sydney Weathers)</td><td class="num">$0</td></tr><tr><td>Montreal FC (Andre Yared)</td><td class="num">$0</td></tr></tbody>
     </table>
   </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Ticket Revenue by Match</h2>
+      <span class="section-note">what each team earned in every match &middot; updates after each round</span>
+    </div>
+    <p class="empty-note">No matches played yet &mdash; each team&rsquo;s ticket revenue for every match appears here automatically as soon as each round is played.</p>
+  </section>
+
+  
 
   <section>
     <div class="section-head">

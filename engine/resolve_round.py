@@ -278,10 +278,20 @@ def main():
 
             finances[str(h_id)]["ticket_revenue"] += home_rev
             finances[str(a_id)]["ticket_revenue"] += away_rev
+            # per-match gate, kept on the match record so the Attendance and
+            # Scoreboard pages can show what each team earned in each match
+            record["gate"] = {
+                "price_tier": price_tier, "price": att["price"],
+                "attendance": att["attendance"], "attendance_rate": att["attendance_rate"],
+                "revenue": att["revenue"], "home_revenue": home_rev, "away_revenue": away_rev,
+                "away_share_rate": split["away_share_rate"],
+            }
             gate_note = (f" | gate: {att['attendance']:,} @ {price_tier} = ${att['revenue']:,}"
                          f" (home ${home_rev:,} / away ${away_rev:,} @ {split['away_share_rate']*100:.1f}%)")
         else:
             gate_note = " | no ticket price submitted -- no gate revenue booked"
+            record["gate"] = {"price_tier": None, "price": 0, "attendance": 0, "attendance_rate": 0,
+                              "revenue": 0, "home_revenue": 0, "away_revenue": 0, "away_share_rate": 0}
 
         outcome = "W" if result["home_goals"] > result["away_goals"] else ("L" if result["home_goals"] < result["away_goals"] else "D")
         print(f"Round {args.round}: {h_name} {result['home_goals']}-{result['away_goals']} {a_name}  "

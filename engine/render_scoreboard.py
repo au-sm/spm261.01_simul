@@ -94,6 +94,20 @@ def render(config, schedule, calendar, matches):
         return "".join(f'<li><span class="min">{e["minute"]}&prime;</span>{esc(e.get("scorer", ""))}'
                        f'<em>{esc(e.get("type", ""))}</em></li>' for e in sorted(evs, key=lambda e: e["minute"]))
 
+    def km(n):
+        return f"${n/1_000_000:.2f}M" if n >= 1_000_000 else (f"${n/1_000:.0f}K" if n >= 1_000 else f"${n:,}")
+
+    def gate_line(m):
+        g = m.get("gate")
+        if not g:
+            return ""
+        if not g.get("price_tier"):
+            return '<div class="gate none">Ticket revenue: no ticket price submitted &mdash; $0 for both teams</div>'
+        return (f'<div class="gate"><span class="g-k">Ticket revenue</span>'
+                f'<span class="g-t">{g["attendance"]:,} fans &middot; {esc(g["price_tier"])} ${g["price"]} &middot; gate <b>${g["revenue"]:,}</b></span>'
+                f'<span class="g-s"><span>{name(m["home_id"])} <b>${g["home_revenue"]:,}</b></span>'
+                f'<span>{name(m["away_id"])} <b>${g["away_revenue"]:,}</b></span></span></div>')
+
     def tile(m):
         h, a, hg, ag = m["home_id"], m["away_id"], m["home_goals"], m["away_goals"]
         hres = "w" if hg > ag else ("l" if hg < ag else "d")
@@ -102,6 +116,7 @@ def render(config, schedule, calendar, matches):
   <div class="side {hres}"><span class="ha">Home</span><b>{name(h)}</b><small>{owner(h)}</small><ul class="sc">{scorers(m, "home")}</ul></div>
   <div class="score"><span class="dig">{hg}</span><span class="dash">&ndash;</span><span class="dig">{ag}</span><span class="ft">FT</span></div>
   <div class="side {ares} right"><span class="ha">Away</span><b>{name(a)}</b><small>{owner(a)}</small><ul class="sc">{scorers(m, "away")}</ul></div>
+  {gate_line(m)}
 </article>'''
 
     def upcoming_tile(h, a):
@@ -142,11 +157,14 @@ def render(config, schedule, calendar, matches):
         rows = []
         for m in by_round[key]:
             h, a, hg, ag = m["home_id"], m["away_id"], m["home_goals"], m["away_goals"]
+            g = m.get("gate")
+            gate = (f'<span class="gt">{km(g["home_revenue"])} / {km(g["away_revenue"])}</span>' if g and g.get("price_tier")
+                    else ('<span class="gt none">no gate</span>' if g else '<span class="gt none">&ndash;</span>'))
             rows.append(f'<tr><td class="r {"win" if hg > ag else ""}">{name(h)}</td><td class="c"><span class="mini">{hg}&ndash;{ag}</span></td>'
-                        f'<td class="l {"win" if ag > hg else ""}">{name(a)}</td></tr>')
+                        f'<td class="l {"win" if ag > hg else ""}">{name(a)}</td><td class="g">{gate}</td></tr>')
         date = fmt_date(date_by_round.get(key[0])) if key[1] == "regular" else ""
         panels.append(f'<div class="panel{" on" if i == 0 else ""}" id="{rid}"><p class="pdate">{date}</p>'
-                      f'<table class="res"><tbody>{"".join(rows)}</tbody></table></div>')
+                      f'<table class="res"><thead><tr><th class="r">Home</th><th></th><th class="l">Away</th><th class="g">Tickets H / A</th></tr></thead><tbody>{"".join(rows)}</tbody></table></div>')
     rounds_html = (f'<div class="tabs">{"".join(tabs)}</div>{"".join(panels)}' if played_keys
                    else '<p class="empty">No results yet &mdash; scores appear here automatically as soon as each round is played.</p>')
 
@@ -184,8 +202,8 @@ h1,h2,h3{{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercas
 .sec-h{{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:30px 0 12px;border-bottom:2px solid var(--led);padding-bottom:6px;}}
 .sec-h h2{{font-size:26px;}} .sec-h span{{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);}}
 
-.board{{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;}}
-.tile{{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:10px;background:linear-gradient(180deg,#121a15,#0d130f);
+.board{{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(360px,100%),1fr));gap:12px;}}
+.tile{{display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:1fr auto;align-items:start;gap:10px;background:linear-gradient(180deg,#121a15,#0d130f);
   border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 8px 24px rgba(0,0,0,.35);}}
 .side{{min-width:0;}} .side.right{{text-align:right;}}
 .side b{{display:block;font-family:"Big Shoulders Display",sans-serif;font-weight:800;font-size:21px;line-height:1.05;text-transform:uppercase;overflow-wrap:anywhere;}}
@@ -226,9 +244,17 @@ h1,h2,h3{{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercas
 .pdate{{margin:0 0 6px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);}}
 .res{{width:100%;border-collapse:collapse;background:var(--board2);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:14px;}}
 .res td{{padding:8px 10px;border-top:1px solid var(--line);}} .res tr:first-child td{{border-top:0;}}
-.res td.r{{text-align:right;width:44%;}} .res td.l{{width:44%;}} .res td.c{{text-align:center;}}
+.res td.r{{text-align:right;}} .res td.c{{text-align:center;}}
 .res td.win{{color:var(--win);font-weight:600;}}
 .mini{{display:inline-block;min-width:54px;padding:2px 8px;border-radius:5px;background:#050806;color:var(--led);font:700 16px "Big Shoulders Display",sans-serif;letter-spacing:.06em;}}
+.gate{{grid-column:1/-1;margin-top:4px;padding-top:9px;border-top:1px dashed var(--line);display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);}}
+.gate .g-k{{letter-spacing:.12em;text-transform:uppercase;font-size:9.5px;color:var(--led);}}
+.gate b{{color:var(--txt);}} .gate .g-s{{display:flex;gap:12px;flex-wrap:wrap;margin-left:auto;}} .gate .g-s b{{color:var(--win);}}
+.gate.none{{font-size:11px;}}
+.res thead th{{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:7px 10px;background:#050806;}}
+.res th.r{{text-align:right;}} .res th.l{{text-align:left;}} .res td.g,.res th.g{{text-align:right;white-space:nowrap;}}
+.gt{{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--win);}} .gt.none{{color:var(--muted);}}
+.res td.r{{width:36%;}} .res td.l{{width:36%;}}
 .empty{{background:var(--board2);border:1px dashed var(--line);border-radius:10px;padding:18px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:13px;}}
 footer{{max-width:1240px;margin:0 auto;padding:0 clamp(14px,4vw,44px) 40px;color:var(--muted);font-size:12px;font-family:"IBM Plex Mono",monospace;}}
 footer a{{color:var(--led);}}

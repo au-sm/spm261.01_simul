@@ -35,9 +35,91 @@ def money(n):
     return f"${n:,}"
 
 
-def render(config, finances):
+def short_money(n):
+    if n >= 1_000_000:
+        return f"${n/1_000_000:.2f}M"
+    if n >= 1_000:
+        return f"${n/1_000:.0f}K"
+    return f"${n:,}"
+
+
+def render_per_match(config, matches):
+    """Team x round grid of ticket revenue earned in each match (home gate
+    share or away cut), plus a full gate log. Built from the per-match
+    "gate" that resolve_round.py stores on every match record."""
+    name_by_id = {t["team_id"]: t["name"] for t in config["teams"]}
+    gated = sorted([m for m in matches if "gate" in m], key=lambda m: (m.get("stage", "regular") != "regular", m["round"]))
+    if not gated:
+        return ('<p class="empty-note">No matches played yet &mdash; each team&rsquo;s ticket revenue for every match '
+                'appears here automatically as soon as each round is played.</p>', "")
+
+    cols = []
+    for m in gated:
+        key = (m["round"], m.get("stage", "regular"))
+        if key not in cols:
+            cols.append(key)
+    col_label = lambda k: f"R{k[0]}" if k[1] == "regular" else f"{k[1][:2].upper()} R{k[0]}"
+    cells = {}  # (team_id, col) -> (revenue, "H"/"A", match)
+    for m in gated:
+        key = (m["round"], m.get("stage", "regular"))
+        g = m["gate"]
+        cells[(m["home_id"], key)] = (g["home_revenue"], "H", m)
+        cells[(m["away_id"], key)] = (g["away_revenue"], "A", m)
+
+    totals = {t["team_id"]: sum(v[0] for (tid, _), v in cells.items() if tid == t["team_id"]) for t in config["teams"]}
+    best = max(v[0] for v in cells.values()) if cells else 0
+    head = "".join(f'<th class="num">{col_label(k)}</th>' for k in cols)
+    rows = []
+    for t in sorted(config["teams"], key=lambda t: -totals[t["team_id"]]):
+        tid = t["team_id"]
+        tds = []
+        for k in cols:
+            c = cells.get((tid, k))
+            if not c:
+                tds.append('<td class="num pm-none">&ndash;</td>')
+                continue
+            rev, ha, m = c
+            opp = name_by_id.get(m["away_id"] if ha == "H" else m["home_id"], "")
+            tier = m["gate"]["price_tier"] or "no price set"
+            tip = f'{"Home" if ha == "H" else "Away"} vs {opp} &middot; {tier} &middot; {m["gate"]["attendance"]:,} fans'
+            cls = " pm-top" if rev and rev == best else ""
+            tds.append(f'<td class="num pm-{ha}{cls}" title="{tip}">{money(rev)}<small>{ha}</small></td>')
+        rows.append(f'<tr><td class="pm-team">{t["name"]}</td>{"".join(tds)}<td class="num pm-total">{money(totals[tid])}</td></tr>')
+    grid = (f'<div class="pm-scroll"><table class="pm"><thead><tr><th>Team</th>{head}<th class="num">Total</th></tr></thead>'
+            f'<tbody>{"".join(rows)}</tbody></table></div>'
+            '<p class="pm-legend"><b>H</b> = home match (your share of your own gate) &middot; <b>A</b> = away match (your cut of the '
+            'home team&rsquo;s gate) &middot; hover a cell for opponent, price tier, and attendance &middot; highlighted = best single-match haul</p>')
+
+    log_rows = []
+    for m in reversed(gated):
+        g = m["gate"]
+        rl = f'Round {m["round"]}' if m.get("stage", "regular") == "regular" else f'{m["stage"].title()} R{m["round"]}'
+        if g["price_tier"]:
+            log_rows.append(
+                f'<tr><td>{rl}</td><td>{name_by_id.get(m["home_id"], "")}</td><td>{name_by_id.get(m["away_id"], "")}</td>'
+                f'<td>{g["price_tier"]} (${g["price"]})</td><td class="num">{g["attendance"]:,} <small>({g["attendance_rate"]*100:.0f}%)</small></td>'
+                f'<td class="num"><b>{money(g["revenue"])}</b></td><td class="num">{money(g["home_revenue"])}</td>'
+                f'<td class="num">{money(g["away_revenue"])} <small>({g["away_share_rate"]*100:.1f}%)</small></td></tr>')
+        else:
+            log_rows.append(
+                f'<tr><td>{rl}</td><td>{name_by_id.get(m["home_id"], "")}</td><td>{name_by_id.get(m["away_id"], "")}</td>'
+                f'<td colspan="5" class="pm-none">no ticket price submitted &mdash; no gate revenue booked</td></tr>')
+    log = (f'<div class="pm-scroll"><table><thead><tr><th>Round</th><th>Home</th><th>Away</th><th>Price Tier</th>'
+           f'<th class="num">Attendance</th><th class="num">Total Gate</th><th class="num">Home Share</th><th class="num">Away Cut</th></tr></thead>'
+           f'<tbody>{"".join(log_rows)}</tbody></table></div>')
+    return grid, log
+
+
+def render(config, finances, matches=None):
     owner_by_id = {t["team_id"]: t.get("owner", "") for t in config["teams"]}
     name_by_id = {t["team_id"]: t["name"] for t in config["teams"]}
+    per_match_grid, gate_log = render_per_match(config, matches or [])
+    gate_log_section = ("""<section>
+    <div class="section-head">
+      <h2>Match Gate Log</h2>
+      <span class="section-note">every match&rsquo;s attendance and how the gate was split, newest first</span>
+    </div>
+    """ + gate_log + "\n  </section>") if gate_log else ""
 
     team_rows = []
     for t in sorted(config["teams"], key=lambda t: t["team_id"]):
@@ -135,6 +217,18 @@ input[type=range]{{accent-color:var(--accent);}}
 .pitch-meter-fill{{height:100%;background:var(--accent);transition:width .15s ease;}}
 .pitch-meter-label{{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;color:var(--ink);mix-blend-mode:difference;}}
 
+.pm-scroll{{overflow-x:auto;margin-bottom:10px;}}
+.pm{{min-width:640px;}} .pm td,.pm th{{white-space:nowrap;}}
+.pm td.pm-team{{font-weight:600;}}
+.pm td small{{display:inline-block;margin-left:4px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--muted);}}
+.pm td.pm-H{{background:color-mix(in srgb,var(--win) 9%,transparent);}}
+.pm td.pm-top{{background:color-mix(in srgb,var(--accent) 28%,transparent);font-weight:700;}}
+.pm td.pm-total{{font-weight:700;background:color-mix(in srgb,var(--navy) 10%,transparent);}}
+.pm-none{{color:var(--muted);}}
+.pm-legend{{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);margin:4px 0 0;}}
+.empty-note{{background:var(--surface);border:1px dashed var(--line);border-radius:4px;padding:14px 16px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:13px;}}
+td small{{color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:10.5px;}}
+
 footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:var(--muted);font-size:12px;font-family:"IBM Plex Mono",monospace;}}
 {NAV_CSS}
 </style>
@@ -184,6 +278,16 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
       <tbody>{team_rows_html}</tbody>
     </table>
   </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Ticket Revenue by Match</h2>
+      <span class="section-note">what each team earned in every match &middot; updates after each round</span>
+    </div>
+    {per_match_grid}
+  </section>
+
+  {gate_log_section}
 
   <section>
     <div class="section-head">
@@ -260,7 +364,8 @@ update();
 if __name__ == "__main__":
     config = load_json("league_config.json")
     finances = load_json("team_finances.json")
-    html = render(config, finances)
+    matches = load_json("matches.json")
+    html = render(config, finances, matches)
     out_dir = os.path.join(BASE, "attendance-site")
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, "index.html")
