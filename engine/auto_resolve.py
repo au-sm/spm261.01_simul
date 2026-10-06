@@ -332,6 +332,13 @@ def main():
     finally:
         strip_pins()
 
+    # keep the Google Sheet "Players per Team" tab in sync (non-fatal)
+    try:
+        import push_roster_tab
+        print("Roster tab:", push_roster_tab.push(os.environ.get("ADMIN_KEY", "")))
+    except Exception as exc:
+        print("Roster tab sync skipped:", exc)
+
     # write a marker file the workflow uses to decide whether to commit
     with open(os.path.join(BASE, "_auto_resolve_actions.txt"), "w") as f:
         f.write("\n".join(actions))

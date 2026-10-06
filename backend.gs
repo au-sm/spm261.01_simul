@@ -347,6 +347,25 @@ function doPost(e) {
     return jsonOut_({ ok: false, error: "malformed request body" });
   }
 
+  // Admin-only: write the "Players per Team" roster tab (no PINs involved).
+  if (body.type === "admin_roster_tab") {
+    if (body.admin_key !== ADMIN_KEY) return jsonOut_({ ok: false, error: "unauthorized" });
+    var rows = body.rows || [];
+    if (!rows.length) return jsonOut_({ ok: false, error: "no rows" });
+    var ssR = SpreadsheetApp.getActiveSpreadsheet();
+    var tab = ssR.getSheetByName("Players per Team") || ssR.insertSheet("Players per Team");
+    tab.clear();
+    tab.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
+    tab.getRange(1, 1, 1, rows[0].length).setFontWeight("bold").setBackground("#1F3864").setFontColor("#FFFFFF");
+    tab.getRange(2, 6, rows.length - 1, 1).setNumberFormat("$#,##0");
+    for (var ri = 2; ri <= rows.length; ri++) {
+      if (String(rows[ri - 1][1]).indexOf(" total (") > -1) tab.getRange(ri, 1, 1, rows[0].length).setFontWeight("bold").setBackground("#EEF2F8");
+    }
+    tab.setFrozenRows(1);
+    tab.autoResizeColumns(1, rows[0].length);
+    return jsonOut_({ ok: true, rows_written: rows.length });
+  }
+
   var pinCheck = checkPin_(teams, body.team_id, body.pin);
   if (!pinCheck.ok) return jsonOut_({ ok: false, error: pinCheck.error });
 
