@@ -64,6 +64,7 @@ def regenerate_all_pages():
     run(["python3", "engine/render_matchday_replay.py"])
     run(["python3", "engine/render_draftboard_site.py"])
     run(["python3", "engine/render_schedule_site.py"])
+    run(["python3", "engine/render_scoreboard.py"])
     run(["python3", "engine/render_trade_site.py"])
     run(["python3", "engine/render_scouting_site.py"])
     run(["python3", "engine/render_player_stats.py"])
@@ -107,6 +108,7 @@ print("dashboard OK")
         "matchday-replay/index.html": "matchday-replay/index.html",
         "draftboard-site/index.html": "draftboard/index.html",
         "schedule-site/index.html": "schedule/index.html",
+        "scoreboard-site/index.html": "scoreboard/index.html",
         "trade-site/index.html": "trade/index.html",
         "scouting-site/index.html": "scouting/index.html",
         "player-stats-site/index.html": "player-stats/index.html",

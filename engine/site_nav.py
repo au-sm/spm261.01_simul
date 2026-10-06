@@ -22,6 +22,7 @@ PAGES = [
     ("home", "Home", f"{GH_BASE}/"),
     ("dashboard", "Dashboard", f"{GH_BASE}/dashboard/"),
     ("draftboard", "Draft Board", f"{GH_BASE}/draftboard/"),
+    ("scoreboard", "Scoreboard", f"{GH_BASE}/scoreboard/"),
     ("schedule", "Schedule", f"{GH_BASE}/schedule/"),
     ("scouting", "Scouting Report", f"{GH_BASE}/scouting/"),
     ("playerstats", "Player Stats", f"{GH_BASE}/player-stats/"),

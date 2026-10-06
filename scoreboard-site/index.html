@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scoreboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#eef2ea; --ink:#0c120e; --accent:#f2b632;
+  --board:#0b100d; --board2:#141b16; --line:#26302a; --txt:#eef2ea; --muted:#8c9a8e;
+  --led:#ffb627; --win:#4fd18b; --loss:#ff7a5c; --draw:#e6c45a; --pitch:#1f4a2c;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --paper:#e7ece1; --ink:#070b08; } }
+:root[data-theme="dark"]{ --paper:#e7ece1; --ink:#070b08; }
+*{box-sizing:border-box;}
+body{margin:0;background:radial-gradient(1200px 500px at 50% -150px,#1d3b27 0%,transparent 70%),var(--board);color:var(--txt);font-family:"Source Serif 4",Georgia,serif;line-height:1.45;}
+h1,h2,h3{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase;letter-spacing:.03em;margin:0;}
+.wrap{max-width:1240px;margin:0 auto;padding:26px clamp(14px,4vw,44px) 70px;}
+.mast{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
+.mast h1{font-size:clamp(34px,6vw,64px);font-weight:900;line-height:.9;color:var(--led);text-shadow:0 0 18px rgba(255,182,39,.45);}
+.mast p{margin:6px 0 0;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted);letter-spacing:.04em;}
+.kpis{display:flex;gap:10px;flex-wrap:wrap;}
+.kpi{background:var(--board2);border:1px solid var(--line);border-radius:10px;padding:8px 14px;min-width:110px;}
+.kpi span{display:block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.kpi b{font-family:"Big Shoulders Display",sans-serif;font-size:26px;color:var(--txt);}
+.kpi.wide b{font-size:16px;}
+
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:30px 0 12px;border-bottom:2px solid var(--led);padding-bottom:6px;}
+.sec-h h2{font-size:26px;} .sec-h span{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);}
+
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;}
+.tile{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:10px;background:linear-gradient(180deg,#121a15,#0d130f);
+  border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 8px 24px rgba(0,0,0,.35);}
+.side{min-width:0;} .side.right{text-align:right;}
+.side b{display:block;font-family:"Big Shoulders Display",sans-serif;font-weight:800;font-size:21px;line-height:1.05;text-transform:uppercase;overflow-wrap:anywhere;}
+.side small{display:block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);margin-top:2px;}
+.ha{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.side.w b{color:var(--win);} .side.l b{color:#c9d2ca;opacity:.75;} .side.d b{color:var(--draw);}
+.score{display:flex;align-items:center;gap:4px;padding-top:12px;position:relative;}
+.dig{display:inline-flex;align-items:center;justify-content:center;min-width:46px;height:58px;border-radius:7px;background:#050806;border:1px solid #1d261f;
+  font-family:"Big Shoulders Display",sans-serif;font-weight:900;font-size:44px;color:var(--led);text-shadow:0 0 12px rgba(255,182,39,.6);}
+.dig.off{color:#3b463e;text-shadow:none;}
+.dash{font-family:"Big Shoulders Display",sans-serif;font-size:30px;color:var(--muted);}
+.ft{position:absolute;left:50%;top:-6px;transform:translateX(-50%);font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;color:var(--muted);}
+.sc{list-style:none;margin:8px 0 0;padding:0;font-size:12.5px;}
+.sc li{margin:2px 0;} .side.right .sc li{direction:ltr;}
+.sc .min{font-family:"IBM Plex Mono",monospace;color:var(--led);margin-right:5px;font-size:11.5px;}
+.sc em{display:block;font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);}
+
+.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:26px;align-items:start;}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--board2);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums;}
+.tbl th{background:#050806;color:var(--led);font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:9px 8px;text-align:center;}
+.tbl th:nth-child(2){text-align:left;}
+.tbl td{padding:7px 8px;border-top:1px solid var(--line);text-align:center;}
+.tbl td.tm{text-align:left;} .tbl td.tm b{display:block;font-weight:600;} .tbl td.tm small{color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:10.5px;}
+.tbl td.pos{font-family:"Big Shoulders Display",sans-serif;font-size:18px;color:var(--muted);width:34px;}
+.tbl td.pts{font-family:"Big Shoulders Display",sans-serif;font-size:20px;font-weight:800;color:var(--led);}
+.tbl tr.po td.pos{color:var(--win);box-shadow:inset 3px 0 0 var(--win);}
+.form{white-space:nowrap;}
+.f{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:4px;margin:0 1px;font:600 10.5px "IBM Plex Mono",monospace;color:#07100a;}
+.f-W{background:var(--win);} .f-L{background:var(--loss);} .f-D{background:var(--draw);}
+.muted{color:var(--muted);}
+.legend{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);margin:8px 2px 0;}
+.legend i{display:inline-block;width:10px;height:10px;background:var(--win);border-radius:2px;margin-right:5px;vertical-align:-1px;}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.tab{background:var(--board2);border:1px solid var(--line);color:var(--txt);border-radius:999px;padding:5px 12px;cursor:pointer;font:500 12px "IBM Plex Mono",monospace;}
+.tab.on{background:var(--led);color:#1a1205;border-color:var(--led);font-weight:600;}
+.panel{display:none;} .panel.on{display:block;}
+.pdate{margin:0 0 6px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);}
+.res{width:100%;border-collapse:collapse;background:var(--board2);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:14px;}
+.res td{padding:8px 10px;border-top:1px solid var(--line);} .res tr:first-child td{border-top:0;}
+.res td.r{text-align:right;width:44%;} .res td.l{width:44%;} .res td.c{text-align:center;}
+.res td.win{color:var(--win);font-weight:600;}
+.mini{display:inline-block;min-width:54px;padding:2px 8px;border-radius:5px;background:#050806;color:var(--led);font:700 16px "Big Shoulders Display",sans-serif;letter-spacing:.06em;}
+.empty{background:var(--board2);border:1px dashed var(--line);border-radius:10px;padding:18px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:13px;}
+footer{max-width:1240px;margin:0 auto;padding:0 clamp(14px,4vw,44px) 40px;color:var(--muted);font-size:12px;font-family:"IBM Plex Mono",monospace;}
+footer a{color:var(--led);}
+@media (max-width:900px){ .grid2{grid-template-columns:1fr;} .board{grid-template-columns:1fr;} }
+@media (max-width:520px){ .tbl th:nth-child(n+5):nth-child(-n+8),.tbl td:nth-child(n+5):nth-child(-n+8){display:none;} .dig{min-width:38px;height:48px;font-size:34px;} }
+
+/* explicit overrides throughout -- some host pages already style bare
+   nav{} / nav a{} for their own in-page section nav, so .sm-nav can't
+   rely on defaults not leaking in from those lower-specificity rules */
+.sm-nav{position:sticky;top:0;z-index:100;background:var(--ink);display:flex;flex-direction:row;
+  align-items:center;flex-wrap:wrap;gap:clamp(10px,2vw,28px);padding:10px clamp(14px,4vw,32px);
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;
+  border:none;box-shadow:0 2px 8px rgba(0,0,0,.18);}
+.sm-nav .sm-brand{color:var(--paper);font-weight:600;letter-spacing:.04em;margin-right:auto;white-space:nowrap;}
+.sm-nav a{color:color-mix(in srgb, var(--paper) 65%, transparent);text-decoration:none;letter-spacing:.02em;
+  padding:3px 0;border-bottom:2px solid transparent;white-space:nowrap;font-size:12.5px;}
+.sm-nav a:hover{color:var(--paper);}
+.sm-nav a.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+</style>
+</head>
+<body>
+<nav class="sm-nav">
+    <span class="sm-brand">SPM261.01 SOCCER LEAGUE</span>
+    <a href="https://au-sm.github.io/spm261.01_simul/" target="_blank" rel="noopener">Home</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/dashboard/" target="_blank" rel="noopener">Dashboard</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/draftboard/" target="_blank" rel="noopener">Draft Board</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/scoreboard/" target="_blank" rel="noopener" class="active">Scoreboard</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/schedule/" target="_blank" rel="noopener">Schedule</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/scouting/" target="_blank" rel="noopener">Scouting Report</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/player-stats/" target="_blank" rel="noopener">Player Stats</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/budget/" target="_blank" rel="noopener">Budget Dashboard</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/rulebook/" target="_blank" rel="noopener">Rulebook</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/sponsorship/" target="_blank" rel="noopener">Sponsorship Marketplace</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/trade/" target="_blank" rel="noopener">Trade Center</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/tv/" target="_blank" rel="noopener">TV Rights Marketplace</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/attendance/" target="_blank" rel="noopener">Attendance &amp; Ticket Sales</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/walkthrough/" target="_blank" rel="noopener">Match Engine Walkthrough</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/matchday-replay/" target="_blank" rel="noopener">Matchday Replay</a>
+  </nav>
+<div class="wrap">
+  <div class="mast">
+    <div><h1>Scoreboard</h1><p>SPM261.01 Soccer League &middot; every game outcome, updated automatically after each round &middot; last updated Oct 6, 2026 3:34 PM</p></div>
+    <div class="kpis">
+      <div class="kpi"><span>Games played</span><b>0 / 153</b></div>
+      <div class="kpi"><span>Total goals</span><b>0</b></div>
+      <div class="kpi"><span>Goals / game</span><b>0.00</b></div>
+      <div class="kpi wide"><span>Biggest win</span><b>&mdash;</b></div>
+    </div>
+  </div>
+
+  <div class="sec-h"><h2>Round 1 &middot; Upcoming</h2><span>Thu Oct 8</span></div>
+  <div class="board"><article class="tile up">
+  <div class="side"><span class="ha">Home</span><b>Knights FC</b><small>Bianca Biagini</small></div>
+  <div class="score"><span class="dig off">&ndash;</span><span class="dash">:</span><span class="dig off">&ndash;</span><span class="ft">VS</span></div>
+  <div class="side right"><span class="ha">Away</span><b>Montreal FC</b><small>Andre Yared</small></div>
+</article><article class="tile up">
+  <div class="side"><span class="ha">Home</span><b>Knight Knight</b><small>Carlos Brito-Mezon</small></div>
+  <div class="score"><span class="dig off">&ndash;</span><span class="dash">:</span><span class="dig off">&ndash;</span><span class="ft">VS</span></div>
+  <div class="side right"><span class="ha">Away</span><b>Peaches United</b><small>Sydney Weathers</small></div>
+</article><article class="tile up">
+  <div class="side"><span class="ha">Home</span><b>The Jersey Kickers</b><small>Mason Walls</small></div>
+  <div class="score"><span class="dig off">&ndash;</span><span class="dash">:</span><span class="dig off">&ndash;</span><span class="ft">VS</span></div>
+  <div class="side right"><span class="ha">Away</span><b>Pink Venom</b><small>Allison Dieckmann</small></div>
+</article><article class="tile up">
+  <div class="side"><span class="ha">Home</span><b>jake dunphy fc</b><small>Jake Dunphy</small></div>
+  <div class="score"><span class="dig off">&ndash;</span><span class="dash">:</span><span class="dig off">&ndash;</span><span class="ft">VS</span></div>
+  <div class="side right"><span class="ha">Away</span><b>Jovanni&#x27;s Team</b><small>Jovanni Romeo</small></div>
+</article><article class="tile up">
+  <div class="side"><span class="ha">Home</span><b>arcadiaballerz</b><small>Anthony Pope</small></div>
+  <div class="score"><span class="dig off">&ndash;</span><span class="dash">:</span><span class="dig off">&ndash;</span><span class="ft">VS</span></div>
+  <div class="side right"><span class="ha">Away</span><b>Team 5</b><small>Jayden Geerders</small></div>
+</article><article class="tile up">
+  <div class="side"><span class="ha">Home</span><b>Oceanic FC</b><small>Yonelisa Hamusten</small></div>
+  <div class="score"><span class="dig off">&ndash;</span><span class="dash">:</span><span class="dig off">&ndash;</span><span class="ft">VS</span></div>
+  <div class="side right"><span class="ha">Away</span><b>New Jersey FC</b><small>Sawyer Ostroff</small></div>
+</article><article class="tile up">
+  <div class="side"><span class="ha">Home</span><b>team twelve</b><small>Maggie O&#x27;Shea</small></div>
+  <div class="score"><span class="dig off">&ndash;</span><span class="dash">:</span><span class="dig off">&ndash;</span><span class="ft">VS</span></div>
+  <div class="side right"><span class="ha">Away</span><b>JSN FC</b><small>Denim Horsford</small></div>
+</article><article class="tile up">
+  <div class="side"><span class="ha">Home</span><b>Wildcats</b><small>Max Lebisky</small></div>
+  <div class="score"><span class="dig off">&ndash;</span><span class="dash">:</span><span class="dig off">&ndash;</span><span class="ft">VS</span></div>
+  <div class="side right"><span class="ha">Away</span><b>Kyles team</b><small>Kyle Miller</small></div>
+</article><article class="tile up">
+  <div class="side"><span class="ha">Home</span><b>Knight United</b><small>Parker Miles</small></div>
+  <div class="score"><span class="dig off">&ndash;</span><span class="dash">:</span><span class="dig off">&ndash;</span><span class="ft">VS</span></div>
+  <div class="side right"><span class="ha">Away</span><b>Pitch Perfect</b><small>Jordan Long</small></div>
+</article></div>
+
+  <div class="grid2">
+    <section>
+      <div class="sec-h"><h2>League Table</h2><span>3 pts win &middot; 1 draw &middot; tiebreak GD, then GF</span></div>
+      <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th><th>Form</th></tr></thead>
+      <tbody><tr><td class="pos">1</td><td class="tm"><b>JSN FC</b><small>Denim Horsford</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">2</td><td class="tm"><b>Jovanni&#x27;s Team</b><small>Jovanni Romeo</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">3</td><td class="tm"><b>Knight Knight</b><small>Carlos Brito-Mezon</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">4</td><td class="tm"><b>Knight United</b><small>Parker Miles</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">5</td><td class="tm"><b>Knights FC</b><small>Bianca Biagini</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">6</td><td class="tm"><b>Kyles team</b><small>Kyle Miller</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">7</td><td class="tm"><b>Montreal FC</b><small>Andre Yared</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">8</td><td class="tm"><b>New Jersey FC</b><small>Sawyer Ostroff</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">9</td><td class="tm"><b>Oceanic FC</b><small>Yonelisa Hamusten</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">10</td><td class="tm"><b>Peaches United</b><small>Sydney Weathers</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">11</td><td class="tm"><b>Pink Venom</b><small>Allison Dieckmann</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">12</td><td class="tm"><b>Pitch Perfect</b><small>Jordan Long</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">13</td><td class="tm"><b>Team 5</b><small>Jayden Geerders</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">14</td><td class="tm"><b>The Jersey Kickers</b><small>Mason Walls</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">15</td><td class="tm"><b>Wildcats</b><small>Max Lebisky</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">16</td><td class="tm"><b>arcadiaballerz</b><small>Anthony Pope</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">17</td><td class="tm"><b>jake dunphy fc</b><small>Jake Dunphy</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr><tr><td class="pos">18</td><td class="tm"><b>team twelve</b><small>Maggie O&#x27;Shea</small></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td><td class="form"><span class="muted">&mdash;</span></td></tr></tbody></table></div>
+      <p class="legend"><i></i>Top 6 = playoff spots</p>
+    </section>
+    <section>
+      <div class="sec-h"><h2>All Results</h2><span><a href="https://au-sm.github.io/spm261.01_simul/matchday-replay/" style="color:var(--led)">Watch replays &rarr;</a></span></div>
+      <p class="empty">No results yet &mdash; scores appear here automatically as soon as each round is played.</p>
+    </section>
+  </div>
+</div>
+<footer>SPM261.01 Soccer League &middot; results are permanent once resolved &middot; full fixture list on the <a href="https://au-sm.github.io/spm261.01_simul/schedule/">Schedule</a></footer>
+<script>
+document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){
+  document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('on',x===b);});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('on',p.id===b.dataset.t);});
+});});
+</script>
+</body>
+</html>
