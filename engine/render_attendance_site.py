@@ -103,7 +103,8 @@ def render_per_match(config, matches):
         else:
             log_rows.append(
                 f'<tr><td>{rl}</td><td>{name_by_id.get(m["home_id"], "")}</td><td>{name_by_id.get(m["away_id"], "")}</td>'
-                f'<td colspan="5" class="pm-none">no ticket price submitted &mdash; no gate revenue booked</td></tr>')
+                f'<td colspan="3" class="pm-none">no ticket price submitted</td>'
+                f'<td class="num">{money(g["home_revenue"])}</td><td class="num">{money(g["away_revenue"])}</td></tr>')
     log = (f'<div class="pm-scroll"><table><thead><tr><th>Round</th><th>Home</th><th>Away</th><th>Price Tier</th>'
            f'<th class="num">Attendance</th><th class="num">Total Gate</th><th class="num">Home Share</th><th class="num">Away Cut</th></tr></thead>'
            f'<tbody>{"".join(log_rows)}</tbody></table></div>')

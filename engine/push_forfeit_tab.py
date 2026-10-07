@@ -38,7 +38,7 @@ def build_rows():
     owner = {t["team_id"]: t.get("owner", "") for t in config["teams"]}
     date_by_round = {r: e["date"] for e in calendar.get("match_day_schedule", []) for r in e["rounds"]}
     rows = [["Round", "Match date", "Team that lost by forfeit", "Owner", "Reason", "Opponent",
-             "Result shown publicly"]]
+             "Result shown publicly", "Ticket revenue given"]]
     for m in sorted(matches, key=lambda m: (m["round"], m["home_id"])):
         ff = m.get("forfeit")
         if not ff:
@@ -52,10 +52,12 @@ def build_rows():
             reason = reasons.get(side) or "no valid lineup"
             if ff == "both":
                 reason += " (both teams forfeited: both take a loss)"
+            payout = (m.get("gate") or {}).get(f"{side}_payout", 0)
             rows.append([m["round"], date_by_round.get(m["round"], ""), name.get(tid, ""), owner.get(tid, ""),
-                         reason, name.get(opp, ""), shown])
+                         reason, name.get(opp, ""), shown,
+                         f"${payout:,} (50% of round avg {side} revenue)" if payout else "$0"])
     if len(rows) == 1:
-        rows.append(["", "", "No forfeits yet", "", "", "", ""])
+        rows.append(["", "", "No forfeits yet", "", "", "", "", ""])
     return rows
 
 

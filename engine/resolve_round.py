@@ -384,6 +384,8 @@ def main():
                 else:
                     print(f"    NOTE: {side} did not submit -- auto-lineup applied, no rationale credit this round.")
 
+    for tid, side, amt in apply_no_rationale_payout(matches, finances, args.round):
+        print(f"    (private) no-rationale ticket payout: team {tid} ({side}) +${amt:,} = 50% of round avg {side} revenue")
     save_json("matches.json", matches)
     save_json("team_finances.json", {"teams": finances})
 
@@ -412,6 +414,43 @@ def main():
         f.write(html)
     print(f"\nRound {args.round} resolved. Dashboard re-rendered -> {dash_path}")
     print("Republish dashboard/index.html as the artifact to make it live.")
+
+
+NO_RATIONALE_SHARE = 0.5
+
+
+def apply_no_rationale_payout(matches, finances, round_num):
+    """A team that lost only because its lineup had no decision rationale
+    still earns ticket revenue: NO_RATIONALE_SHARE (50%) of this round's
+    average for its role -- the average HOME share if it was the home side,
+    the average AWAY cut if it was the visitor -- taken over this round's
+    normally played, ticketed matches. Paid by the league on top of the
+    opponent's gate (the opponent's own revenue is not reduced).
+    Instructor's rule, 2026-10-07. Idempotent per match."""
+    rnd = [m for m in matches if m["round"] == round_num and m.get("stage", "regular") == "regular"]
+    normal = [m for m in rnd if not m.get("forfeit") and (m.get("gate") or {}).get("price_tier")]
+    if not normal:
+        return []
+    avg = {"home": sum(m["gate"]["home_revenue"] for m in normal) / len(normal),
+           "away": sum(m["gate"]["away_revenue"] for m in normal) / len(normal)}
+    paid = []
+    for m in rnd:
+        if not m.get("forfeit"):
+            continue
+        reasons = m.get("forfeit_reason") or {}
+        g = m.setdefault("gate", {"price_tier": None, "price": 0, "attendance": 0, "attendance_rate": 0,
+                                  "revenue": 0, "home_revenue": 0, "away_revenue": 0, "away_share_rate": 0})
+        for side in ("home", "away"):
+            if reasons.get(side) != "no decision rationale" or g.get(f"{side}_payout"):
+                continue
+            amt = round(avg[side] * NO_RATIONALE_SHARE)
+            tid = str(m[f"{side}_id"])
+            finances.setdefault(tid, {"ticket_revenue": 0, "sponsorship_revenue": 0, "tv_revenue": 0})
+            finances[tid]["ticket_revenue"] += amt
+            g[f"{side}_revenue"] = g.get(f"{side}_revenue", 0) + amt
+            g[f"{side}_payout"] = amt
+            paid.append((m[f"{side}_id"], side, amt))
+    return paid
 
 
 if __name__ == "__main__":

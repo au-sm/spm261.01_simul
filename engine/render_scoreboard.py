@@ -105,7 +105,11 @@ def render(config, schedule, calendar, matches):
         if not g:
             return ""
         if not g.get("price_tier"):
-            return '<div class="gate none">Ticket revenue: no ticket price submitted &mdash; $0 for both teams</div>'
+            if not (g.get("home_revenue") or g.get("away_revenue")):
+                return '<div class="gate none">Ticket revenue: no ticket price submitted &mdash; $0 for both teams</div>'
+            return (f'<div class="gate"><span class="g-k">Ticket revenue</span>'
+                    f'<span class="g-s"><span>{name(m["home_id"])} <b>${g["home_revenue"]:,}</b></span>'
+                    f'<span>{name(m["away_id"])} <b>${g["away_revenue"]:,}</b></span></span></div>')
         return (f'<div class="gate"><span class="g-k">Ticket revenue</span>'
                 f'<span class="g-t">{g["attendance"]:,} fans &middot; {esc(g["price_tier"])} ${g["price"]} &middot; gate <b>${g["revenue"]:,}</b></span>'
                 f'<span class="g-s"><span>{name(m["home_id"])} <b>${g["home_revenue"]:,}</b></span>'
