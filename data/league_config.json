@@ -1,8 +1,8 @@
 {
   "league_name": "SPM261.01 Soccer League",
   "season_label": "Fall 2026",
-  "phase": "draft",
-  "current_round": 0,
+  "phase": "season",
+  "current_round": 1,
   "season_seed": 1556832574,
   "n_teams": 18,
   "roster_size": 18,
