@@ -202,9 +202,12 @@ class Standings:
             for tid in team_ids
         }
 
-    def record(self, home_id, away_id, home_goals, away_goals):
+    def record(self, home_id, away_id, home_goals, away_goals, forfeit=None):
         h, a = self.table[home_id], self.table[away_id]
         h["P"] += 1; a["P"] += 1
+        if forfeit == "both":  # neither team submitted a lineup: both lose, no points
+            h["L"] += 1; a["L"] += 1
+            return
         h["GF"] += home_goals; h["GA"] += away_goals
         a["GF"] += away_goals; a["GA"] += home_goals
         if home_goals > away_goals:

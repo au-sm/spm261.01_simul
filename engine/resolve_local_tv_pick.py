@@ -88,7 +88,7 @@ def team_standing_rank(team_id, matches, team_ids):
     st = Standings(team_ids)
     for m in matches:
         if m.get("stage", "regular") == "regular":
-            st.record(m["home_id"], m["away_id"], m["home_goals"], m["away_goals"])
+            st.record(m["home_id"], m["away_id"], m["home_goals"], m["away_goals"], m.get("forfeit"))
     ranked = [tid for tid, _ in st.ranked()]
     return ranked.index(team_id) + 1 if team_id in ranked else None
 

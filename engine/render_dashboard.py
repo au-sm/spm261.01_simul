@@ -40,7 +40,7 @@ def load_json(name):
 def build_standings(matches, team_ids):
     st = Standings(team_ids)
     for m in matches:
-        st.record(m["home_id"], m["away_id"], m["home_goals"], m["away_goals"])
+        st.record(m["home_id"], m["away_id"], m["home_goals"], m["away_goals"], m.get("forfeit"))
     return st.ranked()
 
 
@@ -353,7 +353,7 @@ footer{{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 60px;color
 
   <div class="sub-card">
     <h2>Weekly Lineup</h2>
-    <p class="sub-sub">{round_label} &middot; submit every round before the deadline -- resubmitting before the deadline replaces your earlier answer. Requires a drafted roster.</p>
+    <p class="sub-sub">{round_label} &middot; submit every round before the deadline -- resubmitting before the deadline replaces your earlier answer. Requires a drafted roster. <strong>No lineup by the deadline = automatic 3&ndash;0 forfeit loss.</strong></p>
     <div class="sub-grid">
       <div class="sub-field"><label for="lu-team">Team</label><select id="lu-team" class="sub-team-select"></select></div>
       <div class="sub-field"><label for="lu-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="lu-pin" class="sub-pin" placeholder="4-digit PIN"></div>

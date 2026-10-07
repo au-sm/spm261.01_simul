@@ -51,6 +51,8 @@ def render(config, matches):
 
     match_entries = []
     for m in sorted_matches:
+        if m.get("forfeit"):
+            continue  # forfeits are not played, so there is nothing to replay
         home = team_map[m["home_id"]]
         away = team_map[m["away_id"]]
         goals = [

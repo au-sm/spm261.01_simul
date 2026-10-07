@@ -233,6 +233,54 @@ def main():
         a_name = next(t["name"] for t in config["teams"] if t["team_id"] == a_id)
 
         h_info, a_info = parsed[h_id], parsed[a_id]
+
+        # FORFEIT RULE: a team with no valid lineup this round (missed the
+        # deadline, or a submission rejected for a wrong PIN) loses 3-0 by
+        # forfeit -- the match is not simulated. If NEITHER team submitted,
+        # both lose (0-0 on record, no points for either; see
+        # simulate.Standings.record). The team that did submit still sells
+        # tickets if it is home and set a price: it keeps the whole gate,
+        # since the forfeiting visitor earns no away cut.
+        if not (h_info["submitted"] and a_info["submitted"]):
+            forfeit = "both" if not (h_info["submitted"] or a_info["submitted"]) else ("home" if not h_info["submitted"] else "away")
+            fg = {"both": (0, 0), "home": (0, 3), "away": (3, 0)}[forfeit]
+            record = {
+                "round": args.round, "stage": "regular",
+                "home_id": h_id, "away_id": a_id,
+                "home_goals": fg[0], "away_goals": fg[1], "forfeit": forfeit,
+                "home_formation": h_info["formation"], "away_formation": a_info["formation"],
+                "home_strategy": h_info["strategy"] if h_info["submitted"] else None,
+                "away_strategy": a_info["strategy"] if a_info["submitted"] else None,
+                "home_submitted": h_info["submitted"], "away_submitted": a_info["submitted"],
+                "goal_events": [], "home_starters": [], "away_starters": [],
+            }
+            matches.append(record)
+            finances.setdefault(str(h_id), {"ticket_revenue": 0, "sponsorship_revenue": 0, "tv_revenue": 0})
+            finances.setdefault(str(a_id), {"ticket_revenue": 0, "sponsorship_revenue": 0, "tv_revenue": 0})
+            price_tier = h_info["ticket_price"] if h_info["submitted"] else None
+            if price_tier:
+                att = compute_attendance(price_tier, recent_win_rate(h_id, matches, upto_round=args.round), avg_star_power(h_info["lineup"]))
+                finances[str(h_id)]["ticket_revenue"] += att["revenue"]
+                record["gate"] = {
+                    "price_tier": price_tier, "price": att["price"],
+                    "attendance": att["attendance"], "attendance_rate": att["attendance_rate"],
+                    "revenue": att["revenue"], "home_revenue": att["revenue"], "away_revenue": 0,
+                    "away_share_rate": 0,
+                }
+            else:
+                record["gate"] = {"price_tier": None, "price": 0, "attendance": 0, "attendance_rate": 0,
+                                  "revenue": 0, "home_revenue": 0, "away_revenue": 0, "away_share_rate": 0}
+            label = {"both": "BOTH teams forfeit (no lineups) -- both take a loss",
+                     "home": f"{h_name} forfeits (no lineup) -- {a_name} wins 3-0",
+                     "away": f"{a_name} forfeits (no lineup) -- {h_name} wins 3-0"}[forfeit]
+            print(f"Round {args.round}: {h_name} {fg[0]}-{fg[1]} {a_name}  FORFEIT: {label}"
+                  + (f" | gate ${record['gate']['revenue']:,} to {h_name}" if record['gate']['revenue'] else ""))
+            for side in ((h_name,) if not h_info["submitted"] else ()) + ((a_name,) if not a_info["submitted"] else ()):
+                if side in pin_rejected:
+                    print(f"    WARNING: a submission claiming to be {side} had a missing/incorrect PIN -- REJECTED, "
+                          f"so {side} forfeits. If this wasn't {side}'s own mistake, this is worth following up on.")
+            continue
+
         h_formation = h_info["formation"] or "4-4-2"
         a_formation = a_info["formation"] or "4-4-2"
         h_lineup = h_info["lineup"] or fallback_lineup(h_info["roster"], h_formation)

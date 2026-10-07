@@ -94,10 +94,12 @@ def team_history(team_id, matches, team_map):
         opp_goals = m["away_goals"] if is_home else m["home_goals"]
         formation = m["home_formation"] if is_home else m["away_formation"]
         strategy = m["home_strategy"] if is_home else m["away_strategy"]
-        outcome = "W" if own_goals > opp_goals else ("L" if own_goals < opp_goals else "D")
+        outcome = "L" if m.get("forfeit") == "both" else ("W" if own_goals > opp_goals else ("L" if own_goals < opp_goals else "D"))
         record[outcome] += 1
-        formation_tally[formation] = formation_tally.get(formation, 0) + 1
-        strategy_tally[strategy] = strategy_tally.get(strategy, 0) + 1
+        if formation:  # a forfeiting team has no formation/strategy that round
+            formation_tally[formation] = formation_tally.get(formation, 0) + 1
+        if strategy:
+            strategy_tally[strategy] = strategy_tally.get(strategy, 0) + 1
         rows.append({
             "round": m["round"], "venue": "Home" if is_home else "Away",
             "opponent": team_map.get(opp_id, f"Team {opp_id}"),

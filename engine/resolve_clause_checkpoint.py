@@ -81,7 +81,7 @@ def main():
     st = Standings(team_ids)
     for m in matches:
         if m.get("stage", "regular") == "regular" and m["round"] <= checkpoint_round:
-            st.record(m["home_id"], m["away_id"], m["home_goals"], m["away_goals"])
+            st.record(m["home_id"], m["away_id"], m["home_goals"], m["away_goals"], m.get("forfeit"))
     ranked = [tid for tid, _ in st.ranked()]
     rank_of = {tid: i + 1 for i, tid in enumerate(ranked)}  # 1-indexed final rank
 

@@ -63,6 +63,9 @@ def render(config, schedule, calendar, matches):
             continue
         H, A = table[h], table[a]
         H["P"] += 1; A["P"] += 1
+        if m.get("forfeit") == "both":
+            H["L"] += 1; A["L"] += 1; H["form"].append("L"); A["form"].append("L")
+            continue
         H["GF"] += hg; H["GA"] += ag; A["GF"] += ag; A["GA"] += hg
         if hg > ag:
             H["W"] += 1; H["PTS"] += 3; A["L"] += 1; H["form"].append("W"); A["form"].append("L")
@@ -112,11 +115,19 @@ def render(config, schedule, calendar, matches):
         h, a, hg, ag = m["home_id"], m["away_id"], m["home_goals"], m["away_goals"]
         hres = "w" if hg > ag else ("l" if hg < ag else "d")
         ares = {"w": "l", "l": "w", "d": "d"}[hres]
+        ff = m.get("forfeit")
+        if ff == "both":
+            hres = ares = "l"
+        tag = {"both": "BOTH FORFEIT", "home": "FORFEIT", "away": "FORFEIT"}.get(ff, "FT")
+        ftcls = " ff" if ff else ""
+        note = {"both": '<div class="ffnote">Neither team submitted a lineup &mdash; both teams take a loss</div>',
+                "home": f'<div class="ffnote">{name(h)} did not submit a lineup &mdash; {name(a)} wins 3&ndash;0 by forfeit</div>',
+                "away": f'<div class="ffnote">{name(a)} did not submit a lineup &mdash; {name(h)} wins 3&ndash;0 by forfeit</div>'}.get(ff, "")
         return f'''<article class="tile">
   <div class="side {hres}"><span class="ha">Home</span><b>{name(h)}</b><small>{owner(h)}</small><ul class="sc">{scorers(m, "home")}</ul></div>
-  <div class="score"><span class="dig">{hg}</span><span class="dash">&ndash;</span><span class="dig">{ag}</span><span class="ft">FT</span></div>
+  <div class="score"><span class="dig">{hg}</span><span class="dash">&ndash;</span><span class="dig">{ag}</span><span class="ft{ftcls}">{tag}</span></div>
   <div class="side {ares} right"><span class="ha">Away</span><b>{name(a)}</b><small>{owner(a)}</small><ul class="sc">{scorers(m, "away")}</ul></div>
-  {gate_line(m)}
+  {note}{gate_line(m)}
 </article>'''
 
     def upcoming_tile(h, a):
@@ -145,7 +156,7 @@ def render(config, schedule, calendar, matches):
     total_goals = sum(m["home_goals"] + m["away_goals"] for m in matches)
     n_played = len(matches)
     n_sched = sum(len(r["fixtures"]) for r in schedule)
-    biggest = max(matches, key=lambda m: (abs(m["home_goals"] - m["away_goals"]), m["home_goals"] + m["away_goals"]), default=None)
+    biggest = max([m for m in matches if not m.get("forfeit")], key=lambda m: (abs(m["home_goals"] - m["away_goals"]), m["home_goals"] + m["away_goals"]), default=None)
     big_txt = (f'{name(biggest["home_id"])} {biggest["home_goals"]}&ndash;{biggest["away_goals"]} {name(biggest["away_id"])}'
                if biggest and biggest["home_goals"] != biggest["away_goals"] else "&mdash;")
 
@@ -160,7 +171,9 @@ def render(config, schedule, calendar, matches):
             g = m.get("gate")
             gate = (f'<span class="gt">{km(g["home_revenue"])} / {km(g["away_revenue"])}</span>' if g and g.get("price_tier")
                     else ('<span class="gt none">no gate</span>' if g else '<span class="gt none">&ndash;</span>'))
-            rows.append(f'<tr><td class="r {"win" if hg > ag else ""}">{name(h)}</td><td class="c"><span class="mini">{hg}&ndash;{ag}</span></td>'
+            fft = {"both": "both forfeit", "home": "home forfeit", "away": "away forfeit"}.get(m.get("forfeit"), "")
+            fftag = f'<small class="fft">{fft}</small>' if fft else ""
+            rows.append(f'<tr><td class="r {"win" if hg > ag else ""}">{name(h)}</td><td class="c"><span class="mini">{hg}&ndash;{ag}</span>{fftag}</td>'
                         f'<td class="l {"win" if ag > hg else ""}">{name(a)}</td><td class="g">{gate}</td></tr>')
         date = fmt_date(date_by_round.get(key[0])) if key[1] == "regular" else ""
         panels.append(f'<div class="panel{" on" if i == 0 else ""}" id="{rid}"><p class="pdate">{date}</p>'
@@ -247,6 +260,9 @@ h1,h2,h3{{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercas
 .res td.r{{text-align:right;}} .res td.c{{text-align:center;}}
 .res td.win{{color:var(--win);font-weight:600;}}
 .mini{{display:inline-block;min-width:54px;padding:2px 8px;border-radius:5px;background:#050806;color:var(--led);font:700 16px "Big Shoulders Display",sans-serif;letter-spacing:.06em;}}
+.ft.ff{{color:var(--loss);font-weight:600;white-space:nowrap;}}
+.ffnote{{grid-column:1/-1;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--loss);}}
+.fft{{display:block;font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--loss);text-transform:uppercase;letter-spacing:.06em;}}
 .gate{{grid-column:1/-1;margin-top:4px;padding-top:9px;border-top:1px dashed var(--line);display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);}}
 .gate .g-k{{letter-spacing:.12em;text-transform:uppercase;font-size:9.5px;color:var(--led);}}
 .gate b{{color:var(--txt);}} .gate .g-s{{display:flex;gap:12px;flex-wrap:wrap;margin-left:auto;}} .gate .g-s b{{color:var(--win);}}

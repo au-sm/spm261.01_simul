@@ -89,7 +89,7 @@ def compute_scorecards():
     st = Standings(team_ids)
     for m in matches:
         if m.get("stage", "regular") == "regular":
-            st.record(m["home_id"], m["away_id"], m["home_goals"], m["away_goals"])
+            st.record(m["home_id"], m["away_id"], m["home_goals"], m["away_goals"], m.get("forfeit"))
     standings_ranked = st.ranked()
     ranked_ids = [tid for tid, _ in standings_ranked]
     ranking_points = linear_rank_points(ranked_ids, WEIGHTS["ranking"])
