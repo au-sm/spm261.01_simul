@@ -270,8 +270,8 @@ def build(config, deals, calendar=None, ltv_deals=None):
         "Every round, before the deadline, each owner submits a Weekly Lineup & Strategy form: formation, "
         "strategy, starting XI by name, a ticket price if home that round, and a 2-4 sentence rationale "
         "(graded — see the Decision Rationale Rubric above). Every submission must also include your team's "
-        "4-digit PIN — a submission with a missing or incorrect PIN is rejected and that team forfeits "
-        "the match (see below), so a lineup can't be changed (by accident or on purpose) by anyone but that "
+        "4-digit PIN — a submission with a missing or incorrect PIN is rejected and treated as not "
+        "submitted (see below), so a lineup can't be changed (by accident or on purpose) by anyone but that "
         "team's own owner."
     )
     doc.add_paragraph(
@@ -280,11 +280,9 @@ def build(config, deals, calendar=None, ltv_deals=None):
         "form this week, not just who has the highest base rating."
     )
     doc.add_paragraph(
-        "If you do not submit, you forfeit the match. A team with no valid Weekly Lineup by the deadline "
-        "(including a submission rejected for a wrong PIN) loses 3-0 by forfeit: the match is not played, your "
-        "opponent gets the win and 3 points, and you earn no rationale credit for that round. If neither team "
-        "submits, both teams take a loss (0 points each). A home team that did submit still sells tickets at its "
-        "chosen price and keeps the whole gate; a forfeiting team earns no ticket revenue from that match."
+        "If you do not submit a complete Weekly Lineup — every field, including your decision rationale — by "
+        "the deadline (or your submission is rejected for a wrong PIN), your team is penalized for that round "
+        "and you earn no rationale credit."
     )
 
     # ---- 7. Formations & Strategy ----

@@ -38,6 +38,7 @@ from simulate import simulate_match, FORMATIONS
 from attendance import compute_attendance, compute_away_share, recent_win_rate
 from player_condition import conditions_for_round, roll_new_injuries
 from match_summary import generate_summary
+from goal_events import generate_goal_events
 import render_dashboard
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -178,11 +179,13 @@ def main():
     pin_rejected = []  # (team_name,) -- treated as a non-submission, does NOT block the round
     parsed = {}
     pin_by_team = {t["team_id"]: t.get("pin") for t in config["teams"]}
+    forfeit_reason = {}  # team_id -> why it had no valid lineup (private: instructor's Forfeits tab only)
     for team_id, name in {t["team_id"]: t["name"] for t in config["teams"]}.items():
         row = submissions.get(name)
         roster_by_name = build_roster_index(players, team_id)
         roster = list(roster_by_name.values())
         if row is None:
+            forfeit_reason[team_id] = "no lineup submitted"
             parsed[team_id] = {"lineup": None, "formation": None, "strategy": "Balanced",
                                 "ticket_price": None, "roster": roster, "submitted": False}
             continue
@@ -198,9 +201,17 @@ def main():
             submitted_pin = (row.get("Team PIN") or "").strip()
             if submitted_pin != expected_pin:
                 pin_rejected.append(name)
+                forfeit_reason[team_id] = "lineup rejected: wrong or missing PIN"
                 parsed[team_id] = {"lineup": None, "formation": None, "strategy": "Balanced",
                                     "ticket_price": None, "roster": roster, "submitted": False}
                 continue
+
+        # a lineup with no decision rationale counts as no lineup at all
+        if not (row.get("Decision rationale (2-4 sentences)") or "").strip():
+            forfeit_reason[team_id] = "no decision rationale"
+            parsed[team_id] = {"lineup": None, "formation": None, "strategy": "Balanced",
+                                "ticket_price": None, "roster": roster, "submitted": False}
+            continue
 
         formation = row.get("Formation", "").strip()
         if formation not in FORMATIONS:
@@ -244,15 +255,34 @@ def main():
         if not (h_info["submitted"] and a_info["submitted"]):
             forfeit = "both" if not (h_info["submitted"] or a_info["submitted"]) else ("home" if not h_info["submitted"] else "away")
             fg = {"both": (0, 0), "home": (0, 3), "away": (3, 0)}[forfeit]
+            # PUBLICLY a forfeit must look like an ordinary result (instructor's
+            # call, 2026-10-07): the forfeiting side fields the league office's
+            # default XI, the winner's 3 goals get normal-looking scorers from its
+            # own submitted XI, and no page says "forfeit". Only the instructor's
+            # private Sheet tab (engine/push_forfeit_tab.py) shows who forfeited.
+            h_formation = h_info["formation"] or "4-4-2"
+            a_formation = a_info["formation"] or "4-4-2"
+            h_lineup = h_info["lineup"] or fallback_lineup(h_info["roster"], h_formation)
+            a_lineup = a_info["lineup"] or fallback_lineup(a_info["roster"], a_formation)
+            starters_this_round.extend(flatten_lineup(h_lineup))
+            starters_this_round.extend(flatten_lineup(a_lineup))
+            ff_rng = random.Random(match_seed(season_seed, args.round, h_id, a_id))
+            if forfeit == "both":
+                events = []
+            else:
+                win_side = "home" if forfeit == "away" else "away"
+                events = generate_goal_events(ff_rng, win_side, h_lineup if win_side == "home" else a_lineup, 3)
             record = {
                 "round": args.round, "stage": "regular",
                 "home_id": h_id, "away_id": a_id,
                 "home_goals": fg[0], "away_goals": fg[1], "forfeit": forfeit,
-                "home_formation": h_info["formation"], "away_formation": a_info["formation"],
-                "home_strategy": h_info["strategy"] if h_info["submitted"] else None,
-                "away_strategy": a_info["strategy"] if a_info["submitted"] else None,
+                "home_formation": h_formation, "away_formation": a_formation,
+                "home_strategy": h_info["strategy"] if h_info["submitted"] else "Balanced",
+                "away_strategy": a_info["strategy"] if a_info["submitted"] else "Balanced",
                 "home_submitted": h_info["submitted"], "away_submitted": a_info["submitted"],
-                "goal_events": [], "home_starters": [], "away_starters": [],
+                "forfeit_reason": {"home": forfeit_reason.get(h_id), "away": forfeit_reason.get(a_id)},
+                "goal_events": sorted(events, key=lambda e: e["minute"]),
+                "home_starters": flatten_lineup(h_lineup), "away_starters": flatten_lineup(a_lineup),
             }
             matches.append(record)
             finances.setdefault(str(h_id), {"ticket_revenue": 0, "sponsorship_revenue": 0, "tv_revenue": 0})

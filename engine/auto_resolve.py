@@ -341,6 +341,13 @@ def main():
     except Exception as exc:
         print("Roster tab sync skipped:", exc)
 
+    # instructor-only "Forfeits" tab in the Google Sheet (non-fatal; never on the public site)
+    try:
+        import push_forfeit_tab
+        print("Forfeits tab:", push_forfeit_tab.push(os.environ.get("ADMIN_KEY", "")))
+    except Exception as exc:
+        print("Forfeits tab sync skipped:", exc)
+
     # write a marker file the workflow uses to decide whether to commit
     with open(os.path.join(BASE, "_auto_resolve_actions.txt"), "w") as f:
         f.write("\n".join(actions))

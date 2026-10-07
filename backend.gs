@@ -348,6 +348,22 @@ function doPost(e) {
   }
 
   // Admin-only: write the "Players per Team" roster tab (no PINs involved).
+  // generic admin-only tab writer (e.g. the instructor-only "Forfeits" tab)
+  if (body.type === "admin_tab") {
+    if (body.admin_key !== ADMIN_KEY) return jsonOut_({ ok: false, error: "unauthorized" });
+    var trows = body.rows || [];
+    var tname = String(body.tab_name || "").trim();
+    if (!trows.length || !tname) return jsonOut_({ ok: false, error: "tab_name and rows required" });
+    var ssT = SpreadsheetApp.getActiveSpreadsheet();
+    var ttab = ssT.getSheetByName(tname) || ssT.insertSheet(tname);
+    ttab.clear();
+    ttab.getRange(1, 1, trows.length, trows[0].length).setValues(trows);
+    ttab.getRange(1, 1, 1, trows[0].length).setFontWeight("bold").setBackground("#7A1F1F").setFontColor("#FFFFFF");
+    ttab.setFrozenRows(1);
+    ttab.autoResizeColumns(1, trows[0].length);
+    return jsonOut_({ ok: true, tab: tname, rows_written: trows.length });
+  }
+
   if (body.type === "admin_roster_tab") {
     if (body.admin_key !== ADMIN_KEY) return jsonOut_({ ok: false, error: "unauthorized" });
     var rows = body.rows || [];

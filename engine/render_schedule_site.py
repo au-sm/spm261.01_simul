@@ -79,10 +79,7 @@ def render(config, schedule, calendar, matches):
             if result:
                 score = f'{result["home_goals"]}&ndash;{result["away_goals"]}'
                 status_cls = "status-complete"
-                if result.get("forfeit"):
-                    status = {"both": "both forfeit", "home": f"{score} &middot; home forfeit", "away": f"{score} &middot; away forfeit"}[result["forfeit"]]
-                else:
-                    status = f'<a href="{GH_BASE}/matchday-replay/">{score} &middot; Replay</a>'
+                status = f'<a href="{GH_BASE}/matchday-replay/">{score} &middot; Replay</a>'
             else:
                 status_cls = "status-pending"
                 status = "upcoming" if (date == "TBD" or date >= today) else "pending"

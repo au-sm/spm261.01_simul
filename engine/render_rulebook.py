@@ -269,11 +269,9 @@ def render(config, deals, calendar=None, ltv_deals=None):
           <p><strong>Check that round's Player Condition report first</strong> (see Player Ratings above) &mdash; it's published before the
           deadline specifically so your starting XI and formation choice can react to who's actually in form this week, not
           just who has the highest base rating.</p>
-          <p><strong>If you do not submit, you forfeit the match.</strong> A team with no valid Weekly Lineup by the deadline
-          (including a submission rejected for a wrong PIN) <strong>loses 3&ndash;0 by forfeit</strong>: the match is not played,
-          your opponent gets the win and 3 points, and you earn no rationale credit for that round. If <em>neither</em> team
-          submits, <strong>both teams take a loss</strong> (0 points each). A home team that did submit still sells tickets at its
-          chosen price and keeps the whole gate; a forfeiting team earns no ticket revenue from that match.</p>'''),
+          <p><strong>If you do not submit a complete Weekly Lineup</strong> &mdash; every field, <strong>including your decision
+          rationale</strong> &mdash; by the deadline (or your submission is rejected for a wrong PIN), your team is penalized for that
+          round and you earn no rationale credit.</p>'''),
 
         ("formations", "7. Formations &amp; Strategy", '''
           <table><thead><tr><th>Formation</th><th class="num">GK</th><th class="num">DF</th><th class="num">MF</th><th class="num">FW</th></tr></thead><tbody>

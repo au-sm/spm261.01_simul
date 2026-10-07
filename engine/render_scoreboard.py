@@ -118,11 +118,7 @@ def render(config, schedule, calendar, matches):
         ff = m.get("forfeit")
         if ff == "both":
             hres = ares = "l"
-        tag = {"both": "BOTH FORFEIT", "home": "FORFEIT", "away": "FORFEIT"}.get(ff, "FT")
-        ftcls = " ff" if ff else ""
-        note = {"both": '<div class="ffnote">Neither team submitted a lineup &mdash; both teams take a loss</div>',
-                "home": f'<div class="ffnote">{name(h)} did not submit a lineup &mdash; {name(a)} wins 3&ndash;0 by forfeit</div>',
-                "away": f'<div class="ffnote">{name(a)} did not submit a lineup &mdash; {name(h)} wins 3&ndash;0 by forfeit</div>'}.get(ff, "")
+        tag, ftcls, note = "FT", "", ""
         return f'''<article class="tile">
   <div class="side {hres}"><span class="ha">Home</span><b>{name(h)}</b><small>{owner(h)}</small><ul class="sc">{scorers(m, "home")}</ul></div>
   <div class="score"><span class="dig">{hg}</span><span class="dash">&ndash;</span><span class="dig">{ag}</span><span class="ft{ftcls}">{tag}</span></div>
@@ -156,7 +152,7 @@ def render(config, schedule, calendar, matches):
     total_goals = sum(m["home_goals"] + m["away_goals"] for m in matches)
     n_played = len(matches)
     n_sched = sum(len(r["fixtures"]) for r in schedule)
-    biggest = max([m for m in matches if not m.get("forfeit")], key=lambda m: (abs(m["home_goals"] - m["away_goals"]), m["home_goals"] + m["away_goals"]), default=None)
+    biggest = max(matches, key=lambda m: (abs(m["home_goals"] - m["away_goals"]), m["home_goals"] + m["away_goals"]), default=None)
     big_txt = (f'{name(biggest["home_id"])} {biggest["home_goals"]}&ndash;{biggest["away_goals"]} {name(biggest["away_id"])}'
                if biggest and biggest["home_goals"] != biggest["away_goals"] else "&mdash;")
 
@@ -171,8 +167,7 @@ def render(config, schedule, calendar, matches):
             g = m.get("gate")
             gate = (f'<span class="gt">{km(g["home_revenue"])} / {km(g["away_revenue"])}</span>' if g and g.get("price_tier")
                     else ('<span class="gt none">no gate</span>' if g else '<span class="gt none">&ndash;</span>'))
-            fft = {"both": "both forfeit", "home": "home forfeit", "away": "away forfeit"}.get(m.get("forfeit"), "")
-            fftag = f'<small class="fft">{fft}</small>' if fft else ""
+            fftag = ""
             rows.append(f'<tr><td class="r {"win" if hg > ag else ""}">{name(h)}</td><td class="c"><span class="mini">{hg}&ndash;{ag}</span>{fftag}</td>'
                         f'<td class="l {"win" if ag > hg else ""}">{name(a)}</td><td class="g">{gate}</td></tr>')
         date = fmt_date(date_by_round.get(key[0])) if key[1] == "regular" else ""
