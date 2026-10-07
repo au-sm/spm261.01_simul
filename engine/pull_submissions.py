@@ -77,6 +77,23 @@ def write_draft_boards(draft_boards):
     return out
 
 
+def normalize_formation(value):
+    """Google Sheets auto-converts a typed formation like "4-3-3" into a
+    DATE (April 3, 2003), so the export hands back "2003-04-03T05:00:00.000Z"
+    instead of the formation. Turn such a date back into month-day-(year%100)
+    -> "4-3-3". Anything that isn't a date is returned unchanged."""
+    import datetime
+    s = str(value or "").strip()
+    try:
+        dt = datetime.datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except ValueError:
+        return s
+    # the stored time is local midnight in US Eastern (04:00Z or 05:00Z);
+    # shifting +12h lands safely on the intended calendar day either way
+    d = (dt + datetime.timedelta(hours=12)).date()
+    return f"{d.month}-{d.day}-{d.year % 100}"
+
+
 def write_lineup_csv(lineups, round_num, team_name_by_id, team_pin_by_id):
     """Builds the CSV resolve_round.py --csv expects, for one round, from
     whichever teams actually submitted that round. The PIN column is the
@@ -97,7 +114,7 @@ def write_lineup_csv(lineups, round_num, team_name_by_id, team_pin_by_id):
             w.writerow({
                 "Team name": team_name_by_id.get(team_id, ""),
                 "Team PIN": team_pin_by_id.get(team_id, ""),
-                "Formation": l["formation"],
+                "Formation": normalize_formation(l["formation"]),
                 "Strategy": l["strategy"],
                 "Starting Goalkeeper": l["gk"],
                 "Starting Defenders": l["df"],
