@@ -82,9 +82,23 @@ def get_condition(season_seed, round_num, player_id):
     return labels[idx], mults[idx]
 
 
-def conditions_for_round(season_seed, round_num, players, injuries=None):
+def _apply_boost(tier, mult, boost):
+    """Health Hub treatment on top of the routine roll (see engine/health.py):
+    {"levels": n} moves up n tiers (capped at Excellent); {"set": label}
+    pins the tier (the elite clinic's "back at Average")."""
+    labels = [t[0] for t in TIERS]
+    if "set" in boost and boost["set"] in labels:
+        i = labels.index(boost["set"])
+    else:
+        i = min(len(TIERS) - 1, labels.index(tier) + int(boost.get("levels", 0)))
+    return TIERS[i][0], TIERS[i][1]
+
+
+def conditions_for_round(season_seed, round_num, players, injuries=None, boosts=None):
     """players: list of player dicts (from players.csv, via
     render_dashboard.load_players()).
+    boosts: optional {player_id: boost} Health Hub treatments for this
+    round; None loads them from data/health_treatments.json.
     injuries: optional {player_id: injured_until_round} from
     data/player_injuries.json (see roll_new_injuries) -- a player with
     injured_until_round >= round_num is still out this round and
@@ -96,6 +110,11 @@ def conditions_for_round(season_seed, round_num, players, injuries=None):
       detail_by_id: {player_id: (tier_label, multiplier, injured_until_round_or_None)}
     """
     injuries = injuries or {}
+    if boosts is None:
+        import os, sys
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import health
+        boosts = health.boosts_for_round(round_num)
     mult_by_id = {}
     detail_by_id = {}
     for p in players:
@@ -106,6 +125,8 @@ def conditions_for_round(season_seed, round_num, players, injuries=None):
             detail_by_id[pid] = (tier, mult, injured_until)
         else:
             tier, mult = get_condition(season_seed, round_num, pid)
+            if str(pid) in boosts:
+                tier, mult = _apply_boost(tier, mult, boosts[str(pid)])
             detail_by_id[pid] = (tier, mult, None)
         mult_by_id[pid] = mult
     return mult_by_id, detail_by_id

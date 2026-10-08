@@ -145,6 +145,11 @@ def render(config, deals, calendar=None, ltv_deals=None):
     last_ranking_pts = linear_rank_points(dummy_ranked, WEIGHTS["ranking"])[dummy_ranked[-1]]
     last_revenue_pts = linear_rank_points(dummy_ranked, WEIGHTS["revenue"])[dummy_ranked[-1]]
 
+    import health
+    health_url = [u for k, _l, u in PAGES if k == "health"][0]
+    health_rows = "".join(
+        f'<tr><td>{t["label"]}</td><td>{"Injured players" if t["kind"] == "injury" else "Healthy players"}</td>'
+        f'<td>{t["effect"]}</td><td class="num mono">${t["cost"]:,}</td></tr>' for t in health.CATALOG.values())
     sections = [
         ("overview", "Overview", f'''
           <p>You are not a player &mdash; you are the <strong>owner and general manager</strong> of a professional soccer club.
@@ -237,7 +242,20 @@ def render(config, deals, calendar=None, ltv_deals=None):
           rounds they're still out for &mdash; visible on the dashboard and in the weekly report exactly like ordinary form,
           before you submit. An already-injured player who gets started anyway just keeps counting down; they cannot get
           newly hurt on top of an existing injury. Bench them, or play them at a real, known cost &mdash; that decision, and
-          being able to see it coming, is the point.</p>'''),
+          being able to see it coming, is the point.</p>
+          <h3>Player Health Hub</h3>
+          <p>From Round {health.START_ROUND}, owners can pay for treatment on the
+          <a href="{health_url}">Player Health Hub</a>. Every treatment applies to the next round to be played and is paid
+          from your team's cash on hand (shown on the Budget Dashboard). Spending reduces cash only; it does not reduce the
+          Revenue component of the Season Scorecard.</p>
+          <table><thead><tr><th>Treatment</th><th>For</th><th>Effect</th><th>Cost</th></tr></thead><tbody>
+            {health_rows}
+          </tbody></table>
+          <p>Limit: {health.MAX_PER_ROUND} treatments per team per round, one per player. Condition cannot rise above
+          Excellent. Requests are processed about every 30 minutes, and the weekly Player Condition report updates to show
+          the effect before you submit your lineup. A request that fails a check (not enough cash, round already played,
+          limit reached) is voided at no cost. Explain any treatment in that round's lineup rationale; it is scored under
+          Business/Financial Reasoning.</p>'''),
 
         ("draft", "5. The Draft", f'''
           <p>Before the season begins, every owner drafts a full roster from the shared player pool. Two hard rules apply:</p>

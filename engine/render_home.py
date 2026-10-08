@@ -32,6 +32,7 @@ def money(n):
 
 
 CARD_COPY = {
+    "health": ("Player Health Hub", "Pay for treatment from your team's cash: speed up an injured player's return or lift a player's condition for the next round. Opens for Round 3; up to 4 treatments per round."),
     "dashboard": ("Dashboard", "Standings, rosters, salary caps, this week's Player Condition report, and every real submission tool — rename your team, submit your Draft Board, and turn in your weekly lineup."),
     "draftboard": ("Draft Board", "The full undrafted player pool — search, filter, and sort all 399 players before you rank your own board."),
     "scoreboard": ("Scoreboard", "Every game outcome — final scores, goal scorers, the league table with recent form, and results for every round. Updates itself after each round."),

@@ -28,6 +28,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from site_nav import NAV_CSS, render_nav
 import render_dashboard
+import health
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -66,7 +67,8 @@ def render(config, players, finances):
         cap_used = cap_used_by_team.get(tid, 0)
         cap_left = cap - cap_used
         revenue_total = sum(rec.get(field, 0) for field, _ in REVENUE_FIELDS)
-        available = starting_budget + revenue_total
+        medical = health.team_spend(tid)
+        available = starting_budget + revenue_total - medical
         total_cap_used += cap_used
         total_budget_available += available
 
@@ -84,6 +86,7 @@ def render(config, players, finances):
           <td class="num mono">{money(max(0, cap_left))}</td>
           <td class="cap-cell"><div class="cap-bar"><div class="cap-bar-fill" style="width:{cap_pct}%"></div></div></td>
           {revenue_cells}
+          <td class="num mono">{"&minus;" + money(medical) if medical else money(0)}</td>
           <td class="num mono total-cell">{money(available)}</td>
         </tr>''')
     team_rows_html = "".join(rows)
@@ -219,6 +222,7 @@ footer{{max-width:1280px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
             <th class="num">Cap Left</th>
             <th>Cap Room</th>
             {revenue_header_cells}
+            <th class="num">Medical Spend</th>
             <th class="num">Cash Available</th>
           </tr>
         </thead>
@@ -226,7 +230,9 @@ footer{{max-width:1280px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
       </table>
     </div>
     <p class="section-note">National TV revenue posts at the Round 3 split; Local TV revenue posts at that same split
-    once negotiated. Both read {money(0)} until then &mdash; that's expected pre-split, not a bug.</p>
+    once negotiated. Both read {money(0)} until then &mdash; that's expected pre-split, not a bug.
+    Medical Spend is what a team has paid at the Player Health Hub; it comes out of cash on hand but does not
+    reduce the Revenue component of the Season Scorecard.</p>
   </section>
 </div>
 

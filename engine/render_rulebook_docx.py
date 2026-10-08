@@ -236,6 +236,25 @@ def build(config, deals, calendar=None, ltv_deals=None):
         "just keeps counting down; they cannot get newly hurt on top of an existing injury. Bench them, or "
         "play them at a real, known cost — that decision, and being able to see it coming, is the point."
     )
+    import health
+    doc.add_heading("Player Health Hub", level=2)
+    doc.add_paragraph(
+        f"From Round {health.START_ROUND}, owners can pay for treatment on the Player Health Hub page. Every "
+        "treatment applies to the next round to be played and is paid from your team's cash on hand (shown on "
+        "the Budget Dashboard). Spending reduces cash only; it does not reduce the Revenue component of the "
+        "Season Scorecard."
+    )
+    add_table(doc, ["Treatment", "For", "Effect", "Cost"], [
+        (t["label"], "Injured players" if t["kind"] == "injury" else "Healthy players", t["effect"], f"${t['cost']:,}")
+        for t in health.CATALOG.values()
+    ])
+    doc.add_paragraph(
+        f"Limit: {health.MAX_PER_ROUND} treatments per team per round, one per player. Condition cannot rise "
+        "above Excellent. Requests are processed about every 30 minutes, and the weekly Player Condition report "
+        "updates to show the effect before you submit your lineup. A request that fails a check (not enough "
+        "cash, round already played, limit reached) is voided at no cost. Explain any treatment in that round's "
+        "lineup rationale; it is scored under Business/Financial Reasoning."
+    )
 
     # ---- 5. The Draft ----
     doc.add_heading("5. The Draft", level=1)

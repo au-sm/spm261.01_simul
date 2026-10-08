@@ -72,7 +72,8 @@ def team_available_cash(finances, config, trades_state, team_id):
     revenue_total = sum(rec.get(f, 0) for f in
                          ("ticket_revenue", "sponsorship_revenue", "local_tv_revenue", "tv_revenue"))
     trade_cash_net = trades_state.get("team_cash_net", {}).get(str(team_id), 0)
-    return config.get("starting_budget", 0) + revenue_total + trade_cash_net
+    import health  # Health Hub treatments are paid from this same cash pool
+    return config.get("starting_budget", 0) + revenue_total + trade_cash_net - health.team_spend(team_id)
 
 
 def load_trades_state():

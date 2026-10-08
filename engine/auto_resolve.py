@@ -68,6 +68,7 @@ def regenerate_all_pages():
     run(["python3", "engine/render_trade_site.py"])
     run(["python3", "engine/render_scouting_site.py"])
     run(["python3", "engine/render_player_stats.py"])
+    run(["python3", "engine/render_health_site.py"])
     run(["python3", "engine/generate_players_json.py"])
     # dashboard has no __main__ CLI entry -- render inline exactly like every
     # manual regenerate this project has done all along
@@ -112,6 +113,7 @@ print("dashboard OK")
         "trade-site/index.html": "trade/index.html",
         "scouting-site/index.html": "scouting/index.html",
         "player-stats-site/index.html": "player-stats/index.html",
+        "health-site/index.html": "health/index.html",
     }
     for src, dst in mapping.items():
         src_path = os.path.join(BASE, src)
@@ -226,6 +228,32 @@ def resolve_local_tv_deals(sheet_local_tv_deals):
     return actions
 
 
+def resolve_health_treatments(rows):
+    """Applies Player Health Hub requests (engine/health.py) for the next
+    unplayed round. Runs every cycle like sponsorship/trades, so a request
+    lands within one cycle and the Dashboard condition report reflects it
+    before the lineup deadline."""
+    if not rows:
+        return []
+    import health
+    import render_dashboard
+    import resolve_trade
+    config = load_json("league_config.json")
+    finances = load_json("team_finances.json")
+    trades_state = resolve_trade.load_trades_state()
+    injuries_path = os.path.join(BASE, "data", "player_injuries.json")
+    injuries = load_json("player_injuries.json") if os.path.exists(injuries_path) else {}
+
+    def cash_before_medical(tid):
+        return resolve_trade.team_available_cash(finances, config, trades_state, tid) + health.team_spend(tid)
+
+    _state, actions = health.apply_requests(rows, config, render_dashboard.load_players(),
+                                            injuries, cash_before_medical)
+    if actions:
+        save_json("player_injuries.json", injuries)
+    return actions
+
+
 def resolve_trades(trade_proposals):
     """Writes the current trade_proposals export to a temp file and lets
     resolve_trade.py do the real work (roster ownership, the salary cap,
@@ -323,6 +351,7 @@ def main():
             actions.extend(resolve_sponsorship_deals(export.get("sponsorship_deals", [])))
             actions.extend(resolve_local_tv_deals(export.get("local_tv_deals", [])))
             actions.extend(resolve_trades(export.get("trade_proposals", [])))
+            actions.extend(resolve_health_treatments(export.get("health_treatments", [])))
 
         if actions:
             regenerate_all_pages()

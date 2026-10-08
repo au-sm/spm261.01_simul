@@ -27,6 +27,7 @@ PAGES = [
     ("scouting", "Scouting Report", f"{GH_BASE}/scouting/"),
     ("playerstats", "Player Stats", f"{GH_BASE}/player-stats/"),
     ("budget", "Budget Dashboard", f"{GH_BASE}/budget/"),
+    ("health", "Player Health Hub", f"{GH_BASE}/health/"),
     ("rulebook", "Rulebook", f"{GH_BASE}/rulebook/"),
     ("sponsorship", "Sponsorship Marketplace", f"{GH_BASE}/sponsorship/"),
     ("trade", "Trade Center", f"{GH_BASE}/trade/"),

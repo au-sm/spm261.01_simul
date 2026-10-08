@@ -23,6 +23,8 @@
  *   SponsorshipDeals -- team_id | category | brand | final_revenue | final_clause
  *                    | rep_team_id | submitted_at
  *   LocalTVDeals -- team_id | final_revenue | final_clause | rep_team_id | submitted_at
+ *   HealthTreatments -- team_id | round | player_id | player_name | treatment | submitted_at
+ *                    (Player Health Hub requests; engine/health.py applies or voids them)
  *                    (one row per team, ever -- a Local TV Deal is negotiated once)
  *
  * ADMIN EXPORT (?admin_key=...): the scheduled GitHub Actions job (see
@@ -154,11 +156,17 @@ function ensureSheets_() {
                        "rationale", "status", "responded_at"]);
   }
 
+  var health = ss.getSheetByName("HealthTreatments");
+  if (!health) {
+    health = ss.insertSheet("HealthTreatments");
+    health.appendRow(["team_id", "round", "player_id", "player_name", "treatment", "submitted_at"]);
+  }
+
   // remove the default blank "Sheet1" left by spreadsheet creation, if still present and empty
   var sheet1 = ss.getSheetByName("Sheet1");
   if (sheet1 && sheet1.getLastRow() === 0) ss.deleteSheet(sheet1);
 
-  return { teams: teams, boards: boards, lineups: lineups, sponsorships: sponsorships, localTv: localTv, trades: trades };
+  return { teams: teams, boards: boards, lineups: lineups, sponsorships: sponsorships, localTv: localTv, trades: trades, health: health };
 }
 
 function readTeams_(teamsSheet) {
@@ -265,6 +273,23 @@ function readTradeProposals_(sheet) {
   return out;
 }
 
+function readHealthTreatments_(sheet) {
+  var rows = sheet.getDataRange().getValues();
+  var out = [];
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i][0] === "" || rows[i][0] == null) continue;
+    out.push({ team_id: rows[i][0], round: rows[i][1], player_id: rows[i][2], player_name: rows[i][3],
+               treatment: rows[i][4], submitted_at: rows[i][5] });
+  }
+  return out;
+}
+
+// Player Health Hub -- must match engine/health.py (CATALOG keys, START_ROUND, MAX_PER_ROUND).
+// Prices/effects are enforced by the engine; this only screens the request.
+var HEALTH_TREATMENTS = ["rehab_standard", "rehab_accelerated", "rehab_elite", "recovery", "sports_science"];
+var HEALTH_START_ROUND = 3;
+var HEALTH_MAX_PER_ROUND = 4;
+
 // Sum of players this team has already committed to give away across
 // every trade that isn't yet a settled decline -- pending AND accepted
 // both count, since an accepted trade is expected to apply. This is a
@@ -295,6 +320,7 @@ function doGet(e) {
       sponsorship_deals: readSponsorshipDeals_(sheets.sponsorships),
       local_tv_deals: readLocalTVDeals_(sheets.localTv),
       trade_proposals: readTradeProposals_(sheets.trades),
+      health_treatments: readHealthTreatments_(sheets.health),
     });
   }
 
@@ -539,6 +565,27 @@ function doPost(e) {
       ok: true, team_id: body.team_id, final_revenue: tvFinalRevenue, final_clause: tvFinalClause,
       commission: tvRepTeamId ? Math.abs(tvFinalRevenue - tvBase.base_revenue) : 0,
     });
+  }
+
+  if (body.type === "health_treatment") {
+    if (HEALTH_TREATMENTS.indexOf(body.treatment) < 0) return jsonOut_({ ok: false, error: "Unknown treatment." });
+    var hRound = Number(body.round);
+    if (!hRound || hRound < HEALTH_START_ROUND) {
+      return jsonOut_({ ok: false, error: "The Health Hub opens for Round " + HEALTH_START_ROUND + "." });
+    }
+    if (body.player_id === undefined || body.player_id === null || body.player_id === "") {
+      return jsonOut_({ ok: false, error: "Pick a player." });
+    }
+    var existingHealth = readHealthTreatments_(sheets.health).filter(function (h) {
+      return String(h.team_id) === String(body.team_id) && String(h.round) === String(hRound);
+    });
+    if (existingHealth.length >= HEALTH_MAX_PER_ROUND) {
+      return jsonOut_({ ok: false, error: "Your team has already booked " + HEALTH_MAX_PER_ROUND + " treatments for Round " + hRound + "." });
+    }
+    var dupePlayer = existingHealth.some(function (h) { return String(h.player_id) === String(body.player_id); });
+    if (dupePlayer) return jsonOut_({ ok: false, error: "This player already has a treatment booked for Round " + hRound + "." });
+    sheets.health.appendRow([body.team_id, hRound, String(body.player_id), String(body.player_name || ""), body.treatment, now]);
+    return jsonOut_({ ok: true, team_id: body.team_id, round: hRound, player_id: body.player_id, treatment: body.treatment });
   }
 
   // NOTE ON TRADE VALIDATION: this Apps Script has NO roster data at all
