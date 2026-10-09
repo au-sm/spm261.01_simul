@@ -242,8 +242,10 @@ def render(config, deals, calendar=None, ltv_deals=None):
           rounds they're still out for &mdash; visible on the dashboard and in the weekly report exactly like ordinary form,
           before you submit. An already-injured player who gets started anyway just keeps counting down; they cannot get
           newly hurt on top of an existing injury. Bench them, or play them at a real, known cost &mdash; that decision, and
-          being able to see it coming, is the point.</p>
-          <h3>Player Health Hub</h3>
+          being able to see it coming, is the point. Injured players can be treated on the Player Health Hub
+          (Section 5).</p>'''),
+
+        ("health", "5. Player Health Hub", f'''
           <p>From Round {health.START_ROUND}, owners can pay for treatment on the
           <a href="{health_url}">Player Health Hub</a>. Every treatment applies to the next round to be played and is paid
           from your team's cash on hand (shown on the Budget Dashboard). Spending reduces cash only; it does not reduce the
@@ -255,9 +257,15 @@ def render(config, deals, calendar=None, ltv_deals=None):
           Excellent. Requests are processed about every 30 minutes, and the weekly Player Condition report updates to show
           the effect before you submit your lineup. A request that fails a check (not enough cash, round already played,
           limit reached) is voided at no cost. Explain any treatment in that round's lineup rationale; it is scored under
-          Business/Financial Reasoning.</p>'''),
+          Business/Financial Reasoning.</p>
+          <p><strong>How to book:</strong> open the <a href="{health_url}">Player Health Hub</a>, choose your team, enter your
+          team PIN, pick the player and the treatment, and submit. Book before you submit that round's Weekly Lineup, then
+          check the Player Condition report to confirm the treatment took effect.</p>
+          <p><strong>Thinking like a general manager:</strong> treatment is an investment decision. Weigh the cost against what
+          the player is worth to your result this round: a star forward back two rounds early in a tight playoff race is
+          worth far more than a squad player in a match you are expected to win comfortably.</p>'''),
 
-        ("draft", "5. The Draft", f'''
+        ("draft", "6. The Draft", f'''
           <p>Before the season begins, every owner drafts a full roster from the shared player pool. Two hard rules apply:</p>
           <ul>
             <li>Roster size is fixed at {config["roster_size"]} players, filling every slot your formation choices require.</li>
@@ -281,7 +289,7 @@ def render(config, deals, calendar=None, ltv_deals=None):
             auto-fills" fallback used for a missed Trade Day pairing.</li>
           </ol>'''),
 
-        ("weekly", "6. Weekly Operations", '''
+        ("weekly", "7. Weekly Operations", '''
           <p>Every round, before the deadline, each owner submits a Weekly Lineup &amp; Strategy form: formation, strategy,
           starting XI by name, a ticket price if home that round, and a 2&ndash;4 sentence rationale (graded &mdash; see the grading table below).</p>
           <p><strong>Check that round's Player Condition report first</strong> (see Player Ratings above) &mdash; it's published before the
@@ -289,9 +297,11 @@ def render(config, deals, calendar=None, ltv_deals=None):
           just who has the highest base rating.</p>
           <p><strong>If you do not submit a complete Weekly Lineup</strong> &mdash; every field, <strong>including your decision
           rationale</strong> &mdash; by the deadline (or your submission is rejected for a wrong PIN), your team is penalized for that
-          round and you earn no rationale credit.</p>'''),
+          round and you earn no rationale credit.</p>
+          <p><strong>Medical decisions:</strong> from Round 3, you can also book paid treatment for injured or out-of-form players on
+          the Player Health Hub (Section 5). Book it before you submit your lineup, and explain it in your rationale.</p>'''),
 
-        ("formations", "7. Formations &amp; Strategy", '''
+        ("formations", "8. Formations &amp; Strategy", '''
           <table><thead><tr><th>Formation</th><th class="num">GK</th><th class="num">DF</th><th class="num">MF</th><th class="num">FW</th></tr></thead><tbody>
             <tr><td class="mono">4-4-2</td><td class="num">1</td><td class="num">4</td><td class="num">4</td><td class="num">2</td></tr>
             <tr><td class="mono">4-3-3</td><td class="num">1</td><td class="num">4</td><td class="num">3</td><td class="num">3</td></tr>
@@ -305,7 +315,7 @@ def render(config, deals, calendar=None, ltv_deals=None):
             <tr><td>Defensive</td><td class="mono">ATT &times;0.92 / DEF &times;1.08</td></tr>
           </tbody></table>'''),
 
-        ("engine", "8. How Match Results Are Determined", '''
+        ("engine", "9. How Match Results Are Determined", '''
           <p>Results are not a coin flip, and not roster OVR alone &mdash; every result traces to the lineup, formation, and
           strategy you actually submitted:</p>
           <ol>
@@ -322,7 +332,7 @@ def render(config, deals, calendar=None, ltv_deals=None):
           <p>Every match's random draw is seeded from the season's fixed seed plus that exact matchup &mdash; any result can
           be independently re-verified after the fact, and nothing is adjustable after the fact by the league office.</p>'''),
 
-        ("tickets", "9. Ticket Sales &amp; Attendance", '''
+        ("tickets", "10. Ticket Sales &amp; Attendance", '''
           <p>As the home team, you set a ticket price tier. Attendance responds to price AND to your recent form and
           starting-XI Star Power:</p>
           <table><thead><tr><th>Tier</th><th>Price</th><th>Effect</th></tr></thead><tbody>
@@ -338,9 +348,9 @@ def render(config, deals, calendar=None, ltv_deals=None):
           zero-Star-Power away team earns the 5% floor; a team on a hot streak with strong starters earns up to the 15%
           ceiling. The home side still keeps the large majority of its own gate either way.</p>'''),
 
-        ("sponsorship", "10. Sponsorship Deals &amp; Negotiation", sponsor_html),
+        ("sponsorship", "11. Sponsorship Deals &amp; Negotiation", sponsor_html),
 
-        ("tv", "11. TV / Broadcast Revenue", f'''
+        ("tv", "12. TV / Broadcast Revenue", f'''
           <h3>League-Wide (National) TV Deal</h3>
           <p><strong>Base:</strong> {money(tv["base_payment_per_team"])} per team.</p>
           <p><strong>Standings bonus:</strong> {tv["standings_bonus"]}</p>
@@ -365,7 +375,7 @@ def render(config, deals, calendar=None, ltv_deals=None):
           same thresholds and the same {int(ce["penalty_pct"]*100)}% penalty apply to a Local TV Deal's clause, checked
           once at season end off your one final rank.</p>'''),
 
-        ("trades", "12. Trades &amp; Free Agency", f'''
+        ("trades", "13. Trades &amp; Free Agency", f'''
           <p><strong>Deadline:</strong> {tr["deadline"]}</p>
           <p><strong>How many players:</strong> {tr["player_limits"]}</p>
           <p><strong>Voluntary:</strong> {tr["voluntary"]}</p>
@@ -376,17 +386,17 @@ def render(config, deals, calendar=None, ltv_deals=None):
           <p>{tr["mid_season_trade_day"]}</p>
           <p>Propose and respond to real trades on the <a href="{trade_center_url}">Trade Center</a> page.</p>'''),
 
-        ("standings", "13. Standings", '''
+        ("standings", "14. Standings", '''
           <p>Win = 3 points, draw = 1 point, loss = 0 points. Ties broken first by goal difference, then total goals scored.</p>'''),
 
-        ("playoffs", "14. Playoff Qualification", f'''
+        ("playoffs", "15. Playoff Qualification", f'''
           <p>{po["format"]}</p>
           <table><thead><tr><th>Stage</th><th class="num">Bonus</th></tr></thead><tbody>
             <tr><td>Finish in the top {config["playoff_teams"]} of the final standings</td><td class="num">{money(qualification_bonus)}</td></tr>
           </tbody></table>
           <p>{po["bonus_notes"]}</p>'''),
 
-        ("glossary", "15. Glossary", '''
+        ("glossary", "16. Glossary", '''
           <table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody>
             <tr><td class="mono">OVR</td><td>Overall rating &mdash; a quick-reference blend of ATT/DEF/PAC/PHY</td></tr>
             <tr><td class="mono">ATT / DEF / PAC / PHY</td><td>Attack / Defense / Pace / Physical &mdash; the four core skill ratings</td></tr>
@@ -395,10 +405,13 @@ def render(config, deals, calendar=None, ltv_deals=None):
             <tr><td>Salary cap</td><td>The hard ceiling on total roster salary a team may carry</td></tr>
             <tr><td>Gate revenue</td><td>Ticket sales revenue from a home match</td></tr>
             <tr><td>Free agent</td><td>An undrafted player available for in-season signing</td></tr>
+            <tr><td>Player Health Hub</td><td>The page where owners pay for treatment: rehab to bring an injured player back sooner, or recovery to lift a healthy player's condition for the next round</td></tr>
+            <tr><td>Rehab</td><td>Paid treatment for an injured player that shortens the time out (Standard, Accelerated, or Elite Specialist Clinic)</td></tr>
+            <tr><td>Medical spend</td><td>Team cash spent on Health Hub treatments, shown on the Budget Dashboard</td></tr>
           </tbody></table>'''),
     ]
     if calendar_html:
-        sections.append(("calendar", "16. Season Calendar", calendar_html))
+        sections.append(("calendar", "17. Season Calendar", calendar_html))
 
     nav_html = "".join(f'<a href="#{sid}">{title.replace("&amp;","&")}</a>' for sid, title, _ in sections)
     body_html = "".join(f'<section id="{sid}"><h2>{title}</h2>{content}</section>' for sid, title, content in sections)

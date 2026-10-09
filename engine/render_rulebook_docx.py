@@ -237,7 +237,7 @@ def build(config, deals, calendar=None, ltv_deals=None):
         "play them at a real, known cost — that decision, and being able to see it coming, is the point."
     )
     import health
-    doc.add_heading("Player Health Hub", level=2)
+    doc.add_heading("5. Player Health Hub", level=1)
     doc.add_paragraph(
         f"From Round {health.START_ROUND}, owners can pay for treatment on the Player Health Hub page. Every "
         "treatment applies to the next round to be played and is paid from your team's cash on hand (shown on "
@@ -255,9 +255,19 @@ def build(config, deals, calendar=None, ltv_deals=None):
         "cash, round already played, limit reached) is voided at no cost. Explain any treatment in that round's "
         "lineup rationale; it is scored under Business/Financial Reasoning."
     )
+    doc.add_paragraph(
+        "How to book: open the Player Health Hub page, choose your team, enter your team PIN, pick the player and "
+        "the treatment, and submit. Book before you submit that round's Weekly Lineup, then check the Player "
+        "Condition report to confirm the treatment took effect."
+    )
+    doc.add_paragraph(
+        "Thinking like a general manager: treatment is an investment decision. Weigh the cost against what the "
+        "player is worth to your result this round: a star forward back two rounds early in a tight playoff race "
+        "is worth far more than a squad player in a match you are expected to win comfortably."
+    )
 
     # ---- 5. The Draft ----
-    doc.add_heading("5. The Draft", level=1)
+    doc.add_heading("6. The Draft", level=1)
     doc.add_paragraph("Before the season begins, every owner drafts a full roster from the shared player pool. Two hard rules apply:")
     add_bullets(doc, [
         f"Roster size is fixed at {config['roster_size']} players, filling every slot your formation choices require.",
@@ -284,7 +294,7 @@ def build(config, deals, calendar=None, ltv_deals=None):
     ], numbered=True)
 
     # ---- 6. Weekly Operations ----
-    doc.add_heading("6. Weekly Operations", level=1)
+    doc.add_heading("7. Weekly Operations", level=1)
     doc.add_paragraph(
         "Every round, before the deadline, each owner submits a Weekly Lineup & Strategy form: formation, "
         "strategy, starting XI by name, a ticket price if home that round, and a 2-4 sentence rationale "
@@ -305,7 +315,7 @@ def build(config, deals, calendar=None, ltv_deals=None):
     )
 
     # ---- 7. Formations & Strategy ----
-    doc.add_heading("7. Formations & Strategy", level=1)
+    doc.add_heading("8. Formations & Strategy", level=1)
     add_table(doc, ["Formation", "GK", "DF", "MF", "FW"], [
         ("4-4-2", 1, 4, 4, 2), ("4-3-3", 1, 4, 3, 3), ("3-5-2", 1, 3, 5, 2),
         ("5-3-2", 1, 5, 3, 2), ("4-5-1", 1, 4, 5, 1),
@@ -317,7 +327,7 @@ def build(config, deals, calendar=None, ltv_deals=None):
     ])
 
     # ---- 8. How Match Results Are Determined ----
-    doc.add_heading("8. How Match Results Are Determined", level=1)
+    doc.add_heading("9. How Match Results Are Determined", level=1)
     doc.add_paragraph(
         "Results are not a coin flip, and not roster OVR alone — every result traces to the lineup, "
         "formation, and strategy you actually submitted:"
@@ -343,7 +353,7 @@ def build(config, deals, calendar=None, ltv_deals=None):
     )
 
     # ---- 9. Ticket Sales & Attendance ----
-    doc.add_heading("9. Ticket Sales & Attendance", level=1)
+    doc.add_heading("10. Ticket Sales & Attendance", level=1)
     doc.add_paragraph(
         "As the home team, you set a ticket price tier. Attendance responds to price AND to your recent form "
         "and starting-XI Star Power:"
@@ -366,7 +376,7 @@ def build(config, deals, calendar=None, ltv_deals=None):
     )
 
     # ---- 10. Sponsorship ----
-    doc.add_heading("10. Sponsorship Deals & Negotiation", level=1)
+    doc.add_heading("11. Sponsorship Deals & Negotiation", level=1)
     n_categories = len(deals["sponsorship_categories"])
     doc.add_paragraph(
         f"Sponsors pay you — there is no cost to sign anything, matching how real sponsorship deals work. "
@@ -436,7 +446,7 @@ def build(config, deals, calendar=None, ltv_deals=None):
     )
 
     # ---- 11. TV / Broadcast Revenue ----
-    doc.add_heading("11. TV / Broadcast Revenue", level=1)
+    doc.add_heading("12. TV / Broadcast Revenue", level=1)
     doc.add_heading("League-Wide (National) TV Deal", level=2)
     doc.add_paragraph(f'Base: {money(tv["base_payment_per_team"])} per team.')
     doc.add_paragraph(f'Standings bonus: {tv["standings_bonus"]}')
@@ -469,7 +479,7 @@ def build(config, deals, calendar=None, ltv_deals=None):
     )
 
     # ---- 12. Trades ----
-    doc.add_heading("12. Trades & Free Agency", level=1)
+    doc.add_heading("13. Trades & Free Agency", level=1)
     doc.add_paragraph(f'Deadline: {tr["deadline"]}')
     doc.add_paragraph(f'Salary cap rule: {tr["salary_cap"]}')
     doc.add_paragraph(f'Cash considerations: {tr["cash_considerations"]}')
@@ -478,19 +488,19 @@ def build(config, deals, calendar=None, ltv_deals=None):
     doc.add_paragraph(tr["mid_season_trade_day"])
 
     # ---- 13. Standings ----
-    doc.add_heading("13. Standings", level=1)
+    doc.add_heading("14. Standings", level=1)
     doc.add_paragraph("Win = 3 points, draw = 1 point, loss = 0 points. Ties broken first by goal difference, then total goals scored.")
 
     # ---- 14. Playoff Qualification ----
-    doc.add_heading("14. Playoff Qualification", level=1)
+    doc.add_heading("15. Playoff Qualification", level=1)
     doc.add_paragraph(po["format"])
     add_table(doc, ["Stage", "Bonus"], [
         (f'Finish in the top {config["playoff_teams"]} of the final standings', money(qualification_bonus)),
     ])
     doc.add_paragraph(po["bonus_notes"])
 
-    # ---- 15. Glossary ----
-    doc.add_heading("15. Glossary", level=1)
+    # ---- 16. Glossary ----
+    doc.add_heading("16. Glossary", level=1)
     add_table(doc, ["Term", "Meaning"], [
         ("OVR", "Overall rating — a quick-reference blend of ATT/DEF/PAC/PHY"),
         ("ATT / DEF / PAC / PHY", "Attack / Defense / Pace / Physical — the four core skill ratings"),
@@ -499,12 +509,15 @@ def build(config, deals, calendar=None, ltv_deals=None):
         ("Salary cap", "The hard ceiling on total roster salary a team may carry"),
         ("Gate revenue", "Ticket sales revenue from a home match"),
         ("Free agent", "An undrafted player available for in-season signing"),
+        ("Player Health Hub", "The page where owners pay for treatment: rehab to bring an injured player back sooner, or recovery to lift a healthy player's condition for the next round"),
+        ("Rehab", "Paid treatment for an injured player that shortens the time out (Standard, Accelerated, or Elite Specialist Clinic)"),
+        ("Medical spend", "Team cash spent on Health Hub treatments, shown on the Budget Dashboard"),
     ])
 
-    # ---- 16. Season Calendar ----
+    # ---- 17. Season Calendar ----
     if calendar:
         total_rounds = sum(len(d["rounds"]) for d in calendar["match_day_schedule"])
-        doc.add_heading("16. Season Calendar", level=1)
+        doc.add_heading("17. Season Calendar", level=1)
         doc.add_paragraph(f'Draft Day: {calendar["draft_day"]}')
         doc.add_paragraph(f'Match days: {calendar["match_days"]}')
         doc.add_paragraph(f'Mandatory Mid-Season Trade Day: {calendar["trade_day"]}')
