@@ -35,16 +35,17 @@ PATH = os.path.join(BASE, "data", "health_treatments.json")
 START_ROUND = 3
 MAX_PER_ROUND = 4
 
+# prices halved (instructor, 2026-10-09)
 CATALOG = {
-    "rehab_standard":    {"label": "Standard Rehab", "cost": 150_000, "kind": "injury", "rounds": 1,
+    "rehab_standard":    {"label": "Standard Rehab", "cost": 75_000, "kind": "injury", "rounds": 1,
                           "effect": "Returns 1 round sooner"},
-    "rehab_accelerated": {"label": "Accelerated Rehab", "cost": 400_000, "kind": "injury", "rounds": 2,
+    "rehab_accelerated": {"label": "Accelerated Rehab", "cost": 200_000, "kind": "injury", "rounds": 2,
                           "effect": "Returns 2 rounds sooner"},
-    "rehab_elite":       {"label": "Elite Specialist Clinic", "cost": 750_000, "kind": "injury", "rounds": None,
+    "rehab_elite":       {"label": "Elite Specialist Clinic", "cost": 375_000, "kind": "injury", "rounds": None,
                           "effect": "Fit for next round, at Average condition"},
-    "recovery":          {"label": "Recovery Session", "cost": 100_000, "kind": "form", "levels": 1,
+    "recovery":          {"label": "Recovery Session", "cost": 50_000, "kind": "form", "levels": 1,
                           "effect": "+1 condition level next round"},
-    "sports_science":    {"label": "Sports-Science Package", "cost": 250_000, "kind": "form", "levels": 2,
+    "sports_science":    {"label": "Sports-Science Package", "cost": 125_000, "kind": "form", "levels": 2,
                           "effect": "+2 condition levels next round (max Excellent)"},
 }
 
