@@ -421,12 +421,11 @@ NO_RATIONALE_SHARE = 0.5
 
 def apply_no_rationale_payout(matches, finances, round_num):
     """A team that lost only because its lineup had no decision rationale
-    still earns ticket revenue: NO_RATIONALE_SHARE (50%) of this round's
-    average for its role -- the average HOME share if it was the home side,
-    the average AWAY cut if it was the visitor -- taken over this round's
-    normally played, ticketed matches. Paid by the league on top of the
+    still earns ticket revenue, but the least of any payout: NO_RATIONALE_SHARE
+    (50%) of this round's average AWAY cut, whether it was home or away --
+    taken over this round's normally played, ticketed matches. Paid by the league on top of the
     opponent's gate (the opponent's own revenue is not reduced).
-    Instructor's rule, 2026-10-07. Idempotent per match."""
+    Instructor's rule, 2026-10-07; away-rate-only, 2026-10-13. Idempotent per match."""
     rnd = [m for m in matches if m["round"] == round_num and m.get("stage", "regular") == "regular"]
     normal = [m for m in rnd if not m.get("forfeit") and (m.get("gate") or {}).get("price_tier")]
     if not normal:
@@ -443,7 +442,7 @@ def apply_no_rationale_payout(matches, finances, round_num):
         for side in ("home", "away"):
             if reasons.get(side) != "no decision rationale" or g.get(f"{side}_payout"):
                 continue
-            amt = round(avg[side] * NO_RATIONALE_SHARE)
+            amt = round(avg["away"] * NO_RATIONALE_SHARE)  # instructor 2026-10-13: always the away (least) rate
             tid = str(m[f"{side}_id"])
             finances.setdefault(tid, {"ticket_revenue": 0, "sponsorship_revenue": 0, "tv_revenue": 0})
             finances[tid]["ticket_revenue"] += amt
