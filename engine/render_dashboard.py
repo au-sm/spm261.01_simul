@@ -113,7 +113,8 @@ def render(players, config, deals, matches, schedule=None, calendar=None, injuri
             tier, mult, injured_until = condition_detail_by_id.get(p["player_id"], ("Average", 1.0, None))
             css = CONDITION_CSS.get(tier, "cond-average")
             title = f"out through round {injured_until}" if injured_until else f"{mult:.2f}x"
-            return f'<span class="cond-badge {css}" title="{title}">{tier}</span>'
+            label = f"{tier} · back Round {injured_until + 1}" if injured_until else tier
+            return f'<span class="cond-badge {css}" title="{title}">{label}</span>'
 
         rows_html = "".join(
             f'<tr><td class="pos pos-{p["position"]}">{p["position"]}</td>'

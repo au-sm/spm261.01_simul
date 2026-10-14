@@ -231,7 +231,7 @@ def build(config, deals, calendar=None, ltv_deals=None):
     ])
     doc.add_paragraph(
         'While injured, a player\'s Condition badge shows "Injured" (not one of the five routine tiers above) '
-        "with how many rounds they're still out for — visible on the dashboard and in the weekly report "
+        "together with the round they come back (for example 'Injured · back Round 6') — visible on the dashboard and in the weekly report "
         "exactly like ordinary form, before you submit. An already-injured player who gets started anyway "
         "just keeps counting down; they cannot get newly hurt on top of an existing injury. Bench them, or "
         "play them at a real, known cost — that decision, and being able to see it coming, is the point."

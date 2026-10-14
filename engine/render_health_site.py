@@ -16,7 +16,8 @@ from site_nav import NAV_CSS, render_nav
 import render_dashboard
 import resolve_trade
 import health
-from player_condition import conditions_for_round
+from player_condition import conditions_for_round, INJURY_DURATION_RANGE
+INJ_MIN, INJ_MAX = INJURY_DURATION_RANGE
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -73,10 +74,11 @@ def render(config, players, finances, injuries, state):
 
     injured_rows = "".join(
         f'<tr><td>{escape(team_name.get(r["team_id"], ""))}</td><td>{escape(r["name"])}</td><td>{r["pos"]}</td>'
-        f'<td class="num mono">{r["ovr"]}</td><td class="num mono">Round {r["injured_until"]}</td></tr>'
+        f'<td class="num mono">{r["ovr"]}</td><td class="num mono">Round {r["injured_until"]}</td>'
+        f'<td class="num mono"><b>Round {r["injured_until"] + 1}</b></td></tr>'
         for r in sorted(roster, key=lambda r: (int(r["team_id"]), r["name"])) if r["injured_until"])
     if not injured_rows:
-        injured_rows = f'<tr><td colspan="5">No players are injured for Round {next_round}.</td></tr>'
+        injured_rows = f'<tr><td colspan="6">No players are injured for Round {next_round}.</td></tr>'
 
     log = sorted(state["applied"] + state["voided"], key=lambda r: str(r.get("submitted_at", "")), reverse=True)
     log_rows = "".join(
@@ -211,9 +213,9 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
   </section>
 
   <section>
-    <div class="section-head"><h2>Injury Report</h2><span class="note">players injured for Round {next_round}</span></div>
+    <div class="section-head"><h2>Injury Report</h2><span class="note">players injured for Round {next_round} &middot; injuries last {INJ_MIN}&ndash;{INJ_MAX} rounds; &ldquo;Back In&rdquo; is the first round each player can play again without treatment</span></div>
     <div class="table-scroll"><table>
-      <thead><tr><th>Team</th><th>Player</th><th>Pos</th><th class="num">OVR</th><th class="num">Out Through</th></tr></thead>
+      <thead><tr><th>Team</th><th>Player</th><th>Pos</th><th class="num">OVR</th><th class="num">Out Through</th><th class="num">Back In</th></tr></thead>
       <tbody>{injured_rows}</tbody>
     </table></div>
   </section>
