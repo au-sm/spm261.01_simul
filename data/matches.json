@@ -167,12 +167,12 @@
       "attendance": 0,
       "attendance_rate": 0,
       "revenue": 0,
-      "home_revenue": 137601,
+      "home_revenue": 114668,
       "away_revenue": 34400,
       "away_share_rate": 0,
-      "home_no_submission": 137601,
-      "away_no_submission": 34400,
-      "no_submission_gate": 229335
+      "home_forfeit_gate": 114668,
+      "away_forfeit_gate": 34400,
+      "forfeit_gate": 229335
     }
   },
   {
@@ -418,12 +418,12 @@
       "attendance": 0,
       "attendance_rate": 0,
       "revenue": 0,
-      "home_revenue": 137601,
+      "home_revenue": 114668,
       "away_revenue": 0,
       "away_share_rate": 0,
-      "home_no_submission": 137601,
-      "away_no_submission": 0,
-      "no_submission_gate": 229335
+      "home_forfeit_gate": 114668,
+      "away_forfeit_gate": 0,
+      "forfeit_gate": 229335
     }
   },
   {
@@ -570,12 +570,12 @@
       "attendance": 0,
       "attendance_rate": 0,
       "revenue": 0,
-      "home_revenue": 137601,
+      "home_revenue": 114668,
       "away_revenue": 34400,
       "away_share_rate": 0,
-      "home_no_submission": 137601,
-      "away_no_submission": 34400,
-      "no_submission_gate": 229335
+      "home_forfeit_gate": 114668,
+      "away_forfeit_gate": 34400,
+      "forfeit_gate": 229335
     }
   },
   {
@@ -1148,7 +1148,9 @@
       "revenue": 272070,
       "home_revenue": 272070,
       "away_revenue": 0,
-      "away_share_rate": 0
+      "away_share_rate": 0,
+      "away_forfeit_gate": 0,
+      "forfeit_gate": 272070
     }
   },
   {
@@ -1229,7 +1231,9 @@
       "revenue": 173835,
       "home_revenue": 173835,
       "away_revenue": 0,
-      "away_share_rate": 0
+      "away_share_rate": 0,
+      "away_forfeit_gate": 0,
+      "forfeit_gate": 173835
     }
   },
   {
@@ -1283,13 +1287,12 @@
       "attendance": 0,
       "attendance_rate": 0,
       "revenue": 0,
-      "home_revenue": 153324,
-      "away_revenue": 19022,
+      "home_revenue": 127770,
+      "away_revenue": 12777,
       "away_share_rate": 0,
-      "away_payout": 19022,
-      "home_no_submission": 153324,
-      "away_no_submission": 0,
-      "no_submission_gate": 255540
+      "home_forfeit_gate": 127770,
+      "away_forfeit_gate": 12777,
+      "forfeit_gate": 255540
     }
   },
   {
@@ -1460,12 +1463,12 @@
       "attendance": 0,
       "attendance_rate": 0,
       "revenue": 0,
-      "home_revenue": 153324,
+      "home_revenue": 127770,
       "away_revenue": 38331,
       "away_share_rate": 0,
-      "home_no_submission": 153324,
-      "away_no_submission": 38331,
-      "no_submission_gate": 255540
+      "home_forfeit_gate": 127770,
+      "away_forfeit_gate": 38331,
+      "forfeit_gate": 255540
     }
   },
   {
@@ -1544,12 +1547,12 @@
       "attendance": 0,
       "attendance_rate": 0,
       "revenue": 0,
-      "home_revenue": 153324,
+      "home_revenue": 127770,
       "away_revenue": 38331,
       "away_share_rate": 0,
-      "home_no_submission": 153324,
-      "away_no_submission": 38331,
-      "no_submission_gate": 255540
+      "home_forfeit_gate": 127770,
+      "away_forfeit_gate": 38331,
+      "forfeit_gate": 255540
     }
   }
 ]

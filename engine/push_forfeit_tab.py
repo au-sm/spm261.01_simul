@@ -53,10 +53,9 @@ def build_rows():
             if ff == "both":
                 reason += " (both teams forfeited: both take a loss)"
             g = m.get("gate") or {}
-            payout = g.get(f"{side}_payout", 0)
-            no_sub = g.get(f"{side}_no_submission", 0)
-            given = (f"${payout:,} (50% of round avg {side} revenue)" if payout
-                     else f"${no_sub:,} (60% of round's lowest gate)" if no_sub else "$0")
+            amt = g.get(f"{side}_forfeit_gate", 0)
+            base = g.get("forfeit_gate") or 0
+            given = f"${amt:,} ({round(100 * amt / base)}% of ${base:,} gate)" if amt and base else "$0"
             rows.append([m["round"], date_by_round.get(m["round"], ""), name.get(tid, ""), owner.get(tid, ""),
                          reason, name.get(opp, ""), shown, given])
     if len(rows) == 1:

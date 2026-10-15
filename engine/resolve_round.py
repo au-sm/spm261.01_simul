@@ -384,10 +384,8 @@ def main():
                 else:
                     print(f"    NOTE: {side} did not submit -- auto-lineup applied, no rationale credit this round.")
 
-    for tid, side, amt in apply_no_rationale_payout(matches, finances, args.round):
-        print(f"    (private) no-rationale ticket payout: team {tid} ({side}) +${amt:,} = 50% of round avg {side} revenue")
-    for tid, side, amt in apply_no_submission_gate(matches, finances, args.round):
-        print(f"    no-submission gate: team {tid} ({side}) +${amt:,}")
+    for tid, side, amt in apply_forfeit_gate(matches, finances, args.round):
+        print(f"    forfeit gate: team {tid} ({side}) +${amt:,}")
     save_json("matches.json", matches)
     save_json("team_finances.json", {"teams": finances})
 
@@ -418,54 +416,26 @@ def main():
     print("Republish dashboard/index.html as the artifact to make it live.")
 
 
-NO_RATIONALE_SHARE = 0.5
+
+FORFEIT_HOME_SHARE = 0.50            # home side that forfeited (no lineup OR no rationale)
+FORFEIT_OPPONENT_SHARE = 0.15        # = attendance.AWAY_SHARE_MAX, opponent of a forfeiting home side
+NO_RATIONALE_AWAY_SHARE = 0.05       # = attendance.AWAY_SHARE_MIN, away side that forfeited for no rationale
+OLD_GATE_KEYS = ("payout", "no_submission")  # superseded per-side payout fields, undone on recompute
 
 
-def apply_no_rationale_payout(matches, finances, round_num):
-    """A team that lost only because its lineup had no decision rationale
-    still earns ticket revenue, but the least of any payout: NO_RATIONALE_SHARE
-    (50%) of this round's average AWAY cut, whether it was home or away --
-    taken over this round's normally played, ticketed matches. Paid by the league on top of the
-    opponent's gate (the opponent's own revenue is not reduced).
-    Instructor's rule, 2026-10-07; away-rate-only, 2026-10-13. Idempotent per match."""
-    rnd = [m for m in matches if m["round"] == round_num and m.get("stage", "regular") == "regular"]
-    normal = [m for m in rnd if not m.get("forfeit") and (m.get("gate") or {}).get("price_tier")]
-    if not normal:
-        return []
-    avg = {"home": sum(m["gate"]["home_revenue"] for m in normal) / len(normal),
-           "away": sum(m["gate"]["away_revenue"] for m in normal) / len(normal)}
-    paid = []
-    for m in rnd:
-        if not m.get("forfeit"):
-            continue
-        reasons = m.get("forfeit_reason") or {}
-        g = m.setdefault("gate", {"price_tier": None, "price": 0, "attendance": 0, "attendance_rate": 0,
-                                  "revenue": 0, "home_revenue": 0, "away_revenue": 0, "away_share_rate": 0})
-        for side in ("home", "away"):
-            if reasons.get(side) != "no decision rationale" or g.get(f"{side}_payout"):
-                continue
-            amt = round(avg["away"] * NO_RATIONALE_SHARE)  # instructor 2026-10-13: always the away (least) rate
-            tid = str(m[f"{side}_id"])
-            finances.setdefault(tid, {"ticket_revenue": 0, "sponsorship_revenue": 0, "tv_revenue": 0})
-            finances[tid]["ticket_revenue"] += amt
-            g[f"{side}_revenue"] = g.get(f"{side}_revenue", 0) + amt
-            g[f"{side}_payout"] = amt
-            paid.append((m[f"{side}_id"], side, amt))
-    return paid
-
-
-NO_SUBMISSION_HOME_SHARE = 0.60
-NO_SUBMISSION_AWAY_SHARE = 0.15  # = attendance.AWAY_SHARE_MAX, the highest away rate
-
-
-def apply_no_submission_gate(matches, finances, round_num):
-    """A home match whose home team sent NO lineup (so no ticket price) still
-    books a gate: the round's LOWEST gate among normally played, ticketed
-    matches. The home team gets NO_SUBMISSION_HOME_SHARE (60%) of it; the
-    away team gets NO_SUBMISSION_AWAY_SHARE (15%, the highest away rate) only
-    if it submitted its own lineup + ticket price, else $0. A home team that
-    forfeited for "no decision rationale" is excluded -- it already gets
-    apply_no_rationale_payout(). Instructor's rule, 2026-10-15. Idempotent per match."""
+def apply_forfeit_gate(matches, finances, round_num):
+    """Ticket revenue for forfeited matches (instructor's rule, 2026-10-15;
+    replaces the 2026-10-07/13 50%-of-avg-away payout):
+      - HOME side forfeited (no lineup, or no decision rationale): the match
+        books the round's LOWEST gate among normally played, ticketed
+        matches. Home gets 50% of it; the away side gets 15% (the highest
+        away rate) if it submitted a valid lineup (rationale + ticket price),
+        5% if it forfeited for no rationale, else $0.
+      - AWAY side forfeited for no rationale while home played normally:
+        away gets 5% (the lowest away rate) of that match's home gate, paid by
+        the league on top -- home keeps its full gate.
+      - AWAY side that sent no lineup at all: $0.
+    Idempotent per match (gate["forfeit_gate"] marks it done)."""
     rnd = [m for m in matches if m["round"] == round_num and m.get("stage", "regular") == "regular"]
     normal = [m for m in rnd if not m.get("forfeit") and (m.get("gate") or {}).get("price_tier")]
     if not normal:
@@ -473,19 +443,25 @@ def apply_no_submission_gate(matches, finances, round_num):
     lowest_gate = min(m["gate"]["revenue"] for m in normal)
     paid = []
     for m in rnd:
-        if m.get("forfeit") not in ("home", "both") or m.get("home_submitted"):
-            continue
-        if (m.get("forfeit_reason") or {}).get("home") == "no decision rationale":
+        ff = m.get("forfeit")
+        if not ff:
             continue
         g = m.setdefault("gate", {"price_tier": None, "price": 0, "attendance": 0, "attendance_rate": 0,
                                   "revenue": 0, "home_revenue": 0, "away_revenue": 0, "away_share_rate": 0})
-        if g.get("no_submission_gate"):
+        if g.get("forfeit_gate") is not None:
             continue
-        shares = {"home": NO_SUBMISSION_HOME_SHARE,
-                  "away": NO_SUBMISSION_AWAY_SHARE if m.get("away_submitted") else 0}
+        reasons = m.get("forfeit_reason") or {}
+        if ff in ("home", "both"):
+            base = lowest_gate
+            away_share = (FORFEIT_OPPONENT_SHARE if m.get("away_submitted")
+                          else NO_RATIONALE_AWAY_SHARE if reasons.get("away") == "no decision rationale" else 0)
+            shares = {"home": FORFEIT_HOME_SHARE, "away": away_share}
+        else:  # away forfeited, home played and sold its own tickets
+            base = g.get("revenue", 0)
+            shares = {"away": NO_RATIONALE_AWAY_SHARE if reasons.get("away") == "no decision rationale" else 0}
         for side, share in shares.items():
-            amt = round(lowest_gate * share)
-            g[f"{side}_no_submission"] = amt
+            amt = round(base * share)
+            g[f"{side}_forfeit_gate"] = amt
             if not amt:
                 continue
             tid = str(m[f"{side}_id"])
@@ -493,8 +469,22 @@ def apply_no_submission_gate(matches, finances, round_num):
             finances[tid]["ticket_revenue"] += amt
             g[f"{side}_revenue"] = g.get(f"{side}_revenue", 0) + amt
             paid.append((m[f"{side}_id"], side, amt))
-        g["no_submission_gate"] = lowest_gate
+        g["forfeit_gate"] = base
     return paid
+
+
+def undo_old_forfeit_payouts(matches, finances):
+    """One-off helper for the 2026-10-15 rule change: reverses the old
+    *_payout / *_no_submission amounts so apply_forfeit_gate can recompute."""
+    for m in matches:
+        g = m.get("gate") or {}
+        for side in ("home", "away"):
+            for k in OLD_GATE_KEYS:
+                amt = g.pop(f"{side}_{k}", None)
+                if amt:
+                    finances[str(m[f"{side}_id"])]["ticket_revenue"] -= amt
+                    g[f"{side}_revenue"] -= amt
+        g.pop("no_submission_gate", None)
 
 if __name__ == "__main__":
     main()
