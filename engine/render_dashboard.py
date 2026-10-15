@@ -77,8 +77,12 @@ def render(players, config, deals, matches, schedule=None, calendar=None, injuri
     # fixture per team, not just the single next round.
     schedule = schedule or []
     completed = config.get("current_round", 0)
+    # A doubleheader day can be half-played (round 2 resolved early, round 3
+    # still to come), so take the first day with ANY unplayed round and keep
+    # only its unplayed rounds -- otherwise the page skips ahead a whole day.
     upcoming_rounds = next(
-        (d["rounds"] for d in calendar.get("match_day_schedule", []) if min(d["rounds"]) > completed),
+        ([r for r in d["rounds"] if r > completed]
+         for d in calendar.get("match_day_schedule", []) if max(d["rounds"]) > completed),
         [completed + 1],
     ) if calendar else [completed + 1]
 
@@ -496,7 +500,9 @@ if __name__ == "__main__":
     schedule = load_json("schedule.json") if os.path.exists(schedule_path) else []
     calendar_path = os.path.join(BASE, "data", "season_calendar.json")
     calendar = load_json("season_calendar.json") if os.path.exists(calendar_path) else None
-    html = render(players, config, deals, matches, schedule, calendar)
+    injuries_path = os.path.join(BASE, "data", "player_injuries.json")
+    injuries = load_json("player_injuries.json") if os.path.exists(injuries_path) else {}
+    html = render(players, config, deals, matches, schedule, calendar, injuries)
     out_path = os.path.join(BASE, "dashboard", "index.html")
     with open(out_path, "w") as f:
         f.write(html)
