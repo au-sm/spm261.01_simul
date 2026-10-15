@@ -417,18 +417,19 @@ def main():
 
 
 
-FORFEIT_HOME_SHARE = 0.50            # home side that forfeited (no lineup OR no rationale)
+FORFEIT_HOME_SHARE = 0.50            # home side that forfeited for no rationale (no lineup at all = $0)
 FORFEIT_OPPONENT_SHARE = 0.15        # = attendance.AWAY_SHARE_MAX, opponent of a forfeiting home side
 NO_RATIONALE_AWAY_SHARE = 0.05       # = attendance.AWAY_SHARE_MIN, away side that forfeited for no rationale
-OLD_GATE_KEYS = ("payout", "no_submission")  # superseded per-side payout fields, undone on recompute
+OLD_GATE_KEYS = ("payout", "no_submission", "forfeit_gate")  # superseded per-side payout fields, undone on recompute
 
 
 def apply_forfeit_gate(matches, finances, round_num):
     """Ticket revenue for forfeited matches (instructor's rule, 2026-10-15;
     replaces the 2026-10-07/13 50%-of-avg-away payout):
-      - HOME side forfeited (no lineup, or no decision rationale): the match
-        books the round's LOWEST gate among normally played, ticketed
-        matches. Home gets 50% of it; the away side gets 15% (the highest
+      - HOME side forfeited: the match books the round's LOWEST gate among
+        normally played, ticketed matches. Home gets 50% of it if it forfeited
+        for no decision rationale, $0 if it sent no lineup at all; the away
+        side gets 15% (the highest
         away rate) if it submitted a valid lineup (rationale + ticket price),
         5% if it forfeited for no rationale, else $0.
       - AWAY side forfeited for no rationale while home played normally:
@@ -455,7 +456,8 @@ def apply_forfeit_gate(matches, finances, round_num):
             base = lowest_gate
             away_share = (FORFEIT_OPPONENT_SHARE if m.get("away_submitted")
                           else NO_RATIONALE_AWAY_SHARE if reasons.get("away") == "no decision rationale" else 0)
-            shares = {"home": FORFEIT_HOME_SHARE, "away": away_share}
+            home_share = FORFEIT_HOME_SHARE if reasons.get("home") == "no decision rationale" else 0
+            shares = {"home": home_share, "away": away_share}
         else:  # away forfeited, home played and sold its own tickets
             base = g.get("revenue", 0)
             shares = {"away": NO_RATIONALE_AWAY_SHARE if reasons.get("away") == "no decision rationale" else 0}
@@ -485,6 +487,7 @@ def undo_old_forfeit_payouts(matches, finances):
                     finances[str(m[f"{side}_id"])]["ticket_revenue"] -= amt
                     g[f"{side}_revenue"] -= amt
         g.pop("no_submission_gate", None)
+        g.pop("forfeit_gate", None)
 
 if __name__ == "__main__":
     main()
