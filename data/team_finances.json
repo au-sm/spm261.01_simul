@@ -61,7 +61,14 @@
       "sponsorship_revenue": 0,
       "tv_revenue": 0,
       "sponsors_owned": [],
-      "local_tv_revenue": 0
+      "local_tv_revenue": 250000,
+      "tv_commissions_earned": [
+        {
+          "negotiating_team": "Pitch Perfect",
+          "commission_amount": 250000,
+          "direction": "below"
+        }
+      ]
     },
     "9": {
       "ticket_revenue": 380027,

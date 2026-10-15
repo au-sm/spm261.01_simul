@@ -94,7 +94,12 @@
       "team_name": "Team 9",
       "market_tier": "Small Market",
       "base_revenue": 700000,
-      "base_clause": "standard"
+      "base_clause": "standard",
+      "negotiated": true,
+      "mode": "live",
+      "negotiated_revenue": 450000,
+      "final_clause": "standard",
+      "network_rep_team_id": 8
     },
     {
       "team_id": 9,
