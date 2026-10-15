@@ -167,9 +167,12 @@
       "attendance": 0,
       "attendance_rate": 0,
       "revenue": 0,
-      "home_revenue": 0,
-      "away_revenue": 0,
-      "away_share_rate": 0
+      "home_revenue": 137601,
+      "away_revenue": 34400,
+      "away_share_rate": 0,
+      "home_no_submission": 137601,
+      "away_no_submission": 34400,
+      "no_submission_gate": 229335
     }
   },
   {
@@ -415,9 +418,12 @@
       "attendance": 0,
       "attendance_rate": 0,
       "revenue": 0,
-      "home_revenue": 0,
+      "home_revenue": 137601,
       "away_revenue": 0,
-      "away_share_rate": 0
+      "away_share_rate": 0,
+      "home_no_submission": 137601,
+      "away_no_submission": 0,
+      "no_submission_gate": 229335
     }
   },
   {
@@ -564,9 +570,12 @@
       "attendance": 0,
       "attendance_rate": 0,
       "revenue": 0,
-      "home_revenue": 0,
-      "away_revenue": 0,
-      "away_share_rate": 0
+      "home_revenue": 137601,
+      "away_revenue": 34400,
+      "away_share_rate": 0,
+      "home_no_submission": 137601,
+      "away_no_submission": 34400,
+      "no_submission_gate": 229335
     }
   },
   {
@@ -1274,10 +1283,13 @@
       "attendance": 0,
       "attendance_rate": 0,
       "revenue": 0,
-      "home_revenue": 0,
+      "home_revenue": 153324,
       "away_revenue": 19022,
       "away_share_rate": 0,
-      "away_payout": 19022
+      "away_payout": 19022,
+      "home_no_submission": 153324,
+      "away_no_submission": 0,
+      "no_submission_gate": 255540
     }
   },
   {
@@ -1448,9 +1460,12 @@
       "attendance": 0,
       "attendance_rate": 0,
       "revenue": 0,
-      "home_revenue": 0,
-      "away_revenue": 0,
-      "away_share_rate": 0
+      "home_revenue": 153324,
+      "away_revenue": 38331,
+      "away_share_rate": 0,
+      "home_no_submission": 153324,
+      "away_no_submission": 38331,
+      "no_submission_gate": 255540
     }
   },
   {
@@ -1529,9 +1544,12 @@
       "attendance": 0,
       "attendance_rate": 0,
       "revenue": 0,
-      "home_revenue": 0,
-      "away_revenue": 0,
-      "away_share_rate": 0
+      "home_revenue": 153324,
+      "away_revenue": 38331,
+      "away_share_rate": 0,
+      "home_no_submission": 153324,
+      "away_no_submission": 38331,
+      "no_submission_gate": 255540
     }
   }
 ]

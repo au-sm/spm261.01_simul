@@ -52,10 +52,13 @@ def build_rows():
             reason = reasons.get(side) or "no valid lineup"
             if ff == "both":
                 reason += " (both teams forfeited: both take a loss)"
-            payout = (m.get("gate") or {}).get(f"{side}_payout", 0)
+            g = m.get("gate") or {}
+            payout = g.get(f"{side}_payout", 0)
+            no_sub = g.get(f"{side}_no_submission", 0)
+            given = (f"${payout:,} (50% of round avg {side} revenue)" if payout
+                     else f"${no_sub:,} (60% of round's lowest gate)" if no_sub else "$0")
             rows.append([m["round"], date_by_round.get(m["round"], ""), name.get(tid, ""), owner.get(tid, ""),
-                         reason, name.get(opp, ""), shown,
-                         f"${payout:,} (50% of round avg {side} revenue)" if payout else "$0"])
+                         reason, name.get(opp, ""), shown, given])
     if len(rows) == 1:
         rows.append(["", "", "No forfeits yet", "", "", "", "", ""])
     return rows

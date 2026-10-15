@@ -386,6 +386,8 @@ def main():
 
     for tid, side, amt in apply_no_rationale_payout(matches, finances, args.round):
         print(f"    (private) no-rationale ticket payout: team {tid} ({side}) +${amt:,} = 50% of round avg {side} revenue")
+    for tid, side, amt in apply_no_submission_gate(matches, finances, args.round):
+        print(f"    no-submission gate: team {tid} ({side}) +${amt:,}")
     save_json("matches.json", matches)
     save_json("team_finances.json", {"teams": finances})
 
@@ -451,6 +453,48 @@ def apply_no_rationale_payout(matches, finances, round_num):
             paid.append((m[f"{side}_id"], side, amt))
     return paid
 
+
+NO_SUBMISSION_HOME_SHARE = 0.60
+NO_SUBMISSION_AWAY_SHARE = 0.15  # = attendance.AWAY_SHARE_MAX, the highest away rate
+
+
+def apply_no_submission_gate(matches, finances, round_num):
+    """A home match whose home team sent NO lineup (so no ticket price) still
+    books a gate: the round's LOWEST gate among normally played, ticketed
+    matches. The home team gets NO_SUBMISSION_HOME_SHARE (60%) of it; the
+    away team gets NO_SUBMISSION_AWAY_SHARE (15%, the highest away rate) only
+    if it submitted its own lineup + ticket price, else $0. A home team that
+    forfeited for "no decision rationale" is excluded -- it already gets
+    apply_no_rationale_payout(). Instructor's rule, 2026-10-15. Idempotent per match."""
+    rnd = [m for m in matches if m["round"] == round_num and m.get("stage", "regular") == "regular"]
+    normal = [m for m in rnd if not m.get("forfeit") and (m.get("gate") or {}).get("price_tier")]
+    if not normal:
+        return []
+    lowest_gate = min(m["gate"]["revenue"] for m in normal)
+    paid = []
+    for m in rnd:
+        if m.get("forfeit") not in ("home", "both") or m.get("home_submitted"):
+            continue
+        if (m.get("forfeit_reason") or {}).get("home") == "no decision rationale":
+            continue
+        g = m.setdefault("gate", {"price_tier": None, "price": 0, "attendance": 0, "attendance_rate": 0,
+                                  "revenue": 0, "home_revenue": 0, "away_revenue": 0, "away_share_rate": 0})
+        if g.get("no_submission_gate"):
+            continue
+        shares = {"home": NO_SUBMISSION_HOME_SHARE,
+                  "away": NO_SUBMISSION_AWAY_SHARE if m.get("away_submitted") else 0}
+        for side, share in shares.items():
+            amt = round(lowest_gate * share)
+            g[f"{side}_no_submission"] = amt
+            if not amt:
+                continue
+            tid = str(m[f"{side}_id"])
+            finances.setdefault(tid, {"ticket_revenue": 0, "sponsorship_revenue": 0, "tv_revenue": 0})
+            finances[tid]["ticket_revenue"] += amt
+            g[f"{side}_revenue"] = g.get(f"{side}_revenue", 0) + amt
+            paid.append((m[f"{side}_id"], side, amt))
+        g["no_submission_gate"] = lowest_gate
+    return paid
 
 if __name__ == "__main__":
     main()
