@@ -197,6 +197,66 @@
    "treatment": "recovery",
    "submitted_at": "2026-10-15T14:51:50.422Z",
    "cost": 50000
+  },
+  {
+   "id": "15|4|295|2026-10-22T14:19:31.561Z",
+   "team_id": "15",
+   "round": 4,
+   "player_id": "295",
+   "player_name": "Kenji Toure",
+   "treatment": "sports_science",
+   "submitted_at": "2026-10-22T14:19:31.561Z",
+   "cost": 125000
+  },
+  {
+   "id": "15|4|27|2026-10-22T14:19:57.242Z",
+   "team_id": "15",
+   "round": 4,
+   "player_id": "27",
+   "player_name": "Hassan Bauer",
+   "treatment": "sports_science",
+   "submitted_at": "2026-10-22T14:19:57.242Z",
+   "cost": 125000
+  },
+  {
+   "id": "16|4|135|2026-10-22T14:24:12.655Z",
+   "team_id": "16",
+   "round": 4,
+   "player_id": "135",
+   "player_name": "Nikolai Reyes",
+   "treatment": "sports_science",
+   "submitted_at": "2026-10-22T14:24:12.655Z",
+   "cost": 125000
+  },
+  {
+   "id": "16|4|181|2026-10-22T14:24:56.371Z",
+   "team_id": "16",
+   "round": 4,
+   "player_id": "181",
+   "player_name": "Felix Berg",
+   "treatment": "recovery",
+   "submitted_at": "2026-10-22T14:24:56.371Z",
+   "cost": 50000
+  },
+  {
+   "id": "16|4|280|2026-10-22T14:25:26.021Z",
+   "team_id": "16",
+   "round": 4,
+   "player_id": "280",
+   "player_name": "Lars Nowak",
+   "treatment": "recovery",
+   "submitted_at": "2026-10-22T14:25:26.021Z",
+   "cost": 50000
+  },
+  {
+   "id": "16|4|105|2026-10-22T14:25:49.553Z",
+   "team_id": "16",
+   "round": 4,
+   "player_id": "105",
+   "player_name": "Youssef Kucera",
+   "treatment": "recovery",
+   "submitted_at": "2026-10-22T14:25:49.553Z",
+   "cost": 50000
   }
  ],
  "voided": [],
@@ -206,9 +266,10 @@
   "5": 625000,
   "12": 550000,
   "0": 175000,
-  "16": 350000,
+  "16": 625000,
   "14": 50000,
-  "17": 175000
+  "17": 175000,
+  "15": 250000
  },
  "boosts": {
   "3": {
@@ -261,6 +322,26 @@
     "levels": 1
    },
    "195": {
+    "levels": 1
+   }
+  },
+  "4": {
+   "295": {
+    "levels": 2
+   },
+   "27": {
+    "levels": 2
+   },
+   "135": {
+    "levels": 2
+   },
+   "181": {
+    "levels": 1
+   },
+   "280": {
+    "levels": 1
+   },
+   "105": {
     "levels": 1
    }
   }
