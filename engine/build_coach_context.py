@@ -1,8 +1,10 @@
 """
 Builds data/coach_context.json -- the briefing the AI Coach (/coach/) reads.
-One compact plain-text briefing per team (record, results, gate, cash,
-roster, injuries, next opponent) plus the league table and the rulebook
-text. backend.gs (type "coach_chat") fetches this file from GitHub Pages
+One compact plain-text briefing per team (record, attack/defense ranks,
+home/away form, results with scorers, gate, cash, roster with season
+starts/goals, injuries, a scouting report on the next opponent, and
+league-wide results by formation/strategy/ticket tier) plus the league
+table and the rulebook text. backend.gs (type "coach_chat") fetches this file from GitHub Pages
 server-side and hands ONLY the asking team's briefing + the rulebook to
 Gemini, so a student can't swap in another team's context.
 
@@ -74,8 +76,61 @@ def team_results(tid, matches, names):
                         f"your gate revenue {money(gate.get('home_revenue', 0))}")
         else:
             gate_txt = f"away gate share {money(gate.get('away_revenue', 0))}"
-        lines.append(f"R{m['round']} {side} vs {opp}: {res} {gf}-{ga} | {formation} {strategy} | {gate_txt}")
+        scorers = [f"{g['scorer']} {g['minute']}'" for g in m.get("goal_events") or [] if g.get("side") == side]
+        score_txt = f" | your scorers: {', '.join(scorers)}" if scorers else ""
+        lines.append(f"R{m['round']} {side} vs {opp}: {res} {gf}-{ga} | {formation} {strategy} | {gate_txt}{score_txt}")
     return lines
+
+
+def season_player_stats(matches):
+    """starts and goals per player_id across all played matches"""
+    stats = {}
+    for m in matches:
+        for side in ("home", "away"):
+            for pid in m.get(f"{side}_starters") or []:
+                stats.setdefault(str(pid), {"starts": 0, "goals": 0})["starts"] += 1
+        for g in m.get("goal_events") or []:
+            if g.get("scorer_id") not in (None, ""):
+                stats.setdefault(str(g["scorer_id"]), {"starts": 0, "goals": 0})["goals"] += 1
+    return stats
+
+
+def rank_of(value, values, high_is_good=True):
+    """1-based rank of value among values (ties share the better rank)"""
+    better = [v for v in values if (v > value if high_is_good else v < value)]
+    return len(better) + 1
+
+
+def league_trends(matches):
+    """W/D/L by formation and by strategy, plus attendance by ticket tier,
+    from matches where that side actually submitted a lineup"""
+    by_form, by_strat, tiers = {}, {}, {}
+    for m in matches:
+        if m.get("forfeit"):
+            continue
+        for side, other in (("home", "away"), ("away", "home")):
+            gf, ga = m[f"{side}_goals"], m[f"{other}_goals"]
+            res = "W" if gf > ga else ("L" if gf < ga else "D")
+            for key, bucket in ((m.get(f"{side}_formation"), by_form), (m.get(f"{side}_strategy"), by_strat)):
+                if key:
+                    b = bucket.setdefault(key, {"W": 0, "D": 0, "L": 0, "GF": 0, "GA": 0})
+                    b[res] += 1
+                    b["GF"] += gf
+                    b["GA"] += ga
+        gate = m.get("gate") or {}
+        if gate.get("price_tier"):
+            tiers.setdefault(gate["price_tier"], []).append(gate.get("attendance_rate") or 0)
+
+    def fmt(bucket):
+        rows = sorted(bucket.items(), key=lambda kv: -(kv[1]["W"] + kv[1]["D"] + kv[1]["L"]))
+        return [f"  {k}: W{v['W']} D{v['D']} L{v['L']}, goals for {v['GF']} / against {v['GA']}" for k, v in rows]
+
+    tier_lines = [f"  {t}: average {round(100 * sum(r) / len(r))}% full over {len(r)} home matches"
+                  for t, r in sorted(tiers.items())]
+    return ["LEAGUE TRENDS (all teams, submitted lineups only; small samples early in the season):",
+            "Results by formation:", *fmt(by_form),
+            "Results by strategy:", *fmt(by_strat),
+            "Attendance by ticket tier:", *tier_lines]
 
 
 def main():
@@ -95,6 +150,12 @@ def main():
         f"{i + 1}. {names[tid]} -- P{r['P']} W{r['W']} D{r['D']} L{r['L']} GF{r['GF']} GA{r['GA']} Pts{r['PTS']}"
         for i, (tid, r) in enumerate(ranked)
     ]
+
+    pstats = season_player_stats(matches)
+    rows = dict(ranked)
+    gf_all = [rows[t]["GF"] for t in team_ids]
+    ga_all = [rows[t]["GA"] for t in team_ids]
+    trends_txt = league_trends(matches)
 
     next_round = config.get("current_round", 0) + 1
     _m, cond = conditions_for_round(config.get("season_seed", 2026), next_round, players, injuries)
@@ -117,6 +178,47 @@ def main():
         avg = round(sum(p["ovr"] for p in squad) / len(squad), 1)
         return f"{len(squad)} players, average OVR {avg}", avg
 
+    def stat_txt(p):
+        st = pstats.get(str(p["player_id"]))
+        return f" | season: {st['starts']} starts, {st['goals']} goals" if st else " | season: 0 starts"
+
+    def profile(tid):
+        r = rows[tid]
+        home = [m for m in matches if m["home_id"] == tid]
+        away = [m for m in matches if m["away_id"] == tid]
+
+        def wdl(ms, side):
+            w = sum(1 for m in ms if m[f"{side}_goals"] > m[f"{'away' if side == 'home' else 'home'}_goals"])
+            l = sum(1 for m in ms if m[f"{side}_goals"] < m[f"{'away' if side == 'home' else 'home'}_goals"])
+            return f"W{w} D{len(ms) - w - l} L{l}"
+
+        return (f"attack ranks {rank_of(r['GF'], gf_all)} of {len(team_ids)} ({r['GF']} goals scored), "
+                f"defense ranks {rank_of(r['GA'], ga_all, high_is_good=False)} of {len(team_ids)} ({r['GA']} conceded); "
+                f"home {wdl(home, 'home')}, away {wdl(away, 'away')}")
+
+    def scouting(opp):
+        squad = sorted(rosters[opp], key=lambda p: -p["ovr"])
+        top = []
+        for p in squad[:6]:
+            tier, _mult, inj_until = cond.get(p["player_id"], ("Average", 1.0, None))
+            status = f"INJURED through R{inj_until}" if inj_until else f"condition {tier}"
+            top.append(f"  {p['position']} {p['name']} OVR{p['ovr']} (ATT{p['att']} DEF{p['def']} PACE{p['pace']} "
+                       f"PHY{p['phy']}) {status}{stat_txt(p)}")
+        injured = [p["name"] for p in squad if cond.get(p["player_id"], (None, None, None))[2]]
+        pos_avg = []
+        for pos in ("GK", "DF", "MF", "FW"):
+            g = [p["ovr"] for p in squad if p["position"] == pos]
+            if g:
+                pos_avg.append(f"{pos} {round(sum(g) / len(g), 1)}")
+        return [f"OPPONENT SCOUTING: {names[opp]} (position {position[opp]})",
+                f"  Profile: {profile(opp)}",
+                f"  Average OVR by line: {', '.join(pos_avg)}",
+                f"  Injured for the next round: {', '.join(injured) or 'none'}",
+                "  Their results:",
+                *(["    " + l.split(' | ticket')[0].split(' | away gate')[0] for l in team_results(opp, matches, names)]
+                  or ["    none played yet"]),
+                "  Their best players:", *top]
+
     teams_out = {}
     for tid in team_ids:
         rec = dict(ranked)[tid]
@@ -130,7 +232,7 @@ def main():
             status = f"INJURED through R{inj_until}" if inj_until else f"condition {tier}"
             roster_lines.append(f"{p['position']} {p['name']} OVR{p['ovr']} (ATT{p['att']} DEF{p['def']} "
                                 f"PACE{p['pace']} PHY{p['phy']}, star {p['star_power']}, age {p['age']}, "
-                                f"salary {money(p['salary'])}) {status}")
+                                f"salary {money(p['salary'])}) {status}{stat_txt(p)}")
         summary, _avg = squad_summary(tid)
         if tid in next_fixture:
             opp, side = next_fixture[tid]
@@ -145,6 +247,7 @@ def main():
         briefing = "\n".join([
             f"TEAM: {names[tid]} (league position {position[tid]} of {len(team_ids)})",
             f"RECORD: P{rec['P']} W{rec['W']} D{rec['D']} L{rec['L']}, GF{rec['GF']} GA{rec['GA']}, {rec['PTS']} pts",
+            f"PERFORMANCE PROFILE: {profile(tid)}",
             f"NEXT MATCH: {next_txt}",
             "RESULTS SO FAR:",
             *(["  " + l for l in team_results(tid, matches, names)] or ["  none played yet"]),
@@ -155,6 +258,8 @@ def main():
             f"SPONSORS: {sponsor_txt} ({config.get('sponsorship_categories_required', 6)} categories required)",
             f"SQUAD: {summary}",
             *("  " + l for l in roster_lines),
+            *(scouting(next_fixture[tid][0]) if tid in next_fixture else []),
+            *trends_txt,
         ])
         teams_out[str(tid)] = {"name": names[tid], "position": position[tid],
                                "record": f"{rec['W']}W-{rec['D']}D-{rec['L']}L", "points": rec["PTS"],

@@ -9,6 +9,16 @@
  * Manage deployments > edit the existing deployment > New version --
  * keeps the same /exec URL, no config.js change needed.
  *
+ * AI COACH SETUP (this version, 2026-10-26; coach tuned for performance
+ *   and strategy questions):
+ *   1. Replace ALL code in the Apps Script editor with this file.
+ *   2. Project Settings > Script Properties > Add property:
+ *      GEMINI_API_KEY = your key from aistudio.google.com (never put
+ *      the key in this file, the repo or Discord).
+ *   3. Pick testCoachKey in the function dropdown > Run. The log should
+ *      say "OK via gemini-3.5-flash-lite: ...".
+ *   4. Deploy > Manage deployments > edit > New version > Deploy.
+ *
  * PIN CHECKING IS REAL HERE, unlike the Claude-artifact version this
  * replaced -- this runs server-side, so a wrong/missing PIN is
  * actually rejected, not just a client-side hash comparison a student
@@ -323,7 +333,10 @@ function committedOutgoingCount_(trades, teamId) {
 // Every exchange is logged to the "Coach Log" tab for the instructor.
 // ---------------------------------------------------------------------------
 var COACH_CONTEXT_URL = "https://au-sm.github.io/spm261.01_simul/data/coach_context.json";
-var COACH_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
+// Tried in order. 3.5 Flash-Lite has the largest free daily quota; Google
+// limited 2.5 access on 2026-09-18 to keys that used it recently, so a new
+// key may only reach the 3.x models -- 2.5 stays last as a fallback.
+var COACH_MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-2.5-flash"];
 var COACH_MAX_PER_HOUR = 40;      // per team -- keeps one team from burning the free quota
 var COACH_MAX_MESSAGE = 800;      // characters per student message
 var COACH_MAX_HISTORY = 10;       // earlier turns resent for continuity
@@ -331,21 +344,23 @@ var COACH_MAX_HISTORY = 10;       // earlier turns resent for continuity
 var COACH_INSTRUCTIONS = [
   "You are the AI Coach for the {LEAGUE}, a front-office simulation in SPM261 Introduction to Sport Management at Arcadia University.",
   "Each student is the owner and general manager of one club. You are their front-office advisor, talking to the owner of {TEAM}.",
+  "Your job is to help them understand how their team is performing and why, and to think through strategy so they make better decisions.",
   "",
-  "HOW TO COACH",
-  "- Coach, don't decide. Ask one sharp question back, point to the evidence in their own numbers, and let them reach the call.",
-  "- Ground every claim in the TEAM BRIEFING, LEAGUE TABLE or RULEBOOK below. Quote the actual numbers (attendance %, ticket tier, cash, OVR, results).",
-  "- Tie decisions to sport management concepts by name when they fit: price elasticity, demand drivers, sponsorship fit and activation, broadcast rights value, salary cap and payroll efficiency, risk and opportunity cost, fan identification.",
-  "- When a rule matters, cite the rulebook section number (for example 'Rulebook section 10').",
-  "- Keep replies short: under 150 words, plain sentences, at most 3 bullets. End with one question for the student unless they only asked a factual rule question.",
+  "HOW TO ANSWER",
+  "- Lead with analysis, not a question. Say what the numbers show, explain the likely reason using how the league actually works (rulebook section 9 for match results, section 8 for formations and strategy, section 10 for tickets and attendance), then give 2-3 concrete options with the tradeoff of each.",
+  "- Performance questions: compare them with the league (their attack and defense ranks, home vs away form, the league table), look at the formations and strategies they used and how those went, who is scoring and starting, and player condition and injuries.",
+  "- Strategy questions: use the OPPONENT SCOUTING report and LEAGUE TRENDS. Match their strengths (OVR by player and line, ATT/DEF/PACE/PHY) against the opponent's, and say which data supports each option. Note when a league trend is based on only a few matches.",
+  "- Business questions (tickets, sponsors, TV, cash, payroll, health spending): use their finance lines and tie the answer to sport management concepts by name, such as price elasticity, demand drivers, sponsorship fit and activation, broadcast rights value, payroll efficiency, risk and opportunity cost, fan identification.",
+  "- Quote their actual numbers and players by name. Cite the rulebook section when a rule matters.",
+  "- Keep it readable: under 200 words, short sentences, at most 4 bullets. Finish with one short question that pushes them toward their own decision, unless they only asked a factual rule question.",
   "",
   "LIMITS",
-  "- Never write a decision rationale, lineup justification or any graded text for them. If asked, say that part has to be in their own words and offer to react to their draft ideas instead.",
-  "- Never pick the final lineup, ticket price or deal for them. You may lay out tradeoffs and what the data suggests.",
+  "- The final call is theirs. You may say which option the data favors and why, but never hand them a finished lineup, ticket price or deal as 'the answer'.",
+  "- Never write a decision rationale, lineup justification or any graded text for them. If asked, say that part has to be in their own words and offer to react to their own draft ideas instead.",
   "- Never guess or reveal sponsors' hidden base prices or other teams' private negotiations. If you don't know a number, say so.",
   "- You know nothing about any student's course grade. Don't speculate about grades or points earned.",
-  "- If a question has nothing to do with the league or the course, steer back in one sentence.",
   "- If the briefing doesn't contain something, say it isn't in your data rather than inventing it.",
+  "- If a question has nothing to do with the league or the course, steer back in one sentence.",
 ].join("\n");
 
 function coachLogSheet_() {
@@ -402,8 +417,12 @@ function coachCallModel_(system, contents) {
   var models = preferred ? [preferred].concat(COACH_MODELS.filter(function (m) { return m !== preferred; })) : COACH_MODELS;
   var lastErr = "";
   for (var i = 0; i < models.length; i++) {
-    var gen = { temperature: 0.7, maxOutputTokens: 700 };
-    if (models[i].indexOf("2.5-flash") > -1) gen.thinkingConfig = { thinkingBudget: 0 };
+    // 3.x models think by default and the thinking counts toward
+    // maxOutputTokens, so they get more room and the default temperature
+    var gen = { maxOutputTokens: 2048 };
+    if (models[i].indexOf("2.5-flash") > -1) {
+      gen = { temperature: 0.7, maxOutputTokens: 700, thinkingConfig: { thinkingBudget: 0 } };
+    }
     var resp = UrlFetchApp.fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/" + models[i] + ":generateContent",
       {
@@ -423,6 +442,15 @@ function coachCallModel_(system, contents) {
     }
   }
   return { ok: false, reason: "model_error", detail: lastErr };
+}
+
+// Run this once from the Apps Script editor (select testCoachKey > Run)
+// after setting GEMINI_API_KEY. The execution log shows which model
+// answered, or the exact error if none did. Nothing is written to the Sheet.
+function testCoachKey() {
+  var r = coachCallModel_("You are a test. Reply with one short sentence.",
+                          [{ role: "user", parts: [{ text: "Say hello to the SPM261 league." }] }]);
+  Logger.log(r.ok ? "OK via " + r.model + ": " + r.text : "FAILED (" + r.reason + "): " + (r.detail || "GEMINI_API_KEY not set"));
 }
 
 function handleCoachChat_(body, team) {

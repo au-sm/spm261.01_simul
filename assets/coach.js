@@ -71,7 +71,7 @@
       $('co-s-cash').textContent = money(r.cash);
       $('co-s-next').textContent = 'Next: ' + r.next;
       $('co-signin').hidden = true; $('co-session').hidden = false;
-      bubble('coach', `Hi, owner of **${r.team_name}**. I've got your numbers in front of me: you're ${ordinal(r.position)} with ${r.points} points and ${money(r.cash)} in cash. What decision are you working on?`);
+      bubble('coach', `Hi, owner of **${r.team_name}**. I've got your numbers in front of me: you're ${ordinal(r.position)} with ${r.points} points and ${money(r.cash)} in cash. Ask me how your team is performing, what's behind your results, or how to approach your next match. What do you want to work on?`);
       input.focus();
     } catch (e) {
       signMsg.textContent = 'Could not reach the league server. Please try again.'; signMsg.className = 'co-msg err';

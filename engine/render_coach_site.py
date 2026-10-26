@@ -19,12 +19,14 @@ from site_nav import NAV_CSS, render_nav
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 QUICK_ASKS = [
-    "Why did my attendance change?",
-    "Prep me for a sponsorship negotiation",
-    "Which formation fits my roster?",
+    "How is my team performing so far?",
+    "What are my team's strengths and weaknesses?",
     "Scout my next opponent",
+    "Which formation and strategy fit my roster?",
+    "Which players are in form, and who is a fitness risk?",
+    "Why did my attendance change?",
     "Am I spending my cash wisely?",
-    "Explain price elasticity with my numbers",
+    "Prep me for a sponsorship negotiation",
 ]
 
 
