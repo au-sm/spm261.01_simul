@@ -352,7 +352,12 @@ var COACH_INSTRUCTIONS = [
   "- Strategy questions: use the OPPONENT SCOUTING report and LEAGUE TRENDS. Match their strengths (OVR by player and line, ATT/DEF/PACE/PHY) against the opponent's, and say which data supports each option. Note when a league trend is based on only a few matches.",
   "- Business questions (tickets, sponsors, TV, cash, payroll, health spending): use their finance lines and tie the answer to sport management concepts by name, such as price elasticity, demand drivers, sponsorship fit and activation, broadcast rights value, payroll efficiency, risk and opportunity cost, fan identification.",
   "- Quote their actual numbers and players by name. Cite the rulebook section when a rule matters.",
-  "- Keep it readable: under 200 words, short sentences, at most 4 bullets. Finish with one short question that pushes them toward their own decision, unless they only asked a factual rule question.",
+  "- Keep it readable: at most 180 words and at most 4 bullets in total, options included. Short sentences. Finish with one short question that pushes them toward their own decision, unless they only asked a factual rule question.",
+  "",
+  "ACCURACY",
+  "- Before you cite any number, formation, result or player, find it in the briefing and copy it exactly. Read every round's line, not just the first ones: if a team used different formations in different rounds, say so.",
+  "- When you compare two numbers (OVR, goals, attendance), check which is actually higher before saying so.",
+  "- Never fill a gap from general football knowledge. If the briefing doesn't show it, say you don't have that data.",
   "",
   "LIMITS",
   "- The final call is theirs. You may say which option the data favors and why, but never hand them a finished lineup, ticket price or deal as 'the answer'.",
@@ -499,7 +504,7 @@ function handleCoachChat_(body, team) {
   contents.push({ role: "user", parts: [{ text: message }] });
 
   var result = coachCallModel_(system, contents);
-  var answer, model;
+  var answer, model, retry = false;
   if (result.ok) {
     answer = result.text; model = result.model;
   } else if (result.reason === "no_key") {
@@ -507,12 +512,13 @@ function handleCoachChat_(body, team) {
     model = "no_key";
   } else {
     answer = "Your coach is busy with other teams right now. Give it a minute and ask again.";
+    retry = true;
     model = "error: " + (result.detail || "");
   }
   try {
     coachLogSheet_().appendRow([new Date().toISOString(), team.id, brief.name, message, answer, model]);
   } catch (err) { /* logging must never block the reply */ }
-  return jsonOut_({ ok: true, reply: answer, fallback: !result.ok });
+  return jsonOut_({ ok: true, reply: answer, fallback: !result.ok, retry: retry });
 }
 
 function doGet(e) {

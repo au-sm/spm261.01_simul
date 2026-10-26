@@ -93,6 +93,7 @@ button:disabled{{opacity:.5;cursor:not-allowed;}}
 .snap b{{display:block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:500;}}
 .snap span{{font-size:17px;font-weight:600;}}
 .snap-next{{margin-top:10px;font-size:14px;color:var(--muted);}}
+.co-note{{font-size:13px;color:var(--muted,#666);margin:-6px 0 12px;}}
 .chips{{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}}
 .co-chip{{background:transparent;color:var(--coach);border:1.5px solid var(--coach);border-radius:999px;padding:6px 13px;font-size:14px;font-weight:500;}}
 .co-chip:hover{{background:var(--coach);color:#fff;}}
@@ -140,6 +141,7 @@ footer{{max-width:860px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
     </div>
     <div class="card">
       <div class="chips">{chips}</div>
+      <p class="co-note">The coach can misread numbers. Check anything important against the Scoreboard, Scouting Report and Budget pages before you decide.</p>
       <div class="chat" id="co-chat" aria-live="polite"></div>
       <div class="composer">
         <textarea id="co-input" placeholder="Ask your coach..." maxlength="800"></textarea>

@@ -87,7 +87,15 @@
     bubble('user', text);
     const wait = bubble('coach', 'Thinking…', 'thinking');
     try {
-      const r = await post({ message: text, history });
+      // free-tier Gemini allows only so many answers a minute across the
+      // whole class; when the backend says the model was busy, wait and
+      // retry quietly (twice) instead of making the student resend
+      let r = await post({ message: text, history });
+      for (let tries = 0; r.ok && r.retry && tries < 2; tries++) {
+        wait.textContent = 'Lots of teams are asking right now. Your coach will answer in a few seconds…';
+        await new Promise(res => setTimeout(res, 20000));
+        r = await post({ message: text, history });
+      }
       wait.remove();
       if (r.ok) {
         bubble('coach', r.reply);
