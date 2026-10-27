@@ -203,6 +203,11 @@ def resolve_sponsorship_deals(sheet_sponsorship_deals):
         if d.get("rep_team_id") not in (None, "", "null"):
             cmd += ["--sponsor-rep-team", str(d["rep_team_id"])]
         run(cmd)
+        # resolve_sponsorship_pick.py prints its refusals and exits 0, so
+        # check the deal actually landed before reporting it as signed
+        if pull_submissions.unapplied_sponsorship_deals([d]):
+            print(f"!!! sponsorship deal NOT applied: team {d['team_id']} / {d['brand']} -- see output above", file=sys.stderr)
+            continue
         actions.append(f"sponsorship: team {d['team_id']} signed {d['brand']} ({d['category']})")
     return actions
 

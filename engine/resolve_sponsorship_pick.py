@@ -144,11 +144,12 @@ def main():
 
         commission = 0
         rep_team_name = None
-        if args.final_revenue != brand["base_revenue"]:
-            direction = "above" if args.final_revenue > brand["base_revenue"] else "below"
-            if args.sponsor_rep_team is None:
-                print(f"ERROR: final revenue (${args.final_revenue:,}) is {direction} base (${brand['base_revenue']:,}), "
-                      f"so --sponsor-rep-team is required to credit the ${abs(args.final_revenue - brand['base_revenue']):,} commission."); return
+        # No rep team means the deal was negotiated with the AI Sponsor Rep
+        # (backend.gs sponsor_negotiation): no student played the rep, so no
+        # commission. The manual form in backend.gs still requires a rep
+        # whenever revenue differs from base, so a missing rep is never an
+        # accident there.
+        if args.final_revenue != brand["base_revenue"] and args.sponsor_rep_team is not None:
             rep_team_name = next((t["name"] for t in config["teams"] if t["team_id"] == args.sponsor_rep_team), None)
             if rep_team_name is None:
                 print(f"ERROR: no team with id {args.sponsor_rep_team}"); return
