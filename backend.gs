@@ -577,7 +577,11 @@ var NEG_MAX_TURNS = 6;            // offers per brand before the rep makes a fin
 var NEG_LOWBALL = 0.15;           // asking more than 15% over the private ceiling is a strike
 var NEG_MAX_STRIKES = 3;          // three strikes and the rep walks away for the day
 var NEG_PITCH_BONUS = [0, 0.01, 0.02];
-var NEG_CLAUSE_THRESHOLD = { modest: 20, bold: 50, very_bold: 80 };
+// a clause request names the clause the owner wants; each step looser than
+// the brand's opening clause needs more leverage (1 step 20+, 2 steps 50+,
+// strict -> none 80+), the same 20/50/80 bars as Rulebook section 11
+var NEG_CLAUSE_STEP_LEVERAGE = [0, 20, 50, 80];
+var NEG_OLD_PUSH_STEPS = { modest: 1, bold: 2, very_bold: 3 };  // pages loaded before this change
 var NEG_CLAUSE_LEVELS = ["strict", "standard", "loose", "none"];
 var NEG_SESSION_TTL = 21600;      // 6 hours, the CacheService maximum
 // flagship and premium brands only negotiate with contenders (leverage 0-100);
@@ -619,6 +623,11 @@ function testLeagueUpdate() {
 
 function negMoney_(n) {
   return "$" + String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// "a strict performance clause" / "no performance clause"
+function negClauseText_(clause) {
+  return clause === "none" ? "no performance clause" : "a " + clause + " performance clause";
 }
 
 function negRound_(n) {
@@ -676,7 +685,7 @@ function negModelRateOk_(teamId) {
 }
 
 function negTemplate_(st, decision, ask, clauseNote) {
-  var deal = negMoney_(st.offer) + " per season with a " + st.clause + " performance clause";
+  var deal = negMoney_(st.offer) + " per season with " + negClauseText_(st.clause);
   var line = {
     open: "Thanks for meeting with " + st.brand + ". We're offering " + deal + ". You can sign that today, or make your case for more.",
     agree: "You've made your case. " + st.brand + " can do " + deal + ". Ready to sign?",
@@ -684,7 +693,7 @@ function negTemplate_(st, decision, ask, clauseNote) {
     final: "This is our final offer: " + deal + ". Take it or leave it.",
     walk: "We're too far apart. " + st.brand + " is stepping away from these talks today. You could try another " + st.category + " brand.",
   }[decision];
-  if (clauseNote === "granted") line += " We can also work with a " + st.clause + " clause.";
+  if (clauseNote === "granted") line += " We can also agree to " + negClauseText_(st.clause) + ".";
   if (clauseNote === "refused") line += " The clause stays at " + st.clause + ".";
   return line;
 }
@@ -716,7 +725,7 @@ function negVoice_(st, decision, turn, ctx, brief, teamId) {
     walk: "The owner kept asking for far too much. End the talks politely for today.",
   }[decision];
   var clauseLine = !turn || !turn.clauseNote ? "" :
-    turn.clauseNote === "granted" ? "You agree to the clause the owner asked for: " + st.clause + "." :
+    turn.clauseNote === "granted" ? "You agree to the clause the owner asked for: " + negClauseText_(st.clause) + "." :
     "You decline the looser clause the owner asked for; it stays " + st.clause + ".";
   var facts = String(brief.briefing || "").split("\nFINANCES")[0];
   var system = [
@@ -725,7 +734,7 @@ function negVoice_(st, decision, turn, ctx, brief, teamId) {
     "",
     "The league's deal engine has ALREADY decided this turn. You only say it, in character.",
     "THIS TURN: " + situation + " " + clauseLine,
-    "YOUR OFFER: " + negMoney_(st.offer) + " per season, " + st.clause + " performance clause.",
+    "YOUR OFFER: " + negMoney_(st.offer) + " per season, with " + negClauseText_(st.clause) + ".",
     "",
     "RULES",
     "- The only dollar figures you may write are your offer above, the opening offer of " + negMoney_(st.base) + (turn ? " and the owner's ask of " + negMoney_(turn.ask) : "") + ". Never reveal, hint at or invent a maximum, a budget or any other number.",
@@ -866,20 +875,22 @@ function handleNegotiation_(body, team, sheets) {
   if (!(ask > 0)) return jsonOut_({ ok: false, error: "Enter the yearly revenue you're asking for." });
   var pitch = String(body.pitch || "").trim().substring(0, 800);
   if (pitch.length < 15) return jsonOut_({ ok: false, error: "Make your case first: a sentence or two on why " + brand.name + " should pay that." });
-  var clauseAsk = NEG_CLAUSE_THRESHOLD[body.clause_ask] !== undefined ? body.clause_ask : "keep";
+  var baseIdx = NEG_CLAUSE_LEVELS.indexOf(st.base_clause);
+  var target = NEG_CLAUSE_LEVELS.indexOf(body.clause_target) > -1 ? body.clause_target :
+    NEG_OLD_PUSH_STEPS[body.clause_ask] ? NEG_CLAUSE_LEVELS[Math.min(NEG_CLAUSE_LEVELS.length - 1, baseIdx + NEG_OLD_PUSH_STEPS[body.clause_ask])] : "";
+  var clauseSteps = target ? NEG_CLAUSE_LEVELS.indexOf(target) - baseIdx : 0;
+  var clauseAsk = clauseSteps >= 1 ? target : "keep";
 
   st.turns++;
   var turn = { ask: ask, pitch: pitch, clauseAsk: clauseAsk, clauseNote: "",
                heuristic: negHeuristicScore_(pitch, brand) };
   turn.userText = "My ask: " + negMoney_(ask) + " per season." +
-    (clauseAsk === "keep" ? "" : " Clause request: " + clauseAsk.replace("_", " ") + " push for a looser clause.") +
+    (clauseAsk === "keep" ? "" : " Clause request: " + (clauseAsk === "none" ? "no performance clause." : "a " + clauseAsk + " clause.")) +
     "\n" + pitch;
 
   if (clauseAsk !== "keep") {
-    if (st.leverage >= NEG_CLAUSE_THRESHOLD[clauseAsk]) {
-      var steps = clauseAsk === "very_bold" ? 2 : 1;
-      var want = NEG_CLAUSE_LEVELS[Math.min(NEG_CLAUSE_LEVELS.length - 1, NEG_CLAUSE_LEVELS.indexOf(st.base_clause) + steps)];
-      if (NEG_CLAUSE_LEVELS.indexOf(want) > NEG_CLAUSE_LEVELS.indexOf(st.clause)) st.clause = want;
+    if (st.leverage >= NEG_CLAUSE_STEP_LEVERAGE[clauseSteps]) {
+      if (NEG_CLAUSE_LEVELS.indexOf(clauseAsk) > NEG_CLAUSE_LEVELS.indexOf(st.clause)) st.clause = clauseAsk;
       turn.clauseNote = "granted";
     } else {
       turn.clauseNote = "refused";

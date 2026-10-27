@@ -6,6 +6,7 @@
 (function () {
   const $ = id => document.getElementById(id);
   const money = n => '$' + Math.round(Number(n)).toLocaleString('en-US');
+  const clauseText = c => c === 'none' ? 'no performance clause' : 'a ' + c + ' clause';
   const ordinal = n => n + ({ 1: 'st', 2: 'nd', 3: 'rd' }[(n % 100 > 10 && n % 100 < 14) ? 0 : n % 10] || 'th');
   const teamSel = $('ng-team'), pinIn = $('ng-pin');
   const catSel = $('ng-cat'), brandSel = $('ng-brand');
@@ -115,12 +116,27 @@
   function showSession(s) {
     table = s;
     $('ng-offer').textContent = money(s.offer);
-    $('ng-clause').textContent = s.clause;
+    $('ng-clause').textContent = s.clause === 'none' ? 'no' : s.clause;
     $('ng-left').textContent = s.status === 'final' ? 'final offer' : s.status === 'agreed' ? 'agreed' : s.turns_left + ' offers left';
     const closed = s.status === 'walked';
     $('ng-accept').disabled = closed;
     $('ng-accept').textContent = 'Sign for ' + money(s.offer);
     $('ng-composer').hidden = closed || s.status === 'final' || s.status === 'agreed';
+  }
+
+  // the clause request lists only clauses looser than this brand's opening
+  // clause; each step needs more leverage (backend NEG_CLAUSE_STEP_LEVERAGE)
+  const CLAUSES = ['strict', 'standard', 'loose', 'none'], STEP_LEVERAGE = [0, 20, 50, 80];
+  function buildClauseOptions(opening) {
+    const base = CLAUSES.indexOf(opening), lev = session && session.leverage != null ? Number(session.leverage) : null;
+    let html = `<option value="keep">Keep the ${esc(opening)} clause</option>`;
+    for (let i = base + 1; i < CLAUSES.length; i++) {
+      const need = STEP_LEVERAGE[i - base], short = lev != null && lev < need;
+      const name = CLAUSES[i] === 'none' ? 'No performance clause' : 'Ask for a ' + CLAUSES[i] + ' clause';
+      html += `<option value="${CLAUSES[i]}"${short ? ' disabled' : ''}>${name} (${short ? 'needs ' : ''}leverage ${need}+)</option>`;
+    }
+    $('ng-clause-ask').innerHTML = html;
+    $('ng-clause-ask').value = 'keep';
   }
 
   function openTable(on) {
@@ -139,7 +155,8 @@
       openTable(true);
       table = r.session;
       $('ng-table-title').textContent = r.session.brand + ' · ' + r.session.category;
-      $('ng-ask').value = ''; $('ng-pitch').value = ''; $('ng-clause-ask').value = 'keep';
+      $('ng-ask').value = ''; $('ng-pitch').value = '';
+      buildClauseOptions(r.session.opening_clause);
       bubble('rep', r.reply);
       showSession(r.session);
     } catch (e) {
@@ -157,7 +174,8 @@
     bubble('owner', 'Ask: ' + money(ask) + (clauseAsk !== 'keep' ? ' · clause: ' + $('ng-clause-ask').selectedOptions[0].text.toLowerCase() : '') + '\n' + pitch);
     const wait = bubble('rep', 'The rep is considering your offer…', 'wait');
     try {
-      const r = await post({ type: 'sponsor_negotiation', action: 'offer', brand: table.brand, ask, pitch, clause_ask: clauseAsk });
+      const r = await post({ type: 'sponsor_negotiation', action: 'offer', brand: table.brand, ask, pitch,
+                             clause_target: clauseAsk === 'keep' ? '' : clauseAsk });
       wait.remove();
       if (!r.ok) { setMsg($('ng-msg'), r.error, 'err'); return; }
       bubble('rep', r.reply);
@@ -172,13 +190,13 @@
 
   $('ng-accept').addEventListener('click', async () => {
     if (busy || !table) return;
-    if (!confirm('Sign ' + table.brand + ' for ' + money(table.offer) + ' per season with a ' + table.clause + ' clause? This is final.')) return;
+    if (!confirm('Sign ' + table.brand + ' for ' + money(table.offer) + ' per season with ' + clauseText(table.clause) + '? This is final.')) return;
     busy = true; $('ng-accept').disabled = true;
     try {
       const r = await post({ type: 'sponsor_negotiation', action: 'accept', brand: table.brand });
       if (!r.ok) { setMsg($('ng-msg'), r.error, 'err'); $('ng-accept').disabled = false; return; }
       openTable(false);
-      setMsg($('ng-pick-msg'), `Signed: ${r.brand} (${r.category}), ${money(r.final_revenue)} per season, ${r.final_clause} clause` +
+      setMsg($('ng-pick-msg'), `Signed: ${r.brand} (${r.category}), ${money(r.final_revenue)} per season, ${clauseText(r.final_clause)}` +
         (r.vs_opening ? ` (${r.vs_opening > 0 ? '+' : '−'}${money(Math.abs(r.vs_opening))} vs. the opening offer).` : '.') +
         (r.league_update === 'ok' ? ' Team Progress and your budget update in about 3 minutes.' : ' It reaches your budget on the next league update.'), 'ok');
       await loadCatalog();

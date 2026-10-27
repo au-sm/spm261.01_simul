@@ -412,7 +412,8 @@ def build(config, deals, calendar=None, ltv_deals=None):
         "away from owners who keep asking far more than it will pay, and no sponsor-rep commission is earned, "
         "since no student played the rep. Big brands choose contenders: Nike, Red Bull, Visa, Emirates, BMW "
         "and Samsung only negotiate with clubs at Negotiating Leverage 40+, and Adidas, Mastercard and Qatar "
-        "Airways need 30+."
+        "Airways need 30+. With the AI rep, a clause request names the clause you want: one step looser than "
+        "the brand's opening clause needs leverage 20+, two steps 50+, and strict to no clause 80+."
     )
     doc.add_heading("Clause", level=2)
     doc.add_paragraph(
