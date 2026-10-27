@@ -32,6 +32,7 @@ def money(n):
 
 
 CARD_COPY = {
+    "negotiate": ("AI Sponsor Rep", "Negotiate your sponsorship deals one-on-one with an AI brand rep. Make your ask, back it with your real numbers, and sign the deal when you're happy. Deals save to the league live."),
     "coach": ("AI Coach", "Your front-office advisor. Sign in with your team PIN and ask how your team is performing, what is behind your results, or how to approach your next opponent. It knows your team's numbers and the rulebook, lays out your options, and leaves the final call to you."),
     "health": ("Player Health Hub", "Pay for treatment from your team's cash: speed up an injured player's return or lift a player's condition for the next round. Opens for Round 3; up to 4 treatments per round."),
     "dashboard": ("Dashboard", "Standings, rosters, salary caps, this week's Player Condition report, and every real submission tool — rename your team, submit your Draft Board, and turn in your weekly lineup."),

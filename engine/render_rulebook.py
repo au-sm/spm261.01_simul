@@ -88,6 +88,10 @@ def render(config, deals, calendar=None, ltv_deals=None):
       down below base (good for the sponsor) and the savings goes to the rep's team instead. Landing exactly at base
       earns nobody a commission, since nothing was actually negotiated. Never a deduction from the signing team's own
       booked revenue either way.</p>
+      <p><b>AI Sponsor Rep.</b> Brands can also be negotiated one-on-one with the AI Sponsor Rep page. The same
+      leverage rule sets how far each brand will go (a strong, data-backed pitch can add a little), the rep may walk
+      away from owners who keep asking far more than it will pay, and no sponsor-rep commission is earned, since no
+      student played the rep.</p>
       <h3>Clause</h3>
       <p>A separate ask: push for a looser clause at Modest / Bold / Very Bold intensity, gated by the same leverage
       number. Ask beyond what your leverage supports and the brand walks away on the clause specifically &mdash; that

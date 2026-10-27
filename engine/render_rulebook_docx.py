@@ -406,6 +406,12 @@ def build(config, deals, calendar=None, ltv_deals=None):
         "talk the team down below base (good for the sponsor) and the savings goes to the rep's team "
         "instead. Landing exactly at base earns nobody a commission, since nothing was actually negotiated."
     )
+    doc.add_paragraph(
+        "AI Sponsor Rep: brands can also be negotiated one-on-one on the AI Sponsor Rep page. The same leverage "
+        "rule sets how far each brand will go (a strong, data-backed pitch can add a little), the rep may walk "
+        "away from owners who keep asking far more than it will pay, and no sponsor-rep commission is earned, "
+        "since no student played the rep."
+    )
     doc.add_heading("Clause", level=2)
     doc.add_paragraph(
         "A separate ask: push for a looser clause at Modest / Bold / Very Bold intensity, gated by the same "

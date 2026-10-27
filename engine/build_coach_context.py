@@ -23,6 +23,7 @@ from datetime import datetime, timezone
 sys.path.insert(0, os.path.dirname(__file__))
 import render_dashboard
 import resolve_trade
+from negotiation import compute_leverage
 from player_condition import conditions_for_round
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -267,7 +268,12 @@ def main():
             *(scouting(next_fixture[tid][0]) if tid in next_fixture else []),
             *trends_txt,
         ])
+        # same leverage formula the AI Sponsor Rep (backend.gs) and the
+        # Team Owner Brief use; public anyway since students compute it
+        avg_star = sum(p["star_power"] for p in squad) / len(squad) if squad else 50
+        leverage = compute_leverage(avg_star, position[tid] if matches else None, len(team_ids))
         teams_out[str(tid)] = {"name": names[tid], "position": position[tid],
+                               "avg_star_power": round(avg_star, 1), "leverage": round(leverage, 1),
                                "record": f"{rec['W']}W-{rec['D']}D-{rec['L']}L", "points": rec["PTS"],
                                "cash": cash, "next": next_txt, "briefing": briefing}
 
@@ -278,6 +284,9 @@ def main():
         "league_table": "\n".join(table_lines),
         "teams": teams_out,
         "rulebook": rulebook_text(),
+        # brand personalities for the AI Sponsor Rep (no prices -- those stay in backend.gs)
+        "brand_flavor": {b["name"]: b.get("flavor", "") for c in load_json("deals.json")["sponsorship_categories"]
+                         for b in c["brands"]},
     }
     with open(os.path.join(BASE, "data", "coach_context.json"), "w") as f:
         json.dump(out, f, indent=1)

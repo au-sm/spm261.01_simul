@@ -147,7 +147,7 @@ footer{{max-width:860px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
         <textarea id="co-input" placeholder="Ask your coach..." maxlength="800"></textarea>
         <button id="co-send" type="button">Send</button>
       </div>
-      <div class="fine">The coach asks questions back on purpose. It won't write your rationale for you, since that has to be in your own words. Conversations are saved for your instructor.</div>
+      <div class="fine">The coach lays out options and leaves the final call to you. It won't write your rationale for you, since that has to be in your own words. Conversations are saved for your instructor.</div>
     </div>
   </div>
 </div>

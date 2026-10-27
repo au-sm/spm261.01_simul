@@ -261,6 +261,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
     <div class="sub-card">
       <h2>Sign Your Sponsorship Deal</h2>
       <p class="sub-sub">The real thing -- saved live. One brand per category, {n_required} categories required.</p>
+      <p class="sub-sub"><b>Negotiating with the AI Sponsor Rep?</b> Use the <a href="../negotiate/">AI Sponsor Rep page</a>: deals you sign there are saved automatically. This form is for deals agreed in person.</p>
       <div class="sub-grid">
         <div class="sub-field"><label for="sp-team">Team</label><select id="sp-team" class="sub-team-select"></select></div>
         <div class="sub-field"><label for="sp-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="sp-pin" class="sub-pin" placeholder="4-digit PIN"></div>

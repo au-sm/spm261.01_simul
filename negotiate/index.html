@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Sponsor Rep</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#eef2ea; --ink:#16201a; --muted:#5b6b5e; --line:#d6decd;
+  --surface:#f7f9f4; --rep:#8a3b12; --rep-soft:#f6e6da; --bad:#b4472f; --good:#2f7a4f;
+  --shadow: 0 1px 2px rgba(22,32,26,.06), 0 4px 14px rgba(22,32,26,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
+    --surface:#171d17; --rep:#e0915e; --rep-soft:#2e2118; --bad:#e07a5c; --good:#4fae76;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+    --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
+    --surface:#171d17; --rep:#e0915e; --rep-soft:#2e2118; --bad:#e07a5c; --good:#4fae76;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;line-height:1.5;}
+h1,h2,h3{font-family:"Big Shoulders Display",sans-serif;text-transform:uppercase;letter-spacing:.02em;margin:0;}
+.masthead{background:var(--rep);color:#fff;padding:28px clamp(16px,4vw,48px);}
+.masthead-inner{max-width:860px;margin:0 auto;}
+.masthead h1{font-size:clamp(26px,4vw,38px);font-weight:800;}
+.masthead p{font-family:"IBM Plex Mono",monospace;font-size:12.5px;opacity:.9;margin:6px 0 0;}
+.wrap{max-width:860px;margin:0 auto;padding:24px clamp(16px,4vw,48px) 60px;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;box-shadow:var(--shadow);padding:16px 18px;margin-bottom:16px;}
+.card h2{font-size:20px;margin-bottom:8px;}
+label{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:0 0 4px;}
+select,input,textarea{width:100%;padding:9px 10px;font-size:16px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);font-family:inherit;}
+.row{display:grid;grid-template-columns:2fr 1fr auto;gap:12px;align-items:end;}
+.row2{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;}
+@media (max-width:600px){ .row,.row2{grid-template-columns:1fr;} }
+button{background:var(--rep);color:#fff;border:0;border-radius:4px;padding:10px 18px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;}
+button.ghost{background:transparent;color:var(--rep);border:1.5px solid var(--rep);}
+button.sign{background:var(--good);}
+button:disabled{opacity:.5;cursor:not-allowed;}
+.msg{margin-top:10px;font-size:14px;} .msg.err{color:var(--bad);} .msg.ok{color:var(--good);font-weight:600;}
+.rules{margin:0;padding-left:20px;font-size:15px;} .rules li{margin:3px 0;}
+.snap{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;}
+.snap div{border-left:4px solid var(--rep);padding:4px 10px;}
+.snap b{display:block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:500;}
+.snap span{font-size:17px;font-weight:600;}
+.filled{font-size:14px;color:var(--muted);margin-top:10px;}
+.flavor{font-style:italic;color:var(--muted);font-size:14px;margin:8px 0 0;}
+.chat{display:flex;flex-direction:column;gap:12px;min-height:120px;max-height:56vh;overflow-y:auto;padding:4px 2px 8px;}
+.bubble{max-width:86%;padding:10px 14px;border-radius:14px;font-size:15.5px;overflow-wrap:anywhere;white-space:pre-wrap;}
+.bubble.rep{align-self:flex-start;background:var(--rep-soft);border-bottom-left-radius:4px;}
+.bubble.rep::before{content:attr(data-who);display:block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--rep);margin-bottom:3px;font-weight:600;}
+.bubble.owner{align-self:flex-end;background:var(--rep);color:#fff;border-bottom-right-radius:4px;}
+.bubble.wait{color:var(--muted);font-style:italic;}
+.offerbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);margin-top:10px;padding-top:12px;}
+.offerbar .now{font-size:16px;} .offerbar .now b{font-size:19px;}
+.composer{display:grid;gap:10px;margin-top:12px;}
+.composer textarea{resize:vertical;min-height:70px;}
+.fine{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);margin-top:10px;}
+[hidden]{display:none !important;}
+footer{max-width:860px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:var(--muted);font-size:12px;font-family:"IBM Plex Mono",monospace;}
+
+/* explicit overrides throughout -- some host pages already style bare
+   nav{} / nav a{} for their own in-page section nav, so .sm-nav can't
+   rely on defaults not leaking in from those lower-specificity rules */
+.sm-nav{position:sticky;top:0;z-index:100;background:var(--ink);display:flex;flex-direction:row;
+  align-items:center;flex-wrap:wrap;gap:clamp(10px,2vw,28px);padding:10px clamp(14px,4vw,32px);
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;
+  border:none;box-shadow:0 2px 8px rgba(0,0,0,.18);}
+.sm-nav .sm-brand{color:var(--paper);font-weight:600;letter-spacing:.04em;margin-right:auto;white-space:nowrap;}
+.sm-nav a{color:color-mix(in srgb, var(--paper) 65%, transparent);text-decoration:none;letter-spacing:.02em;
+  padding:3px 0;border-bottom:2px solid transparent;white-space:nowrap;font-size:12.5px;}
+.sm-nav a:hover{color:var(--paper);}
+.sm-nav a.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+</style>
+</head>
+<body>
+<nav class="sm-nav">
+    <span class="sm-brand">SPM261.01 SOCCER LEAGUE</span>
+    <a href="https://au-sm.github.io/spm261.01_simul/" target="_blank" rel="noopener">Home</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/dashboard/" target="_blank" rel="noopener">Dashboard</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/coach/" target="_blank" rel="noopener">AI Coach</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/negotiate/" target="_blank" rel="noopener" class="active">AI Sponsor Rep</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/draftboard/" target="_blank" rel="noopener">Draft Board</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/scoreboard/" target="_blank" rel="noopener">Scoreboard</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/schedule/" target="_blank" rel="noopener">Schedule</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/scouting/" target="_blank" rel="noopener">Scouting Report</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/player-stats/" target="_blank" rel="noopener">Player Stats</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/budget/" target="_blank" rel="noopener">Budget Dashboard</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/health/" target="_blank" rel="noopener">Player Health Hub</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/rulebook/" target="_blank" rel="noopener">Rulebook</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/sponsorship/" target="_blank" rel="noopener">Sponsorship Marketplace</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/trade/" target="_blank" rel="noopener">Trade Center</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/tv/" target="_blank" rel="noopener">TV Rights Marketplace</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/attendance/" target="_blank" rel="noopener">Attendance &amp; Ticket Sales</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/walkthrough/" target="_blank" rel="noopener">Match Engine Walkthrough</a>
+    <a href="https://au-sm.github.io/spm261.01_simul/matchday-replay/" target="_blank" rel="noopener">Matchday Replay</a>
+  </nav>
+<header class="masthead"><div class="masthead-inner">
+  <h1>AI Sponsor Rep</h1>
+  <p>SPM261.01 Soccer League &middot; negotiate your sponsorship deals one-on-one &middot; deals are saved to the league live</p>
+</div></header>
+<div class="wrap">
+  <div class="card">
+    <h2>How it works</h2>
+    <ul class="rules">
+      <li>Each brand opens with a public offer: a yearly revenue and a performance clause. You can sign it straight away, which is guaranteed and risk-free.</li>
+      <li>Or negotiate. Every offer you make needs a pitch: why should this brand pay more for <i>your</i> club? Real numbers from your season (standings, attendance, star power) persuade a rep; vague claims don't.</li>
+      <li>How far a brand will go depends on your <b>Negotiating Leverage</b> (Rulebook Section 11). A weak hand can end <b>below</b> the opening offer once you start negotiating.</li>
+      <li>You get 6 offers per brand, then the rep makes a final offer. Asking far more than a brand will ever pay counts as a strike. After 3 strikes the rep walks away, and that brand is closed to your club for the day.</li>
+      <li>A looser clause is a separate ask (Modest, Bold, Very Bold). It only works if your leverage supports it, and asking never costs you revenue.</li>
+      <li>One brand per category, 6 categories required. AI-negotiated deals earn no sponsor-rep commission. Every conversation is saved for your instructor.</li>
+    </ul>
+  </div>
+
+  <div class="card" id="ng-signin">
+    <div class="row">
+      <div><label for="ng-team">Team</label><select id="ng-team"></select></div>
+      <div><label for="ng-pin">Team PIN</label><input id="ng-pin" type="password" inputmode="numeric" autocomplete="off"></div>
+      <button id="ng-signin-btn" type="button">Sign in</button>
+    </div>
+    <div class="msg" id="ng-signin-msg"></div>
+  </div>
+
+  <div id="ng-desk" hidden>
+    <div class="card">
+      <div class="snap">
+        <div><b>Team</b><span id="ng-s-name"></span></div>
+        <div><b>Position</b><span id="ng-s-pos"></span></div>
+        <div><b>Leverage</b><span id="ng-s-lev"></span></div>
+        <div><b>Categories signed</b><span id="ng-s-cats"></span></div>
+      </div>
+      <div class="filled" id="ng-filled"></div>
+    </div>
+
+    <div class="card" id="ng-pick">
+      <h2>Choose a brand</h2>
+      <div class="row2">
+        <div><label for="ng-cat">Category</label><select id="ng-cat"></select></div>
+        <div><label for="ng-brand">Brand</label><select id="ng-brand"></select></div>
+        <button id="ng-start" type="button">Meet the rep</button>
+      </div>
+      <p class="flavor" id="ng-flavor"></p>
+      <div class="msg" id="ng-pick-msg"></div>
+    </div>
+
+    <div class="card" id="ng-table" hidden>
+      <h2 id="ng-table-title"></h2>
+      <div class="chat" id="ng-chat" aria-live="polite"></div>
+      <div class="offerbar">
+        <div class="now">On the table: <b id="ng-offer"></b> &middot; <span id="ng-clause"></span> clause &middot; <span id="ng-left"></span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="sign" id="ng-accept" type="button">Sign this deal</button>
+          <button class="ghost" id="ng-leave" type="button">Leave the table</button>
+        </div>
+      </div>
+      <div class="composer" id="ng-composer">
+        <div class="row2">
+          <div><label for="ng-ask">Your ask (revenue per season, $)</label><input id="ng-ask" type="number" min="0" step="10000" placeholder="e.g. 3700000"></div>
+          <div><label for="ng-clause-ask">Clause request</label>
+            <select id="ng-clause-ask"><option value="keep">Keep the current clause</option><option value="modest">Modest push for a looser clause</option><option value="bold">Bold push</option><option value="very_bold">Very bold push</option></select></div>
+          <button id="ng-send" type="button">Make offer</button>
+        </div>
+        <div><label for="ng-pitch">Your pitch</label><textarea id="ng-pitch" maxlength="800" placeholder="Why should this brand pay that? Use your real numbers."></textarea></div>
+      </div>
+      <div class="msg" id="ng-msg"></div>
+      <div class="fine">The rep's offers come from the league's deal rules, not from the AI's mood. The AI only does the talking.</div>
+    </div>
+  </div>
+</div>
+<footer>SPM261.01 Soccer League &middot; AI Sponsor Rep &mdash; the manual Sponsorship Deal form stays on the Sponsorship Marketplace page as a backup</footer>
+<script>const NG_TEAMS = [{"id": "0", "name": "Knights FC", "owner": "Bianca Biagini"}, {"id": "1", "name": "Knight Knight", "owner": "Carlos Brito-Mezon"}, {"id": "2", "name": "Pink Venom", "owner": "Allison Dieckmann"}, {"id": "3", "name": "jake dunphy fc", "owner": "Jake Dunphy"}, {"id": "4", "name": "Team 5", "owner": "Jayden Geerders"}, {"id": "5", "name": "Oceanic FC", "owner": "Yonelisa Hamusten"}, {"id": "6", "name": "JSN FC", "owner": "Denim Horsford"}, {"id": "7", "name": "Wildcats", "owner": "Max Lebisky"}, {"id": "8", "name": "Pitch Perfect", "owner": "Jordan Long"}, {"id": "9", "name": "Knight United", "owner": "Parker Miles"}, {"id": "10", "name": "Kyles team", "owner": "Kyle Miller"}, {"id": "11", "name": "team twelve", "owner": "Maggie O'Shea"}, {"id": "12", "name": "New Jersey FC", "owner": "Sawyer Ostroff"}, {"id": "13", "name": "arcadiaballerz", "owner": "Anthony Pope"}, {"id": "14", "name": "Jovanni's Team", "owner": "Jovanni Romeo"}, {"id": "15", "name": "The Jersey Kickers", "owner": "Mason Walls"}, {"id": "16", "name": "Peaches United", "owner": "Sydney Weathers"}, {"id": "17", "name": "Montreal FC", "owner": "Andre Yared"}]; const NG_BRANDS = [{"name": "Nike", "category": "Kit / Apparel", "flavor": "The biggest name in the market -- everyone wants this jersey."}, {"name": "Adidas", "category": "Kit / Apparel", "flavor": "Nike's closest rival -- nearly as prestigious."}, {"name": "Under Armour", "category": "Kit / Apparel", "flavor": "Aggressive challenger brand, hungry for exposure."}, {"name": "Puma", "category": "Kit / Apparel", "flavor": "Solid mid-market kit deal."}, {"name": "New Balance", "category": "Kit / Apparel", "flavor": "Reliable, unglamorous, always available."}, {"name": "Red Bull", "category": "Beverage", "flavor": "Wants an exciting, attacking team on the pitch -- flash sells cans."}, {"name": "Gatorade", "category": "Beverage", "flavor": "The default performance-drink partner for a serious club."}, {"name": "Coca-Cola", "category": "Beverage", "flavor": "Massive, safe, universally recognized."}, {"name": "Pepsi", "category": "Beverage", "flavor": "Coca-Cola's rival -- comparable deal, slightly less reach."}, {"name": "Monster Energy", "category": "Beverage", "flavor": "Loud, cheap, easy to get."}, {"name": "Visa", "category": "Financial Services", "flavor": "The prestige payments partner."}, {"name": "Mastercard", "category": "Financial Services", "flavor": "Visa's closest competitor for the same prestige."}, {"name": "American Express", "category": "Financial Services", "flavor": "Wants a winning, upscale image attached to its card."}, {"name": "PayPal", "category": "Financial Services", "flavor": "Easy, low-friction, always has room."}, {"name": "Emirates", "category": "Airline", "flavor": "The gold standard of sports sponsorship -- wants a true marquee club."}, {"name": "Qatar Airways", "category": "Airline", "flavor": "Right behind Emirates in prestige and price."}, {"name": "Delta", "category": "Airline", "flavor": "Solid national carrier, dependable terms."}, {"name": "American Airlines", "category": "Airline", "flavor": "Widely available, modest terms."}, {"name": "BMW", "category": "Automotive", "flavor": "Premium marque, wants a premium club to match."}, {"name": "Toyota", "category": "Automotive", "flavor": "Dependable, high-volume, broad reach."}, {"name": "Ford", "category": "Automotive", "flavor": "Solid mainstream automotive deal."}, {"name": "Hyundai", "category": "Automotive", "flavor": "Value-focused, easy to sign."}, {"name": "Samsung", "category": "Technology", "flavor": "Wants marketability and star wattage over wins."}, {"name": "Sony", "category": "Technology", "flavor": "Comparable tech-sector prestige deal."}, {"name": "AT&T", "category": "Technology", "flavor": "Telecom partner, steady terms."}, {"name": "Verizon", "category": "Technology", "flavor": "AT&T's rival, comparable deal."}]; const NG_REQUIRED = 6;</script>
+<script src="../assets/config.js"></script>
+<script src="../assets/negotiate.js"></script>
+</body>
+</html>

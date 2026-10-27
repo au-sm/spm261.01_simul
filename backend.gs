@@ -34,6 +34,8 @@
  *                    | rep_team_id | submitted_at
  *   LocalTVDeals -- team_id | final_revenue | final_clause | rep_team_id | submitted_at
  *   Coach Log    -- timestamp | team_id | team_name | question | answer | model
+ *   Negotiations -- AI Sponsor Rep turns (see handleNegotiation_), incl. the
+ *                    private ceiling -- instructor-only, never sent to students
  *                    (AI Coach exchanges, see handleCoachChat_; needs the
  *                    GEMINI_API_KEY script property)
  *   HealthTreatments -- team_id | round | player_id | player_name | treatment | submitted_at
@@ -417,10 +419,43 @@ function coachRateOk_(teamId) {
   return true;
 }
 
+// Claude (optional). With a CLAUDE_API_KEY script property set, every model
+// call tries Claude first and falls back to Gemini; CLAUDE_MODEL overrides the
+// default model. The Claude API has no free tier (prepaid credits).
+var CLAUDE_MODEL = "claude-haiku-5-5";
+
+function coachCallClaude_(system, contents, key, model) {
+  var messages = contents.map(function (c) {
+    return { role: c.role === "model" ? "assistant" : "user",
+             content: c.parts.map(function (p) { return p.text || ""; }).join("") };
+  });
+  var resp = UrlFetchApp.fetch("https://api.anthropic.com/v1/messages", {
+    method: "post", contentType: "application/json", muteHttpExceptions: true,
+    headers: { "x-api-key": key, "anthropic-version": "2026-10-21" },
+    payload: JSON.stringify({ model: model, max_tokens: 2048, system: system, messages: messages,
+                              output_config: { effort: "low" } }),
+  });
+  var code = resp.getResponseCode();
+  if (code !== 200) return { ok: false, detail: "claude " + code + " " + resp.getContentText().substring(0, 200) };
+  var data = JSON.parse(resp.getContentText());
+  if (data.stop_reason === "refusal") return { ok: false, detail: "claude refusal" };
+  var text = (data.content || []).filter(function (b) { return b.type === "text"; })
+    .map(function (b) { return b.text; }).join("").trim();
+  return text ? { ok: true, text: text, model: model } : { ok: false, detail: "claude empty reply (" + data.stop_reason + ")" };
+}
+
 function coachCallModel_(system, contents) {
-  var key = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
-  if (!key) return { ok: false, reason: "no_key" };
-  var preferred = PropertiesService.getScriptProperties().getProperty("GEMINI_MODEL");
+  var props = PropertiesService.getScriptProperties();
+  var claudeKey = props.getProperty("CLAUDE_API_KEY");
+  var claudeErr = "";
+  if (claudeKey) {
+    var c = coachCallClaude_(system, contents, claudeKey, props.getProperty("CLAUDE_MODEL") || CLAUDE_MODEL);
+    if (c.ok) return c;
+    claudeErr = c.detail;
+  }
+  var key = props.getProperty("GEMINI_API_KEY");
+  if (!key) return claudeKey ? { ok: false, reason: "model_error", detail: claudeErr } : { ok: false, reason: "no_key" };
+  var preferred = props.getProperty("GEMINI_MODEL");
   var models = preferred ? [preferred].concat(COACH_MODELS.filter(function (m) { return m !== preferred; })) : COACH_MODELS;
   var lastErr = "";
   for (var i = 0; i < models.length; i++) {
@@ -448,7 +483,7 @@ function coachCallModel_(system, contents) {
       lastErr = code + " " + resp.getContentText().substring(0, 200);
     }
   }
-  return { ok: false, reason: "model_error", detail: lastErr };
+  return { ok: false, reason: "model_error", detail: (claudeErr ? claudeErr + " | " : "") + lastErr };
 }
 
 // Run this once from the Apps Script editor (select testCoachKey > Run)
@@ -474,7 +509,7 @@ function handleCoachChat_(body, team) {
   if (body.hello) {
     return jsonOut_({ ok: true, team_id: team.id, team_name: brief.name, position: brief.position,
                       record: brief.record, points: brief.points, cash: brief.cash, next: brief.next,
-                      generated_at: ctx.generated_at });
+                      leverage: brief.leverage, generated_at: ctx.generated_at });
   }
 
   var message = String(body.message || "").trim();
@@ -523,6 +558,326 @@ function handleCoachChat_(body, team) {
     coachLogSheet_().appendRow([new Date().toISOString(), team.id, brief.name, message, answer, model]);
   } catch (err) { /* logging must never block the reply */ }
   return jsonOut_({ ok: true, reply: answer, fallback: !result.ok, retry: retry });
+}
+
+// ---------------------------------------------------------------------------
+// AI SPONSOR REP (type "sponsor_negotiation", page /negotiate/). The deal
+// math is decided HERE in code, never by the model: each team's private
+// ceiling for a brand is base_revenue x (1 + leverage adjustment + pitch
+// bonus), the same -10%..+10% leverage rule as engine/negotiation.py and
+// Rulebook section 11, capped at +10%. The model only voices the decision
+// in the brand's voice and scores the pitch 0-2; when no model answers, the
+// rep uses written lines and a simple pitch check, so a busy free-tier quota
+// never stalls a negotiation. base_revenue and the ceiling never leave the
+// server except as the rep's actual offers. A signed deal is written to
+// SponsorshipDeals like a form submission (no rep_team_id -- AI deals carry
+// no commission), and every turn is logged to the "Negotiations" tab.
+// ---------------------------------------------------------------------------
+var NEG_MAX_TURNS = 6;            // offers per brand before the rep makes a final offer
+var NEG_LOWBALL = 0.15;           // asking more than 15% over the private ceiling is a strike
+var NEG_MAX_STRIKES = 3;          // three strikes and the rep walks away for the day
+var NEG_PITCH_BONUS = [0, 0.01, 0.02];
+var NEG_CLAUSE_THRESHOLD = { modest: 20, bold: 50, very_bold: 80 };
+var NEG_CLAUSE_LEVELS = ["strict", "standard", "loose", "none"];
+var NEG_SESSION_TTL = 21600;      // 6 hours, the CacheService maximum
+var NEG_MODEL_PER_HOUR = 60;      // model calls per team per hour; past this the rep uses written lines
+var NEG_PITCH_WORDS = ["fan", "attend", "crowd", "star", "win", "top", "rank", "exposure", "audience",
+                       "market", "brand", "sell", "follow", "young", "media", "ticket", "goal"];
+
+function negMoney_(n) {
+  return "$" + String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function negRound_(n) {
+  return Math.round(n / 10000) * 10000;
+}
+
+function negBrand_(name) {
+  for (var i = 0; i < SPONSOR_CATALOG.length; i++) {
+    if (SPONSOR_CATALOG[i].name === name) return SPONSOR_CATALOG[i];
+  }
+  return null;
+}
+
+function negToday_() {
+  return Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
+}
+
+function negLockKey_(teamId, brandName) {
+  return "neglock_" + teamId + "_" + brandName;
+}
+
+// why this team can't sign this brand right now, or "" if it can
+function negBlocked_(teamId, brand, sheets) {
+  var deals = readSponsorshipDeals_(sheets.sponsorships);
+  var mine = deals.some(function (d) { return String(d.team_id) === String(teamId) && d.category === brand.category; });
+  if (mine) return "You already have a " + brand.category + " sponsor. One brand per category.";
+  var taken = deals.filter(function (d) { return d.brand === brand.name; }).length;
+  if (taken >= brand.qty) return brand.name + " is sold out (" + brand.qty + "/" + brand.qty + " slots taken). Try another " + brand.category + " brand.";
+  if (PropertiesService.getScriptProperties().getProperty(negLockKey_(teamId, brand.name)) === negToday_()) {
+    return brand.name + " walked away from talks with your club today. Try another " + brand.category + " brand, or come back tomorrow.";
+  }
+  return "";
+}
+
+function negCeiling_(st, bonus) {
+  var adj = Math.max(-0.10, Math.min(0.10, st.adj + bonus));
+  return negRound_(st.base * (1 + adj));
+}
+
+// rough pitch score used before the model answers and whenever it can't
+function negHeuristicScore_(pitch, brand) {
+  var p = pitch.toLowerCase();
+  if (!/\d/.test(p)) return 0;
+  var relevant = NEG_PITCH_WORDS.concat([brand.name.toLowerCase()]).some(function (w) { return p.indexOf(w) > -1; });
+  return relevant && p.length >= 120 ? 2 : 1;
+}
+
+function negModelRateOk_(teamId) {
+  var cache = CacheService.getScriptCache();
+  var key = "neg_rate_" + teamId + "_" + Math.floor(Date.now() / 3600000);
+  var used = Number(cache.get(key) || 0);
+  if (used >= NEG_MODEL_PER_HOUR) return false;
+  cache.put(key, String(used + 1), 3700);
+  return true;
+}
+
+function negTemplate_(st, decision, ask, clauseNote) {
+  var deal = negMoney_(st.offer) + " per season with a " + st.clause + " performance clause";
+  var line = {
+    open: "Thanks for meeting with " + st.brand + ". We're offering " + deal + ". You can sign that today, or make your case for more.",
+    agree: "You've made your case. " + st.brand + " can do " + deal + ". Ready to sign?",
+    counter: "We're not at " + negMoney_(ask) + ". Right now we can do " + deal + ". Show us more about why your club is worth it.",
+    final: "This is our final offer: " + deal + ". Take it or leave it.",
+    walk: "We're too far apart. " + st.brand + " is stepping away from these talks today. You could try another " + st.category + " brand.",
+  }[decision];
+  if (clauseNote === "granted") line += " We can also work with a " + st.clause + " clause.";
+  if (clauseNote === "refused") line += " The clause stays at " + st.clause + ".";
+  return line;
+}
+
+// the model's reply may only name the rep's offer or the owner's own ask
+function negReplySafe_(reply, allowed) {
+  var re = /\$\s?([\d,]+(?:\.\d+)?)\s*(million|mil|m|k|thousand)?/gi, m;
+  while ((m = re.exec(reply)) !== null) {
+    var n = parseFloat(m[1].replace(/,/g, ""));
+    var unit = (m[2] || "").toLowerCase();
+    if (unit === "million" || unit === "mil" || unit === "m") n *= 1000000;
+    if (unit === "k" || unit === "thousand") n *= 1000;
+    var ok = allowed.some(function (a) { return a && Math.abs(n - a) <= a * 0.01; });
+    if (!ok) return false;
+  }
+  return !/ceiling|walk-away|walkaway|maximum budget|our max/i.test(reply);
+}
+
+function negVoice_(st, decision, turn, ctx, brief, teamId) {
+  var fallback = negTemplate_(st, decision, turn ? turn.ask : 0, turn ? turn.clauseNote : "");
+  var heuristic = turn ? turn.heuristic : 0;
+  if (!negModelRateOk_(teamId)) return { reply: fallback, score: heuristic, model: "template (team hourly cap)" };
+
+  var situation = {
+    open: "The owner just sat down. Greet them and state your opening offer.",
+    agree: "The owner's ask is within what " + st.brand + " can pay. Agree to it warmly.",
+    counter: "The owner asked for more than " + st.brand + " will pay. Counter with your offer and invite a stronger case.",
+    final: "This is your final offer. Say so clearly and politely.",
+    walk: "The owner kept asking for far too much. End the talks politely for today.",
+  }[decision];
+  var clauseLine = !turn || !turn.clauseNote ? "" :
+    turn.clauseNote === "granted" ? "You agree to the clause the owner asked for: " + st.clause + "." :
+    "You decline the looser clause the owner asked for; it stays " + st.clause + ".";
+  var facts = String(brief.briefing || "").split("\nFINANCES")[0];
+  var system = [
+    "You are the sports partnerships manager for " + st.brand + " (" + st.category + "), negotiating a sponsorship with the owner of " + (brief.name || "a club") + " in the " + (ctx.league_name || "league") + ", a class simulation in SPM261 Introduction to Sport Management at Arcadia University. The owner is a student.",
+    "Brand personality: " + ((ctx.brand_flavor || {})[st.brand] || "a major brand looking for a strong partner") + ".",
+    "",
+    "The league's deal engine has ALREADY decided this turn. You only say it, in character.",
+    "THIS TURN: " + situation + " " + clauseLine,
+    "YOUR OFFER: " + negMoney_(st.offer) + " per season, " + st.clause + " performance clause.",
+    "",
+    "RULES",
+    "- The only dollar figures you may write are your offer above, the opening offer of " + negMoney_(st.base) + (turn ? " and the owner's ask of " + negMoney_(turn.ask) : "") + ". Never reveal, hint at or invent a maximum, a budget or any other number.",
+    "- Never promise anything beyond the offer above.",
+    "- React to the owner's pitch in a sentence or two: give credit for real team numbers that matter to " + st.brand + ", and push back on vague or untrue claims using the TEAM FACTS.",
+    "- Friendly and professional, under 90 words, no bullet points.",
+    "",
+    "Also rate the owner's latest pitch: 0 = vague or no real numbers, 1 = cites at least one real team number, 2 = specific, true numbers tied to what " + st.brand + " cares about. Use 0 when there is no pitch yet.",
+    "Answer ONLY with JSON in this form: {\"pitch_score\": 0, \"reply\": \"...\"}",
+    "",
+    "TEAM FACTS",
+    facts,
+  ].join("\n");
+
+  var contents = [];
+  (st.history || []).slice(-8).forEach(function (h) {
+    var role = h.role === "rep" ? "model" : "user";
+    if (contents.length && contents[contents.length - 1].role === role) contents[contents.length - 1].parts[0].text += "\n" + h.text;
+    else contents.push({ role: role, parts: [{ text: h.text }] });
+  });
+  while (contents.length && contents[0].role !== "user") contents.shift();
+  if (contents.length && contents[contents.length - 1].role === "user") contents.pop();
+  contents.push({ role: "user", parts: [{ text: turn ? turn.userText : "(The owner sits down at the table.)" }] });
+
+  var result = coachCallModel_(system, contents);
+  if (!result.ok) return { reply: fallback, score: heuristic, model: result.reason === "no_key" ? "template (no key)" : "template (busy)" };
+  var parsed = null;
+  try { parsed = JSON.parse((result.text.match(/\{[\s\S]*\}/) || [""])[0]); } catch (err) { parsed = null; }
+  var reply = parsed && typeof parsed.reply === "string" ? parsed.reply.trim() : "";
+  var score = parsed ? Number(parsed.pitch_score) : NaN;
+  if (!(score >= 0 && score <= 2)) score = heuristic;
+  if (!reply || !negReplySafe_(reply, [st.offer, st.base, turn ? turn.ask : 0])) {
+    return { reply: fallback, score: Math.round(score), model: result.model + " (template used)" };
+  }
+  // the model's text never carries the terms on its own: restate them
+  if (decision !== "walk" && reply.indexOf(negMoney_(st.offer)) === -1) reply += "\n\n" + fallback;
+  return { reply: reply, score: Math.round(score), model: result.model };
+}
+
+function negLogSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var log = ss.getSheetByName("Negotiations");
+  if (!log) {
+    log = ss.insertSheet("Negotiations");
+    log.appendRow(["timestamp", "team_id", "team_name", "brand", "event", "turn", "student_ask", "clause_ask",
+                   "pitch", "pitch_score", "rep_offer", "rep_clause", "private_ceiling", "base_revenue", "rep_reply", "model"]);
+    log.getRange(1, 1, 1, 16).setFontWeight("bold");
+    log.setFrozenRows(1);
+  }
+  return log;
+}
+
+function negLog_(teamId, teamName, st, event, turn, voice, ceiling) {
+  try {
+    negLogSheet_().appendRow([new Date().toISOString(), teamId, teamName, st.brand, event, st.turns,
+      turn ? turn.ask : "", turn ? turn.clauseAsk : "", turn ? turn.pitch : "", voice ? voice.score : "",
+      st.offer, st.clause, ceiling || "", st.base, voice ? voice.reply : "", voice ? voice.model : ""]);
+  } catch (err) { /* logging must never block the negotiation */ }
+}
+
+function negPublic_(st) {
+  return { brand: st.brand, category: st.category, opening_offer: st.base, opening_clause: st.base_clause,
+           offer: st.offer, clause: st.clause, status: st.status, turns_left: Math.max(0, NEG_MAX_TURNS - st.turns),
+           strikes: st.strikes, leverage: st.leverage };
+}
+
+function handleNegotiation_(body, team, sheets) {
+  var brand = negBrand_(body.brand);
+  if (!brand) return jsonOut_({ ok: false, error: "Pick a brand first." });
+  var cache = CacheService.getScriptCache();
+  var key = "neg_" + team.id + "_" + brand.name;
+  var action = String(body.action || "");
+  var ctx;
+  try {
+    ctx = coachContext_();
+  } catch (err) {
+    return jsonOut_({ ok: false, error: "The sponsor can't load your team data right now. Try again in a minute." });
+  }
+  var brief = (ctx.teams || {})[String(team.id)] || {};
+  var teamName = brief.name || team.name;
+  var st, voice, block;
+
+  if (action === "start") {
+    block = negBlocked_(team.id, brand, sheets);
+    if (block) return jsonOut_({ ok: false, error: block });
+    var leverage = Number(brief.leverage);
+    if (!(leverage >= 0)) leverage = 50;
+    st = { brand: brand.name, category: brand.category, base: brand.base_revenue, base_clause: brand.base_clause,
+           leverage: leverage, adj: -0.10 + (leverage / 100) * 0.20, best_score: 0, offer: brand.base_revenue,
+           clause: brand.base_clause, turns: 0, strikes: 0, status: "open", history: [] };
+    voice = negVoice_(st, "open", null, ctx, brief, team.id);
+    st.history.push({ role: "rep", text: voice.reply });
+    cache.put(key, JSON.stringify(st), NEG_SESSION_TTL);
+    negLog_(team.id, teamName, st, "start", null, voice, negCeiling_(st, 0));
+    return jsonOut_({ ok: true, session: negPublic_(st), reply: voice.reply });
+  }
+
+  var raw = cache.get(key);
+  if (!raw) return jsonOut_({ ok: false, error: "This negotiation has expired. Start it again." });
+  st = JSON.parse(raw);
+
+  if (action === "leave") {
+    cache.remove(key);
+    negLog_(team.id, teamName, st, "left", null, null, "");
+    return jsonOut_({ ok: true, left: true });
+  }
+
+  if (action === "accept") {
+    if (st.status === "walked") return jsonOut_({ ok: false, error: "The rep already walked away from this deal." });
+    var lock = LockService.getScriptLock();
+    lock.waitLock(20000);
+    try {
+      block = negBlocked_(team.id, brand, sheets);
+      if (block) return jsonOut_({ ok: false, error: block });
+      sheets.sponsorships.appendRow([team.id, brand.category, brand.name, st.offer, st.clause, "", new Date().toISOString()]);
+    } finally {
+      lock.releaseLock();
+    }
+    st.status = "signed";
+    cache.remove(key);
+    negLog_(team.id, teamName, st, "signed", null, null, negCeiling_(st, NEG_PITCH_BONUS[st.best_score]));
+    return jsonOut_({ ok: true, signed: true, brand: brand.name, category: brand.category,
+                      final_revenue: st.offer, final_clause: st.clause, vs_opening: st.offer - st.base });
+  }
+
+  if (action !== "offer") return jsonOut_({ ok: false, error: "unknown negotiation action" });
+  if (st.status === "walked") return jsonOut_({ ok: false, error: "The rep already walked away from this deal." });
+  if (st.status === "final") return jsonOut_({ ok: false, error: "That was the rep's final offer. Accept it or leave the table." });
+  if (st.status === "agreed") return jsonOut_({ ok: false, error: "The rep already agreed to your number. Sign the deal, or leave the table." });
+
+  var ask = Math.round(Number(body.ask));
+  if (!(ask > 0)) return jsonOut_({ ok: false, error: "Enter the yearly revenue you're asking for." });
+  var pitch = String(body.pitch || "").trim().substring(0, 800);
+  if (pitch.length < 15) return jsonOut_({ ok: false, error: "Make your case first: a sentence or two on why " + brand.name + " should pay that." });
+  var clauseAsk = NEG_CLAUSE_THRESHOLD[body.clause_ask] !== undefined ? body.clause_ask : "keep";
+
+  st.turns++;
+  var turn = { ask: ask, pitch: pitch, clauseAsk: clauseAsk, clauseNote: "",
+               heuristic: negHeuristicScore_(pitch, brand) };
+  turn.userText = "My ask: " + negMoney_(ask) + " per season." +
+    (clauseAsk === "keep" ? "" : " Clause request: " + clauseAsk.replace("_", " ") + " push for a looser clause.") +
+    "\n" + pitch;
+
+  if (clauseAsk !== "keep") {
+    if (st.leverage >= NEG_CLAUSE_THRESHOLD[clauseAsk]) {
+      var steps = clauseAsk === "very_bold" ? 2 : 1;
+      var want = NEG_CLAUSE_LEVELS[Math.min(NEG_CLAUSE_LEVELS.length - 1, NEG_CLAUSE_LEVELS.indexOf(st.base_clause) + steps)];
+      if (NEG_CLAUSE_LEVELS.indexOf(want) > NEG_CLAUSE_LEVELS.indexOf(st.clause)) st.clause = want;
+      turn.clauseNote = "granted";
+    } else {
+      turn.clauseNote = "refused";
+    }
+  }
+
+  // this turn's pitch counts right away through the quick check; the
+  // model's own score (usually better) counts from the next offer on
+  var ceiling = negCeiling_(st, NEG_PITCH_BONUS[Math.max(st.best_score, turn.heuristic)]);
+  var decision;
+  if (ask <= ceiling) {
+    st.offer = ask;
+    st.status = "agreed";
+    decision = "agree";
+  } else {
+    if (ask > ceiling * (1 + NEG_LOWBALL)) st.strikes++;
+    if (st.strikes >= NEG_MAX_STRIKES) {
+      st.status = "walked";
+      decision = "walk";
+      PropertiesService.getScriptProperties().setProperty(negLockKey_(team.id, brand.name), negToday_());
+    } else {
+      // a weak hand is re-priced below the opening offer the moment it
+      // negotiates; otherwise the rep closes half the gap to its ceiling
+      st.offer = ceiling < st.offer ? ceiling : Math.min(ceiling, negRound_(st.offer + (ceiling - st.offer) / 2));
+      decision = st.turns >= NEG_MAX_TURNS ? "final" : "counter";
+      st.status = decision === "final" ? "final" : "open";
+    }
+  }
+
+  voice = negVoice_(st, decision, turn, ctx, brief, team.id);
+  st.best_score = Math.max(st.best_score, voice.score);
+  st.history.push({ role: "owner", text: turn.userText }, { role: "rep", text: voice.reply });
+  st.history = st.history.slice(-10);
+  if (st.status === "walked") cache.remove(key);
+  else cache.put(key, JSON.stringify(st), NEG_SESSION_TTL);
+  negLog_(team.id, teamName, st, decision, turn, voice, ceiling);
+  return jsonOut_({ ok: true, session: negPublic_(st), reply: voice.reply, decision: decision });
 }
 
 function doGet(e) {
@@ -630,6 +985,7 @@ function doPost(e) {
   if (!pinCheck.ok) return jsonOut_({ ok: false, error: pinCheck.error });
 
   if (body.type === "coach_chat") return handleCoachChat_(body, pinCheck.team);
+  if (body.type === "sponsor_negotiation") return handleNegotiation_(body, pinCheck.team, sheets);
 
   var now = new Date().toISOString();
 

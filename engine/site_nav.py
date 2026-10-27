@@ -22,6 +22,7 @@ PAGES = [
     ("home", "Home", f"{GH_BASE}/"),
     ("dashboard", "Dashboard", f"{GH_BASE}/dashboard/"),
     ("coach", "AI Coach", f"{GH_BASE}/coach/"),
+    ("negotiate", "AI Sponsor Rep", f"{GH_BASE}/negotiate/"),
     ("draftboard", "Draft Board", f"{GH_BASE}/draftboard/"),
     ("scoreboard", "Scoreboard", f"{GH_BASE}/scoreboard/"),
     ("schedule", "Schedule", f"{GH_BASE}/schedule/"),
