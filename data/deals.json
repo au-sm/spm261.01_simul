@@ -62,7 +62,7 @@
           "flavor": "Wants an exciting, attacking team on the pitch -- flash sells cans.",
           "base_revenue": 2800000,
           "base_clause": "strict",
-          "qty": 3
+          "qty": 4
         },
         {
           "name": "Gatorade",
@@ -102,14 +102,14 @@
           "flavor": "The prestige payments partner.",
           "base_revenue": 2500000,
           "base_clause": "strict",
-          "qty": 4
+          "qty": 5
         },
         {
           "name": "Mastercard",
           "flavor": "Visa's closest competitor for the same prestige.",
           "base_revenue": 2200000,
           "base_clause": "strict",
-          "qty": 4
+          "qty": 5
         },
         {
           "name": "American Express",
@@ -135,14 +135,14 @@
           "flavor": "The gold standard of sports sponsorship -- wants a true marquee club.",
           "base_revenue": 3000000,
           "base_clause": "strict",
-          "qty": 3
+          "qty": 5
         },
         {
           "name": "Qatar Airways",
           "flavor": "Right behind Emirates in prestige and price.",
           "base_revenue": 2400000,
           "base_clause": "strict",
-          "qty": 4
+          "qty": 5
         },
         {
           "name": "Delta",
@@ -168,7 +168,7 @@
           "flavor": "Premium marque, wants a premium club to match.",
           "base_revenue": 2600000,
           "base_clause": "strict",
-          "qty": 3
+          "qty": 5
         },
         {
           "name": "Toyota",
@@ -201,7 +201,7 @@
           "flavor": "Wants marketability and star wattage over wins.",
           "base_revenue": 2400000,
           "base_clause": "strict",
-          "qty": 4
+          "qty": 5
         },
         {
           "name": "Sony",
