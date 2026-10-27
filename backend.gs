@@ -1060,6 +1060,11 @@ function doPost(e) {
     }
     if (!brand) return jsonOut_({ ok: false, error: "unknown brand: " + body.brand });
 
+    // same lock as the AI Sponsor Rep's signing, so two submissions can
+    // never both take a brand's last slot
+    var spLock = LockService.getScriptLock();
+    spLock.waitLock(20000);
+    try {
     var existingDeals = readSponsorshipDeals_(sheets.sponsorships);
     var alreadyInCategory = existingDeals.some(function (d) {
       return String(d.team_id) === String(body.team_id) && d.category === brand.category;
@@ -1105,6 +1110,9 @@ function doPost(e) {
     }
 
     sheets.sponsorships.appendRow([body.team_id, brand.category, brand.name, finalRevenue, finalClause, repTeamId, now]);
+    } finally {
+      spLock.releaseLock();
+    }
     return jsonOut_({
       ok: true, team_id: body.team_id, category: brand.category, brand: brand.name,
       final_revenue: finalRevenue, final_clause: finalClause,
