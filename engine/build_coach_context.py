@@ -243,7 +243,13 @@ def main():
         else:
             next_txt = "no fixture scheduled"
         sponsors = fin.get("sponsors_owned") or []
-        sponsor_txt = ", ".join(s if isinstance(s, str) else s.get("brand", str(s)) for s in sponsors) or "none signed yet"
+        def sponsor_line(sp):
+            if isinstance(sp, str):
+                return sp
+            name = sp.get("sponsor") or sp.get("brand") or "?"
+            return (f"{name} ({sp.get('category', '?')}, {money(sp.get('final_revenue', 0))}/season, "
+                    f"{sp.get('final_clause', '?')} clause)")
+        sponsor_txt = "; ".join(sponsor_line(sp) for sp in sponsors) or "none signed yet"
         briefing = "\n".join([
             f"TEAM: {names[tid]} (league position {position[tid]} of {len(team_ids)})",
             f"RECORD: P{rec['P']} W{rec['W']} D{rec['D']} L{rec['L']}, GF{rec['GF']} GA{rec['GA']}, {rec['PTS']} pts",
