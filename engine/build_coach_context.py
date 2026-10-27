@@ -251,10 +251,16 @@ def main():
             return (f"{name} ({sp.get('category', '?')}, {money(sp.get('final_revenue', 0))}/season, "
                     f"{sp.get('final_clause', '?')} clause)")
         sponsor_txt = "; ".join(sponsor_line(sp) for sp in sponsors) or "none signed yet"
+        # same leverage formula the AI Sponsor Rep (backend.gs) and the
+        # Team Owner Brief use; public anyway since students compute it
+        avg_star = sum(p["star_power"] for p in squad) / len(squad) if squad else 50
+        leverage = compute_leverage(avg_star, position[tid] if matches else None, len(team_ids))
         briefing = "\n".join([
             f"TEAM: {names[tid]} (league position {position[tid]} of {len(team_ids)})",
             f"RECORD: P{rec['P']} W{rec['W']} D{rec['D']} L{rec['L']}, GF{rec['GF']} GA{rec['GA']}, {rec['PTS']} pts",
             f"PERFORMANCE PROFILE: {profile(tid)}",
+            f"STAR POWER: squad average {avg_star:.1f} of 99 across all {len(squad)} players; "
+            f"Negotiating Leverage {leverage:.1f} of 100 (Rulebook section 11)",
             f"NEXT MATCH: {next_txt}",
             "RESULTS SO FAR:",
             *(["  " + l for l in team_results(tid, matches, names)] or ["  none played yet"]),
@@ -268,10 +274,6 @@ def main():
             *(scouting(next_fixture[tid][0]) if tid in next_fixture else []),
             *trends_txt,
         ])
-        # same leverage formula the AI Sponsor Rep (backend.gs) and the
-        # Team Owner Brief use; public anyway since students compute it
-        avg_star = sum(p["star_power"] for p in squad) / len(squad) if squad else 50
-        leverage = compute_leverage(avg_star, position[tid] if matches else None, len(team_ids))
         teams_out[str(tid)] = {"name": names[tid], "position": position[tid],
                                "avg_star_power": round(avg_star, 1), "leverage": round(leverage, 1),
                                "record": f"{rec['W']}W-{rec['D']}D-{rec['L']}L", "points": rec["PTS"],
