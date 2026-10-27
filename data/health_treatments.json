@@ -257,19 +257,204 @@
    "treatment": "recovery",
    "submitted_at": "2026-10-22T14:25:49.553Z",
    "cost": 50000
+  },
+  {
+   "id": "0|4|130|2026-10-27T14:44:06.026Z",
+   "team_id": "0",
+   "round": 4,
+   "player_id": "130",
+   "player_name": "Adrian Sokol",
+   "treatment": "sports_science",
+   "submitted_at": "2026-10-27T14:44:06.026Z",
+   "cost": 125000
+  },
+  {
+   "id": "0|4|168|2026-10-27T14:44:31.122Z",
+   "team_id": "0",
+   "round": 4,
+   "player_id": "168",
+   "player_name": "Rafael Malik",
+   "treatment": "sports_science",
+   "submitted_at": "2026-10-27T14:44:31.122Z",
+   "cost": 125000
+  },
+  {
+   "id": "14|4|288|2026-10-27T14:44:46.925Z",
+   "team_id": "14",
+   "round": 4,
+   "player_id": "288",
+   "player_name": "Milan Krause",
+   "treatment": "recovery",
+   "submitted_at": "2026-10-27T14:44:46.925Z",
+   "cost": 50000
+  },
+  {
+   "id": "14|4|380|2026-10-27T14:45:18.372Z",
+   "team_id": "14",
+   "round": 4,
+   "player_id": "380",
+   "player_name": "Sven Adamu",
+   "treatment": "recovery",
+   "submitted_at": "2026-10-27T14:45:18.372Z",
+   "cost": 50000
+  },
+  {
+   "id": "14|4|391|2026-10-27T14:45:41.996Z",
+   "team_id": "14",
+   "round": 4,
+   "player_id": "391",
+   "player_name": "Tomas Toure",
+   "treatment": "sports_science",
+   "submitted_at": "2026-10-27T14:45:41.996Z",
+   "cost": 125000
+  },
+  {
+   "id": "1|4|125|2026-10-27T14:46:04.802Z",
+   "team_id": "1",
+   "round": 4,
+   "player_id": "125",
+   "player_name": "Mateo Malik",
+   "treatment": "recovery",
+   "submitted_at": "2026-10-27T14:46:04.802Z",
+   "cost": 50000
+  },
+  {
+   "id": "1|4|20|2026-10-27T14:46:23.470Z",
+   "team_id": "1",
+   "round": 4,
+   "player_id": "20",
+   "player_name": "Diego Vidal",
+   "treatment": "sports_science",
+   "submitted_at": "2026-10-27T14:46:23.470Z",
+   "cost": 125000
+  },
+  {
+   "id": "5|4|137|2026-10-27T14:46:26.746Z",
+   "team_id": "5",
+   "round": 4,
+   "player_id": "137",
+   "player_name": "Tobias Rossi",
+   "treatment": "sports_science",
+   "submitted_at": "2026-10-27T14:46:26.746Z",
+   "cost": 125000
+  },
+  {
+   "id": "1|4|355|2026-10-27T14:46:37.706Z",
+   "team_id": "1",
+   "round": 4,
+   "player_id": "355",
+   "player_name": "Yusuf Novak",
+   "treatment": "recovery",
+   "submitted_at": "2026-10-27T14:46:37.706Z",
+   "cost": 50000
+  },
+  {
+   "id": "5|4|31|2026-10-27T14:46:47.232Z",
+   "team_id": "5",
+   "round": 4,
+   "player_id": "31",
+   "player_name": "Milan Larsson",
+   "treatment": "recovery",
+   "submitted_at": "2026-10-27T14:46:47.232Z",
+   "cost": 50000
+  },
+  {
+   "id": "1|4|394|2026-10-27T14:47:04.408Z",
+   "team_id": "1",
+   "round": 4,
+   "player_id": "394",
+   "player_name": "Kenji Silva",
+   "treatment": "rehab_elite",
+   "submitted_at": "2026-10-27T14:47:04.408Z",
+   "injured_until_before": 6,
+   "injured_until_after": 3,
+   "cost": 375000
+  },
+  {
+   "id": "12|4|60|2026-10-27T14:48:16.902Z",
+   "team_id": "12",
+   "round": 4,
+   "player_id": "60",
+   "player_name": "Yusuf Haddad",
+   "treatment": "rehab_standard",
+   "submitted_at": "2026-10-27T14:48:16.902Z",
+   "injured_until_before": 4,
+   "injured_until_after": 3,
+   "cost": 75000
+  },
+  {
+   "id": "5|4|339|2026-10-27T14:49:00.850Z",
+   "team_id": "5",
+   "round": 4,
+   "player_id": "339",
+   "player_name": "Emil Ivanov",
+   "treatment": "sports_science",
+   "submitted_at": "2026-10-27T14:49:00.850Z",
+   "cost": 125000
+  },
+  {
+   "id": "8|4|54|2026-10-27T14:52:26.702Z",
+   "team_id": "8",
+   "round": 4,
+   "player_id": "54",
+   "player_name": "Hassan Larsson",
+   "treatment": "recovery",
+   "submitted_at": "2026-10-27T14:52:26.702Z",
+   "cost": 50000
+  },
+  {
+   "id": "12|4|265|2026-10-27T14:57:58.870Z",
+   "team_id": "12",
+   "round": 4,
+   "player_id": "265",
+   "player_name": "Tariq Kovac",
+   "treatment": "sports_science",
+   "submitted_at": "2026-10-27T14:57:58.870Z",
+   "cost": 125000
+  },
+  {
+   "id": "12|4|347|2026-10-27T14:58:32.762Z",
+   "team_id": "12",
+   "round": 4,
+   "player_id": "347",
+   "player_name": "Rui Krause",
+   "treatment": "recovery",
+   "submitted_at": "2026-10-27T14:58:32.762Z",
+   "cost": 50000
+  },
+  {
+   "id": "12|4|94|2026-10-27T14:58:57.842Z",
+   "team_id": "12",
+   "round": 4,
+   "player_id": "94",
+   "player_name": "Youssef Fischer",
+   "treatment": "sports_science",
+   "submitted_at": "2026-10-27T14:58:57.842Z",
+   "cost": 125000
+  },
+  {
+   "id": "10|4|101|2026-10-27T15:35:30.718Z",
+   "team_id": "10",
+   "round": 4,
+   "player_id": "101",
+   "player_name": "Andre Sokol",
+   "treatment": "recovery",
+   "submitted_at": "2026-10-27T15:35:30.718Z",
+   "cost": 50000
   }
  ],
  "voided": [],
  "team_spend": {
-  "8": 275000,
-  "1": 250000,
-  "5": 625000,
-  "12": 550000,
-  "0": 175000,
+  "8": 325000,
+  "1": 850000,
+  "5": 925000,
+  "12": 925000,
+  "0": 425000,
   "16": 625000,
-  "14": 50000,
+  "14": 275000,
   "17": 175000,
-  "15": 250000
+  "15": 250000,
+  "10": 50000
  },
  "boosts": {
   "3": {
@@ -342,6 +527,57 @@
     "levels": 1
    },
    "105": {
+    "levels": 1
+   },
+   "130": {
+    "levels": 2
+   },
+   "168": {
+    "levels": 2
+   },
+   "288": {
+    "levels": 1
+   },
+   "380": {
+    "levels": 1
+   },
+   "391": {
+    "levels": 2
+   },
+   "125": {
+    "levels": 1
+   },
+   "20": {
+    "levels": 2
+   },
+   "137": {
+    "levels": 2
+   },
+   "355": {
+    "levels": 1
+   },
+   "31": {
+    "levels": 1
+   },
+   "394": {
+    "set": "Average"
+   },
+   "339": {
+    "levels": 2
+   },
+   "54": {
+    "levels": 1
+   },
+   "265": {
+    "levels": 2
+   },
+   "347": {
+    "levels": 1
+   },
+   "94": {
+    "levels": 2
+   },
+   "101": {
     "levels": 1
    }
   }
