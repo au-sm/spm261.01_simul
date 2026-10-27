@@ -349,7 +349,8 @@ function initSponsorshipForm() {
       const result = await postSubmission(body);
       if (result.ok) {
         msg.textContent = `Saved -- ${result.brand} (${result.category}): $${result.final_revenue.toLocaleString()}, ${result.final_clause} clause` +
-          (result.commission ? `. $${result.commission.toLocaleString()} commission credited to the rep.` : '.');
+          (result.commission ? `. $${result.commission.toLocaleString()} commission credited to the rep.` : '.') +
+          (result.league_update === 'ok' ? ' Team Progress and budgets update in about 3 minutes.' : '');
         msg.className = 'sub-msg ok';
         pinInput.value = '';
         await loadCatalog();

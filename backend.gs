@@ -588,6 +588,35 @@ var NEG_MODEL_PER_HOUR = 60;      // model calls per team per hour; past this th
 var NEG_PITCH_WORDS = ["fan", "attend", "crowd", "star", "win", "top", "rank", "exposure", "audience",
                        "market", "brand", "sell", "follow", "young", "media", "ticket", "goal"];
 
+// LEAGUE UPDATE ON DEMAND. GitHub's scheduled auto-resolve runs hours late,
+// so a saved sponsorship deal asks GitHub to run it now (rounds are NOT
+// simulated -- resolve_rounds stays false). Needs a GITHUB_TOKEN script
+// property: a fine-grained token for this repo with Actions: read and write.
+// The workflow's concurrency group queues overlapping requests, so every
+// deal is picked up by the run in progress or the one queued behind it.
+var GITHUB_REPO = "au-sm/spm261.01_simul";
+
+function triggerLeagueUpdate_() {
+  var token = PropertiesService.getScriptProperties().getProperty("GITHUB_TOKEN");
+  if (!token) return "no_token";
+  try {
+    var resp = UrlFetchApp.fetch("https://api.github.com/repos/" + GITHUB_REPO + "/actions/workflows/auto-resolve.yml/dispatches", {
+      method: "post", contentType: "application/json", muteHttpExceptions: true,
+      headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" },
+      payload: JSON.stringify({ ref: "main" }),
+    });
+    return resp.getResponseCode() === 204 ? "ok" : "error " + resp.getResponseCode();
+  } catch (err) {
+    return "error";
+  }
+}
+
+// Run once from the editor (select testLeagueUpdate > Run) after adding
+// GITHUB_TOKEN: "ok" means GitHub started a league update.
+function testLeagueUpdate() {
+  Logger.log("League update request: " + triggerLeagueUpdate_());
+}
+
 function negMoney_(n) {
   return "$" + String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
@@ -824,7 +853,8 @@ function handleNegotiation_(body, team, sheets) {
     cache.remove(key);
     negLog_(team.id, teamName, st, "signed", null, null, negCeiling_(st, NEG_PITCH_BONUS[st.best_score]));
     return jsonOut_({ ok: true, signed: true, brand: brand.name, category: brand.category,
-                      final_revenue: st.offer, final_clause: st.clause, vs_opening: st.offer - st.base });
+                      final_revenue: st.offer, final_clause: st.clause, vs_opening: st.offer - st.base,
+                      league_update: triggerLeagueUpdate_() });
   }
 
   if (action !== "offer") return jsonOut_({ ok: false, error: "unknown negotiation action" });
@@ -1117,6 +1147,7 @@ function doPost(e) {
       ok: true, team_id: body.team_id, category: brand.category, brand: brand.name,
       final_revenue: finalRevenue, final_clause: finalClause,
       commission: repTeamId ? Math.abs(finalRevenue - brand.base_revenue) : 0,
+      league_update: triggerLeagueUpdate_(),
     });
   }
 

@@ -15,6 +15,12 @@ on:
 permissions:
   contents: write
 
+# deal-triggered runs (backend.gs triggerLeagueUpdate_) can overlap: run one
+# at a time, keep the newest request queued so no saved deal is missed
+concurrency:
+  group: auto-resolve
+  cancel-in-progress: false
+
 jobs:
   resolve:
     runs-on: ubuntu-latest
@@ -40,5 +46,6 @@ jobs:
             echo "Nothing changed -- skipping commit."
           else
             git commit -m "Auto-resolve: $(cat _auto_resolve_actions.txt | tr '\n' ',' | sed 's/,$//')"
+            git pull --rebase --autostash
             git push
           fi

@@ -180,7 +180,7 @@
       openTable(false);
       setMsg($('ng-pick-msg'), `Signed: ${r.brand} (${r.category}), ${money(r.final_revenue)} per season, ${r.final_clause} clause` +
         (r.vs_opening ? ` (${r.vs_opening > 0 ? '+' : '−'}${money(Math.abs(r.vs_opening))} vs. the opening offer).` : '.') +
-        ' It reaches your budget on the next league update.', 'ok');
+        (r.league_update === 'ok' ? ' Team Progress and your budget update in about 3 minutes.' : ' It reaches your budget on the next league update.'), 'ok');
       await loadCatalog();
     } catch (e) {
       setMsg($('ng-msg'), 'Could not reach the league server. Check the Sponsorship Marketplace before trying again.', 'err');
