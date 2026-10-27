@@ -340,6 +340,7 @@ var COACH_MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-2.5-fla
 var COACH_MAX_PER_HOUR = 40;      // per team -- keeps one team from burning the free quota
 var COACH_MAX_MESSAGE = 800;      // characters per student message
 var COACH_MAX_HISTORY = 10;       // earlier turns resent for continuity
+var COACH_REMINDER = "\n\n(Coach: reply in under 180 words with at most 4 bullets, and copy every number exactly from the briefing.)";
 
 var COACH_INSTRUCTIONS = [
   "You are the AI Coach for the {LEAGUE}, a front-office simulation in SPM261 Introduction to Sport Management at Arcadia University.",
@@ -357,6 +358,7 @@ var COACH_INSTRUCTIONS = [
   "ACCURACY",
   "- Before you cite any number, formation, result or player, find it in the briefing and copy it exactly. Read every round's line, not just the first ones: if a team used different formations in different rounds, say so.",
   "- When you compare two numbers (OVR, goals, attendance), check which is actually higher before saying so.",
+  "- In every result line the score is written from that team's side: 'W 4-1' means that team scored 4 and conceded 1. Keep goals scored and goals conceded straight.",
   "- Never fill a gap from general football knowledge. If the briefing doesn't show it, say you don't have that data.",
   "",
   "LIMITS",
@@ -501,7 +503,9 @@ function handleCoachChat_(body, team) {
   });
   while (contents.length && contents[0].role !== "user") contents.shift();
   if (contents.length && contents[contents.length - 1].role === "user") contents.pop();
-  contents.push({ role: "user", parts: [{ text: message }] });
+  // a reminder right next to the question is followed far more reliably
+  // than the length rule in the system prompt; not logged or shown
+  contents.push({ role: "user", parts: [{ text: message + COACH_REMINDER }] });
 
   var result = coachCallModel_(system, contents);
   var answer, model, retry = false;
