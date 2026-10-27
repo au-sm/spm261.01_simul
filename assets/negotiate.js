@@ -65,10 +65,13 @@
     brandSel.innerHTML = list.map(b => {
       const s = catalog.slots[b.name];
       const open = s ? s.qty - s.taken : null;
-      const label = s ? `${b.name} (${s.clause} clause, ${Math.max(0, open)}/${s.qty} open)` : b.name;
-      return `<option value="${esc(b.name)}"${open === 0 ? ' disabled' : ''}>${esc(label)}</option>`;
+      const locked = b.min_leverage && session.leverage != null && session.leverage < b.min_leverage;
+      const label = (s ? `${b.name} (${s.clause} clause, ${Math.max(0, open)}/${s.qty} open)` : b.name) +
+        (b.min_leverage ? ` · leverage ${b.min_leverage}+` : '');
+      return `<option value="${esc(b.name)}"${open === 0 || locked ? ' disabled' : ''}>${esc(label)}</option>`;
     }).join('');
-    if (list.some(b => b.name === keep)) brandSel.value = keep;
+    const enabled = [...brandSel.options].filter(o => !o.disabled).map(o => o.value);
+    brandSel.value = enabled.includes(keep) ? keep : (enabled[0] || '');
     showFlavor();
   }
 
@@ -87,7 +90,7 @@
     try {
       const r = await post({ type: 'coach_chat', hello: true });
       if (!r.ok) { setMsg(msg, r.error, 'err'); $('ng-signin-btn').disabled = false; return; }
-      session = { team_id: teamSel.value, pin: pinIn.value.trim() };
+      session = { team_id: teamSel.value, pin: pinIn.value.trim(), leverage: r.leverage };
       $('ng-s-name').textContent = r.team_name;
       $('ng-s-pos').textContent = ordinal(r.position) + ' of ' + NG_TEAMS.length;
       $('ng-s-lev').textContent = r.leverage != null ? r.leverage + ' / 100' : 'see Rulebook 11';

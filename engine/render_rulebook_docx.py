@@ -410,7 +410,9 @@ def build(config, deals, calendar=None, ltv_deals=None):
         "AI Sponsor Rep: brands can also be negotiated one-on-one on the AI Sponsor Rep page. The same leverage "
         "rule sets how far each brand will go (a strong, data-backed pitch can add a little), the rep may walk "
         "away from owners who keep asking far more than it will pay, and no sponsor-rep commission is earned, "
-        "since no student played the rep."
+        "since no student played the rep. Big brands choose contenders: Nike, Red Bull, Visa, Emirates, BMW "
+        "and Samsung only negotiate with clubs at Negotiating Leverage 40+, and Adidas, Mastercard and Qatar "
+        "Airways need 30+."
     )
     doc.add_heading("Clause", level=2)
     doc.add_paragraph(

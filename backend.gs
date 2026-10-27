@@ -580,6 +580,10 @@ var NEG_PITCH_BONUS = [0, 0.01, 0.02];
 var NEG_CLAUSE_THRESHOLD = { modest: 20, bold: 50, very_bold: 80 };
 var NEG_CLAUSE_LEVELS = ["strict", "standard", "loose", "none"];
 var NEG_SESSION_TTL = 21600;      // 6 hours, the CacheService maximum
+// flagship and premium brands only negotiate with contenders (leverage 0-100);
+// keep in sync with min_leverage in data/deals.json, which the site displays
+var NEG_MIN_LEVERAGE = { "Nike": 40, "Red Bull": 40, "Visa": 40, "Emirates": 40, "BMW": 40, "Samsung": 40,
+                         "Adidas": 30, "Mastercard": 30, "Qatar Airways": 30 };
 var NEG_MODEL_PER_HOUR = 60;      // model calls per team per hour; past this the rep uses written lines
 var NEG_PITCH_WORDS = ["fan", "attend", "crowd", "star", "win", "top", "rank", "exposure", "audience",
                        "market", "brand", "sell", "follow", "young", "media", "ticket", "goal"];
@@ -780,6 +784,11 @@ function handleNegotiation_(body, team, sheets) {
     if (block) return jsonOut_({ ok: false, error: block });
     var leverage = Number(brief.leverage);
     if (!(leverage >= 0)) leverage = 50;
+    var minLev = NEG_MIN_LEVERAGE[brand.name] || 0;
+    if (leverage < minLev) {
+      return jsonOut_({ ok: false, error: brand.name + " is only partnering with contenders this season (leverage " + minLev +
+                        "+; yours is " + leverage + "). Pick another " + brand.category + " brand, or come back when your results improve." });
+    }
     st = { brand: brand.name, category: brand.category, base: brand.base_revenue, base_clause: brand.base_clause,
            leverage: leverage, adj: -0.10 + (leverage / 100) * 0.20, best_score: 0, offer: brand.base_revenue,
            clause: brand.base_clause, turns: 0, strikes: 0, status: "open", history: [] };

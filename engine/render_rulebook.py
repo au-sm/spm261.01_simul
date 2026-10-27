@@ -91,7 +91,8 @@ def render(config, deals, calendar=None, ltv_deals=None):
       <p><b>AI Sponsor Rep.</b> Brands can also be negotiated one-on-one with the AI Sponsor Rep page. The same
       leverage rule sets how far each brand will go (a strong, data-backed pitch can add a little), the rep may walk
       away from owners who keep asking far more than it will pay, and no sponsor-rep commission is earned, since no
-      student played the rep.</p>
+      student played the rep. Big brands choose contenders: Nike, Red Bull, Visa, Emirates, BMW and Samsung only
+      negotiate with clubs at Negotiating Leverage 40+, and Adidas, Mastercard and Qatar Airways need 30+.</p>
       <h3>Clause</h3>
       <p>A separate ask: push for a looser clause at Modest / Bold / Very Bold intensity, gated by the same leverage
       number. Ask beyond what your leverage supports and the brand walks away on the clause specifically &mdash; that

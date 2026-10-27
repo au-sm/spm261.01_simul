@@ -28,7 +28,8 @@ def load_json(name, default=None):
 
 def render(config, deals):
     teams = [{"id": str(t["team_id"]), "name": t["name"], "owner": t.get("owner", "")} for t in config["teams"]]
-    brands = [{"name": b["name"], "category": c["category"], "flavor": b.get("flavor", "")}
+    brands = [{"name": b["name"], "category": c["category"], "flavor": b.get("flavor", ""),
+               "min_leverage": b.get("min_leverage", 0)}
               for c in deals["sponsorship_categories"] for b in c["brands"]]
     n_required = config.get("sponsorship_categories_required", 6)
     return f'''<!doctype html>
@@ -113,6 +114,7 @@ footer{{max-width:860px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
       <li>Or negotiate. Every offer you make needs a pitch: why should this brand pay more for <i>your</i> club? Real numbers from your season (standings, attendance, star power) persuade a rep; vague claims don't.</li>
       <li>How far a brand will go depends on your <b>Negotiating Leverage</b> (Rulebook Section 11). A weak hand can end <b>below</b> the opening offer once you start negotiating.</li>
       <li>You get 6 offers per brand, then the rep makes a final offer. Asking far more than a brand will ever pay counts as a strike. After 3 strikes the rep walks away, and that brand is closed to your club for the day.</li>
+      <li>Big brands choose contenders: flagship brands (Nike, Red Bull, Visa, Emirates, BMW, Samsung) only negotiate with clubs at leverage 40+, and Adidas, Mastercard and Qatar Airways need 30+. Leverage moves with the standings every round, so a club can earn its way in.</li>
       <li>A looser clause is a separate ask (Modest, Bold, Very Bold). It only works if your leverage supports it, and asking never costs you revenue.</li>
       <li>One brand per category, {n_required} categories required. AI-negotiated deals earn no sponsor-rep commission. Every conversation is saved for your instructor.</li>
     </ul>
