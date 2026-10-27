@@ -924,6 +924,12 @@ function doGet(e) {
   var params = (e && e.parameter) || {};
 
   if (params.admin_key && params.admin_key === ADMIN_KEY) {
+    // instructor-only read of the AI log tabs (?admin_key=...&tab=Coach Log),
+    // used to review or clean up conversations before rewriting via admin_tab
+    if (params.tab === "Coach Log" || params.tab === "Negotiations") {
+      var logTab = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(params.tab);
+      return jsonOut_({ ok: true, tab: params.tab, rows: logTab ? logTab.getDataRange().getValues() : [] });
+    }
     return jsonOut_({
       ok: true,
       teams: readTeams_(sheets.teams), // pins included -- admin-only export
