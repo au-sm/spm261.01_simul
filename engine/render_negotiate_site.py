@@ -43,18 +43,21 @@ def render(config, deals):
 :root{{
   --paper:#eef2ea; --ink:#16201a; --muted:#5b6b5e; --line:#d6decd;
   --surface:#f7f9f4; --rep:#8a3b12; --rep-soft:#f6e6da; --bad:#b4472f; --good:#2f7a4f;
+  --accent:#b8811f;
   --shadow: 0 1px 2px rgba(22,32,26,.06), 0 4px 14px rgba(22,32,26,.05);
 }}
 @media (prefers-color-scheme: dark){{
   :root:not([data-theme="light"]){{
     --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
     --surface:#171d17; --rep:#e0915e; --rep-soft:#2e2118; --bad:#e07a5c; --good:#4fae76;
+    --accent:#d9a44a;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.35);
   }}
 }}
 :root[data-theme="dark"]{{
     --paper:#111611; --ink:#e7ece1; --muted:#93a091; --line:#2a352a;
     --surface:#171d17; --rep:#e0915e; --rep-soft:#2e2118; --bad:#e07a5c; --good:#4fae76;
+    --accent:#d9a44a;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.35);
 }}
 *{{box-sizing:border-box;}}
