@@ -2,9 +2,19 @@
   "teams": {
     "0": {
       "ticket_revenue": 609626,
-      "sponsorship_revenue": 0,
+      "sponsorship_revenue": 3400000,
       "tv_revenue": 0,
-      "sponsors_owned": [],
+      "sponsors_owned": [
+        {
+          "category": "Kit / Apparel",
+          "sponsor": "Nike",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 3400000,
+          "final_clause": "strict",
+          "sponsor_rep_team_id": null
+        }
+      ],
       "local_tv_revenue": 0
     },
     "1": {
