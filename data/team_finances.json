@@ -1,7 +1,7 @@
 {
   "teams": {
     "0": {
-      "ticket_revenue": 609626,
+      "ticket_revenue": 637409,
       "sponsorship_revenue": 9400000,
       "tv_revenue": 0,
       "sponsors_owned": [
@@ -63,7 +63,7 @@
       "local_tv_revenue": 0
     },
     "1": {
-      "ticket_revenue": 246207,
+      "ticket_revenue": 272044,
       "sponsorship_revenue": 1730000,
       "tv_revenue": 0,
       "sponsors_owned": [
@@ -80,7 +80,7 @@
       "local_tv_revenue": 0
     },
     "2": {
-      "ticket_revenue": 353104,
+      "ticket_revenue": 717576,
       "sponsorship_revenue": 13100000,
       "tv_revenue": 0,
       "sponsors_owned": [
@@ -142,7 +142,7 @@
       "local_tv_revenue": 0
     },
     "3": {
-      "ticket_revenue": 204984,
+      "ticket_revenue": 217454,
       "sponsorship_revenue": 1300000,
       "tv_revenue": 0,
       "sponsors_owned": [
@@ -166,7 +166,7 @@
       "local_tv_revenue": 0
     },
     "5": {
-      "ticket_revenue": 848480,
+      "ticket_revenue": 898151,
       "sponsorship_revenue": 2200000,
       "tv_revenue": 0,
       "sponsors_owned": [
@@ -190,14 +190,14 @@
       "local_tv_revenue": 0
     },
     "7": {
-      "ticket_revenue": 380211,
+      "ticket_revenue": 429882,
       "sponsorship_revenue": 0,
       "tv_revenue": 0,
       "sponsors_owned": [],
       "local_tv_revenue": 0
     },
     "8": {
-      "ticket_revenue": 64004,
+      "ticket_revenue": 313404,
       "sponsorship_revenue": 3000000,
       "tv_revenue": 0,
       "sponsors_owned": [
@@ -221,7 +221,7 @@
       ]
     },
     "9": {
-      "ticket_revenue": 879167,
+      "ticket_revenue": 943485,
       "sponsorship_revenue": 2980000,
       "tv_revenue": 0,
       "sponsors_owned": [
@@ -238,7 +238,7 @@
       "local_tv_revenue": 0
     },
     "10": {
-      "ticket_revenue": 295089,
+      "ticket_revenue": 600392,
       "sponsorship_revenue": 930000,
       "tv_revenue": 0,
       "sponsors_owned": [
@@ -317,7 +317,7 @@
       "local_tv_revenue": 0
     },
     "12": {
-      "ticket_revenue": 240126,
+      "ticket_revenue": 533027,
       "sponsorship_revenue": 4900000,
       "tv_revenue": 0,
       "sponsors_owned": [
@@ -369,7 +369,7 @@
       "local_tv_revenue": 0
     },
     "14": {
-      "ticket_revenue": 332964,
+      "ticket_revenue": 649551,
       "sponsorship_revenue": 2170000,
       "tv_revenue": 0,
       "sponsors_owned": [
@@ -386,7 +386,7 @@
       "local_tv_revenue": 0
     },
     "15": {
-      "ticket_revenue": 465014,
+      "ticket_revenue": 897734,
       "sponsorship_revenue": 10890000,
       "tv_revenue": 0,
       "sponsors_owned": [
@@ -448,7 +448,7 @@
       "local_tv_revenue": 0
     },
     "16": {
-      "ticket_revenue": 987934,
+      "ticket_revenue": 1033673,
       "sponsorship_revenue": 3500000,
       "tv_revenue": 0,
       "sponsors_owned": [
@@ -465,7 +465,7 @@
       "local_tv_revenue": 0
     },
     "17": {
-      "ticket_revenue": 502082,
+      "ticket_revenue": 920912,
       "sponsorship_revenue": 0,
       "tv_revenue": 0,
       "sponsors_owned": [],
