@@ -129,6 +129,17 @@ print("dashboard OK")
         with open(dst_path, "w") as f:
             f.write(content)
 
+    # walkthrough/ is hand-authored (no generator), so only its nav is
+    # rewritten here, keeping its menu in step with site_nav.PAGES
+    sys.path.insert(0, os.path.join(BASE, "engine"))
+    import site_nav
+    wt = os.path.join(BASE, "walkthrough", "index.html")
+    with open(wt) as f:
+        page = f.read()
+    start, end = page.index('<nav class="sm-nav">'), page.index("</nav>") + len("</nav>")
+    with open(wt, "w") as f:
+        f.write(page[:start] + site_nav.render_nav("walkthrough") + page[end:])
+
 
 def find_date_for_round(calendar, round_num):
     for entry in calendar["match_day_schedule"]:
