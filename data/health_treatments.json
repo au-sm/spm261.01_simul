@@ -441,13 +441,35 @@
    "treatment": "recovery",
    "submitted_at": "2026-10-27T15:35:30.718Z",
    "cost": 50000
+  },
+  {
+   "id": "5|5|268|2026-10-28T15:54:27.184Z",
+   "team_id": "5",
+   "round": 5,
+   "player_id": "268",
+   "player_name": "Pavel Berg",
+   "treatment": "rehab_standard",
+   "submitted_at": "2026-10-28T15:54:27.184Z",
+   "injured_until_before": 5,
+   "injured_until_after": 4,
+   "cost": 75000
+  },
+  {
+   "id": "5|5|305|2026-10-28T15:58:27.666Z",
+   "team_id": "5",
+   "round": 5,
+   "player_id": "305",
+   "player_name": "Yusuf Lindqvist",
+   "treatment": "recovery",
+   "submitted_at": "2026-10-28T15:58:27.666Z",
+   "cost": 50000
   }
  ],
  "voided": [],
  "team_spend": {
   "8": 325000,
   "1": 850000,
-  "5": 925000,
+  "5": 1050000,
   "12": 925000,
   "0": 425000,
   "16": 625000,
@@ -578,6 +600,11 @@
     "levels": 2
    },
    "101": {
+    "levels": 1
+   }
+  },
+  "5": {
+   "305": {
     "levels": 1
    }
   }

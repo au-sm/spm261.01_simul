@@ -167,7 +167,7 @@
     },
     "5": {
       "ticket_revenue": 898151,
-      "sponsorship_revenue": 2200000,
+      "sponsorship_revenue": 10300000,
       "tv_revenue": 0,
       "sponsors_owned": [
         {
@@ -176,6 +176,51 @@
           "mode": "live",
           "outcome": "accepted",
           "final_revenue": 2200000,
+          "final_clause": "standard",
+          "sponsor_rep_team_id": null
+        },
+        {
+          "category": "Beverage",
+          "sponsor": "Gatorade",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 2000000,
+          "final_clause": "standard",
+          "sponsor_rep_team_id": null
+        },
+        {
+          "category": "Airline",
+          "sponsor": "American Airlines",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 1300000,
+          "final_clause": "loose",
+          "sponsor_rep_team_id": null
+        },
+        {
+          "category": "Financial Services",
+          "sponsor": "American Express",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 1800000,
+          "final_clause": "standard",
+          "sponsor_rep_team_id": null
+        },
+        {
+          "category": "Automotive",
+          "sponsor": "Hyundai",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 1000000,
+          "final_clause": "loose",
+          "sponsor_rep_team_id": null
+        },
+        {
+          "category": "Technology",
+          "sponsor": "Sony",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 2000000,
           "final_clause": "standard",
           "sponsor_rep_team_id": null
         }
