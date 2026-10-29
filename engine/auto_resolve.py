@@ -338,6 +338,20 @@ def main():
             else:
                 print(f"NOOP: today ({today}) is before draft day ({calendar['draft_day']})")
 
+        # Sponsorship and Local TV negotiation aren't tied to a round date --
+        # a team can submit either any time after it has a drafted roster --
+        # so these run unconditionally every cycle rather than being gated
+        # by today's date the way draft/round resolution are. They run BEFORE
+        # any round is resolved, so Health Hub requests (and trades) submitted
+        # ahead of a simulation apply to that round instead of being voided as
+        # "already played" (bug hit SPM261.01 Round 5 on 2026-10-29).
+        if config["phase"] != "pre-draft":
+            actions.extend(resolve_sponsorship_deals(export.get("sponsorship_deals", [])))
+            actions.extend(resolve_local_tv_deals(export.get("local_tv_deals", [])))
+            actions.extend(resolve_trades(export.get("trade_proposals", [])))
+            actions.extend(resolve_health_treatments(export.get("health_treatments", [])))
+            config = load_json("league_config.json")
+
         # Match results stay hidden until the instructor explicitly asks for a
         # simulation: scheduled runs never resolve rounds. A manual run with
         # RESOLVE_ROUNDS=1 resolves exactly the next round, regardless of date.
@@ -364,15 +378,6 @@ def main():
                 actions.append(resolve_round_now(next_round, team_name_by_id, team_pin_by_id, export["lineups"]))
                 config = load_json("league_config.json")
 
-        # Sponsorship and Local TV negotiation aren't tied to a round date --
-        # a team can submit either any time after it has a drafted roster --
-        # so these run unconditionally every cycle rather than being gated
-        # by today's date the way draft/round resolution are.
-        if config["phase"] != "pre-draft":
-            actions.extend(resolve_sponsorship_deals(export.get("sponsorship_deals", [])))
-            actions.extend(resolve_local_tv_deals(export.get("local_tv_deals", [])))
-            actions.extend(resolve_trades(export.get("trade_proposals", [])))
-            actions.extend(resolve_health_treatments(export.get("health_treatments", [])))
 
         if actions:
             regenerate_all_pages()
