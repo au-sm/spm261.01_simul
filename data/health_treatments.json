@@ -715,11 +715,35 @@
    "treatment": "recovery",
    "submitted_at": "2026-10-29T15:10:08.880Z",
    "cost": 50000
+  },
+  {
+   "id": "8|6|356|2026-10-29T22:39:33.755Z",
+   "team_id": "8",
+   "round": 6,
+   "player_id": "356",
+   "player_name": "Mateo Costa",
+   "treatment": "rehab_elite",
+   "submitted_at": "2026-10-29T22:39:33.755Z",
+   "injured_until_before": 8,
+   "injured_until_after": 5,
+   "cost": 375000
+  },
+  {
+   "id": "8|6|160|2026-10-29T22:39:59.916Z",
+   "team_id": "8",
+   "round": 6,
+   "player_id": "160",
+   "player_name": "Sami Suarez",
+   "treatment": "rehab_elite",
+   "submitted_at": "2026-10-29T22:39:59.916Z",
+   "injured_until_before": 8,
+   "injured_until_after": 5,
+   "cost": 375000
   }
  ],
  "voided": [],
  "team_spend": {
-  "8": 375000,
+  "8": 1125000,
   "1": 1075000,
   "5": 1050000,
   "12": 1675000,
@@ -916,6 +940,14 @@
    },
    "355": {
     "levels": 1
+   }
+  },
+  "6": {
+   "356": {
+    "set": "Average"
+   },
+   "160": {
+    "set": "Average"
    }
   }
  }
