@@ -60,7 +60,7 @@ def render(config, deals, ltv):
         if negotiated:
             clause = a.get("final_clause", a["base_clause"])
             status_cls = "complete"
-            status = a["mode"]
+            status = "signed"
         else:
             clause = a["base_clause"]
             status_cls = "pending"
@@ -196,8 +196,8 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
       Day, together with the League-Wide (National) TV Deal, once your instructor closes Local TV negotiations. The Star
       Power modifier (+15% if your latest starting XI is top-3 league-wide that day) applies on top of your rate. A team
       with no signed deal by the deadline gets its base rate and base clause. The clause is checked once at season end.</p>
-      <p style="margin-top:10px;"><b>The National TV Deal is automatic</b> &mdash; a shared base plus standings and Star
-      Power bonuses, with nothing to negotiate. See the Rulebook's TV / Broadcast Revenue section.</p>
+      <p style="margin-top:10px;"><b>The National TV Deal is automatic</b> &mdash; {money(tv_deal_formula["base_payment_per_team"])} for every team, plus a
+      standings bonus for the top 3 and {money(tv_deal_formula["star_power_bonus_amount"])} for the top-3 starting XIs by Star Power, with nothing to negotiate. See the Rulebook's TV / Broadcast Revenue section.</p>
     </div>
   </section>
 
@@ -248,7 +248,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
       <span class="section-note">a rehearsal &mdash; the real negotiation is on the AI TV Rep page</span>
     </div>
     <div class="sim">
-      <p class="sim-note">Practice the math with a hypothetical rate -- real market-tier base rates aren't posted
+      <p class="sim-note">Practice the math with a hypothetical rate. It leaves out the pitch bonus of up to 2% the AI TV Rep can give -- real market-tier base rates aren't posted
       publicly anywhere on this site; the AI TV Rep opens with yours.</p>
       <div class="sim-grid">
         <div class="field">
@@ -279,9 +279,9 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
           <label for="sim-clause-ask">Clause</label>
           <select id="sim-clause-ask">
             <option value="none">Don't push it (keep base clause)</option>
-            <option value="modest">Ask Modest</option>
-            <option value="bold">Ask Bold</option>
-            <option value="very_bold">Ask Very Bold</option>
+            <option value="1">Ask for 1 step looser (leverage 20+)</option>
+            <option value="2">Ask for 2 steps looser (leverage 50+)</option>
+            <option value="3">Ask for strict to no clause (leverage 80+)</option>
           </select>
         </div>
       </div>
@@ -299,11 +299,10 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
   </section>
 </div>
 
-<footer>{config["league_name"]} &middot; TV rights marketplace &mdash; math matches engine/negotiation.py and engine/resolve_local_tv_pick.py exactly</footer>
+<footer>{config["league_name"]} &middot; TV rights marketplace &mdash; practice math follows the AI TV Rep's leverage and clause rules</footer>
 
 <script>
-const REQUIRED_THRESHOLD = {{modest: 20, bold: 50, very_bold: 80}};
-const CLAUSE_UPSIDE = {{modest: 0.10, bold: 0.20, very_bold: 0.30}};
+const REQUIRED_THRESHOLD = {{1: 20, 2: 50, 3: 80}};
 const CLAUSE_LEVELS = ["strict", "standard", "loose", "none"];
 const REVENUE_RANGE = 0.10;
 
@@ -338,11 +337,10 @@ document.getElementById('sim-go').addEventListener('click', () => {{
   const resultEl = document.getElementById('sim-result');
 
   // --- revenue axis ---
-  let rate = baseRevenue, commission = 0;
+  let rate = baseRevenue;
   if (revenueAsk === 'negotiate') {{
     const adj = -REVENUE_RANGE + (leverage / 100) * (2 * REVENUE_RANGE);
     rate = Math.round(baseRevenue * (1 + adj));
-    commission = Math.max(0, rate - baseRevenue);
   }}
 
   // --- clause axis (independent) ---
@@ -350,33 +348,19 @@ document.getElementById('sim-go').addEventListener('click', () => {{
   let clauseNote = '';
   if (clauseAsk !== 'none') {{
     const threshold = REQUIRED_THRESHOLD[clauseAsk];
-    const gap = leverage - threshold;
-    let outcome, fraction;
-    if (gap >= 15) {{ outcome = 'accepted'; fraction = 1.0; }}
-    else if (gap <= -15) {{ outcome = 'walk_away'; fraction = 0.0; }}
-    else {{
-      const acceptProb = 0.5 + gap / 30.0;
-      if (Math.random() < acceptProb) {{ outcome = 'accepted'; fraction = 1.0; }}
-      else {{ outcome = 'partial'; fraction = 0.5; }}
-    }}
-    if (outcome === 'walk_away') {{
-      clauseNote = ` Clause ask WALKED AWAY (leverage ${{leverage.toFixed(0)}} too far below the ${{threshold}} needed) -- clause stays ${{baseClause}}.`;
+    const target = CLAUSE_LEVELS.indexOf(baseClause) + Number(clauseAsk);
+    if (target >= CLAUSE_LEVELS.length) {{
+      clauseNote = ` That is looser than a ${{baseClause}} clause can go -- clause stays ${{baseClause}}.`;
+    }} else if (leverage >= threshold) {{
+      clause = CLAUSE_LEVELS[target];
+      clauseNote = ' Clause ask GRANTED.';
     }} else {{
-      const upside = CLAUSE_UPSIDE[clauseAsk] * fraction;
-      if (upside > 0) {{
-        const idx = CLAUSE_LEVELS.indexOf(baseClause);
-        const steps = (clauseAsk === 'very_bold' && fraction === 1.0) ? 2 : 1;
-        clause = CLAUSE_LEVELS[Math.min(CLAUSE_LEVELS.length - 1, idx + steps)];
-        clauseNote = outcome === 'accepted' ? ' Clause ask ACCEPTED.' : ' Clause ask PARTIAL (met halfway).';
-      }}
+      clauseNote = ` Clause ask REFUSED (leverage ${{leverage.toFixed(0)}} is below the ${{threshold}} needed) -- clause stays ${{baseClause}}. Asking costs you nothing.`;
     }}
   }}
 
   resultEl.className = 'sim-result ' + (revenueAsk === 'negotiate' && rate < baseRevenue ? 'walk_away' : 'accepted');
   let text = `Negotiated terms: rate $${{rate.toLocaleString()}}/season, clause ${{clause}}.${{clauseNote}} Paid on TV Revenue Day, plus Star Power bonus if earned then.`;
-  if (commission > 0) {{
-    text += ` A live network rep here would earn a $${{commission.toLocaleString()}} commission for their own team, credited now.`;
-  }}
   resultEl.textContent = text;
 }});
 </script>

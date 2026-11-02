@@ -460,7 +460,7 @@ def build(config, deals, calendar=None, ltv_deals=None):
     doc.add_paragraph(f'Base: {money(tv["base_payment_per_team"])} per team.')
     doc.add_paragraph(f'Standings bonus: {tv["standings_bonus"]}')
     doc.add_paragraph(f'Star Power bonus: {tv["star_power_bonus"]}')
-    doc.add_paragraph(f'Split timing: {tv["midseason_split_timing"]}')
+    doc.add_paragraph(f'Payout timing: {tv["midseason_split_timing"]}')
     doc.add_heading("Local TV Deals", level=2)
     doc.add_paragraph(ltv["description"])
     doc.add_paragraph(f'Market tiers: {ltv["market_tiers"]}')

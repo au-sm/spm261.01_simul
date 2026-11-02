@@ -362,7 +362,7 @@ def render(config, deals, calendar=None, ltv_deals=None):
           <p><strong>Base:</strong> {money(tv["base_payment_per_team"])} per team.</p>
           <p><strong>Standings bonus:</strong> {tv["standings_bonus"]}</p>
           <p><strong>Star Power bonus:</strong> {tv["star_power_bonus"]}</p>
-          <p><strong>Split timing:</strong> {tv["midseason_split_timing"]}</p>
+          <p><strong>Payout timing:</strong> {tv["midseason_split_timing"]}</p>
           <h3>Local TV Deals</h3>
           <p>{ltv["description"]}</p>
           <p><strong>Market tiers:</strong> {ltv["market_tiers"]}</p>

@@ -444,11 +444,12 @@ footer{{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 60px;color
         <p class="tier-clause">Full marketplace, live signings, and the negotiation simulator: see the separate Sponsorship Marketplace site.</p>
       </div>
       <div class="rail-card">
-        <h3>TV / Broadcast Split</h3>
+        <h3>National TV Split</h3>
         <p class="tier-qual">Base: <strong class="mono">{money(tv["base_payment_per_team"])}</strong>/team</p>
         <p class="tier-qual">{tv["standings_bonus"]}</p>
         <p class="tier-qual">{tv["star_power_bonus"]}</p>
-        <p class="tier-clause">Split at: {tv["midseason_split_timing"]}</p>
+        <p class="tier-clause">When: {tv["midseason_split_timing"]}</p>
+        <p class="tier-clause">Your Local TV Deal is separate: negotiate it on the AI TV Rep page.</p>
       </div>
       <div class="rail-card">
         <h3>Playoff Qualification</h3>
