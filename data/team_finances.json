@@ -281,7 +281,7 @@
     },
     "7": {
       "ticket_revenue": 429882,
-      "sponsorship_revenue": 6900000,
+      "sponsorship_revenue": 13240000,
       "tv_revenue": 0,
       "sponsors_owned": [
         {
@@ -308,6 +308,33 @@
           "mode": "live",
           "outcome": "accepted",
           "final_revenue": 1800000,
+          "final_clause": "loose",
+          "sponsor_rep_team_id": null
+        },
+        {
+          "category": "Airline",
+          "sponsor": "Qatar Airways",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 2380000,
+          "final_clause": "standard",
+          "sponsor_rep_team_id": null
+        },
+        {
+          "category": "Automotive",
+          "sponsor": "Toyota",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 1980000,
+          "final_clause": "loose",
+          "sponsor_rep_team_id": null
+        },
+        {
+          "category": "Technology",
+          "sponsor": "Sony",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 1980000,
           "final_clause": "loose",
           "sponsor_rep_team_id": null
         }
