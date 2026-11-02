@@ -23,7 +23,8 @@ def load_json(name, default=None):
         return json.load(f)
 
 
-def render(config):
+def render(config, deals):
+    tv = deals["tv_deal_formula"]
     teams = [{"id": str(t["team_id"]), "name": t["name"], "owner": t.get("owner", "")} for t in config["teams"]]
     return f'''<!doctype html>
 <html lang="en">
@@ -100,7 +101,7 @@ footer{{max-width:860px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
 {render_nav("tvrep")}
 <header class="masthead"><div class="masthead-inner">
   <h1>AI TV Rep</h1>
-  <p>{escape(config["league_name"])} &middot; negotiate your Local TV Deal one-on-one &middot; one deal per team</p>
+  <p>{escape(config["league_name"])} &middot; national TV is automatic, local TV you negotiate one-on-one &middot; one deal per team</p>
 </div></header>
 <div class="wrap">
   <div class="card">
@@ -135,6 +136,15 @@ footer{{max-width:860px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
         <div><b>Local TV Deal</b><span id="tr-s-deal"></span></div>
       </div>
       <div class="msg" id="tr-done"></div>
+    </div>
+
+    <div class="card">
+      <h2>Your TV deal has two parts</h2>
+      <div class="snap">
+        <div><b>National TV &middot; automatic</b><span>${tv["base_payment_per_team"]:,} base</span></div>
+        <div><b>Local TV &middot; you negotiate</b><span>Set with the rep below</span></div>
+      </div>
+      <p class="filled">National TV has nothing to negotiate. Every team gets the base. The top 3 teams in the standings on TV Revenue Day add {", ".join(f"${b:,}" for b in tv["standings_bonus_amounts"])}, and the 3 teams with the highest starting-XI Star Power add ${tv["star_power_bonus_amount"]:,}. National and local money post to your budget together.</p>
     </div>
 
     <div class="card" id="tr-pick">
@@ -176,7 +186,7 @@ footer{{max-width:860px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
 
 
 if __name__ == "__main__":
-    html = render(load_json("league_config.json"))
+    html = render(load_json("league_config.json"), load_json("deals.json"))
     out_dir = os.path.join(BASE, "tv-rep-site")
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "index.html"), "w") as f:
