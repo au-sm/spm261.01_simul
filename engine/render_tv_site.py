@@ -168,7 +168,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
 <div class="masthead">
   <div class="masthead-inner">
     <h1>TV Rights Marketplace</h1>
-    <p>{config["league_name"]} &middot; every team negotiates ONE Local TV Deal rate, right after Draft Day</p>
+    <p>{config["league_name"]} &middot; every team negotiates ONE Local TV Deal</p>
   </div>
 </div>
 
@@ -180,31 +180,24 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
       assigned right after Draft Day (evenly split across all five tiers league-wide, drawn from the season seed). That
       tier sets your base clause:</p>
       <table><thead><tr><th>Market Tier</th><th>Base Clause</th></tr></thead><tbody>{tier_rows_html}</tbody></table>
-      <p><b>Your market tier's actual base rate is not posted publicly anywhere on this site.</b> Your network rep tells
-      you the number face to face when you sit down to negotiate &mdash; the same convention Sponsorship uses for its own
-      brand base revenue.</p>
-      <p>Right after that assignment, you negotiate LIVE against a classmate playing the network rep (rotation:
-      <span class="mono">engine/generate_tv_negotiation_rotation.py</span>). Exactly like Sponsorship, two separate
-      things are on the table:</p>
+      <p><b>Your market tier's actual base rate is not posted publicly anywhere on this site.</b> The rep opens with it
+      when you sit down to negotiate &mdash; the same convention Sponsorship uses.</p>
+      <p>You negotiate one-on-one on the <a href="../tv-rep/">AI TV Rep</a> page. Two separate things are on the table:</p>
       <div class="asks-grid">
         <div class="ask-chip"><b>Revenue</b>Take the market-tier Base exactly (guaranteed), or Negotiate &mdash; lands
         anywhere from &minus;10% to +10% of base, set by your <b>Negotiating Leverage</b> (roster avg. Star Power + a
         standings bonus once the season starts). A weak hand can genuinely land below base.</div>
-        <div class="ask-chip"><b>Clause</b>A separate ask &mdash; push for a looser clause at Modest/Bold/Very Bold
-        intensity, gated by the same leverage. This one CAN walk away if you overreach; the revenue side never does.</div>
-        <div class="ask-chip"><b>The commission</b>Land the rate away from base, in EITHER direction, and that gap is
-        credited &mdash; immediately, not at the Round 3 split &mdash; as bonus revenue to whichever team played the
-        network rep. Above base rewards the negotiating team's win; below base (a good deal for the network) rewards
-        the rep instead. Landing exactly at base earns nobody a commission.</div>
+        <div class="ask-chip"><b>Clause</b>A separate ask &mdash; one step looser than your base clause needs leverage 20+,
+        two steps 50+, strict to no clause 80+. Asking never costs you revenue.</div>
+        <div class="ask-chip"><b>Limits</b>6 offers, then a final offer. Asking far more than the network will pay is a
+        strike; 3 strikes and the rep walks away for the day. AI deals earn no commission.</div>
       </div>
-      <p style="margin-top:12px;"><b>This negotiation sets the RATE and the CLAUSE.</b> The money itself is still paid at the
-      league's Round 3 TV Revenue Day, with the Star Power modifier (+15% if your starting XI is top-3 league-wide then)
-      still applied on top of whatever rate you locked in here. The clause is checked once at season end, exactly like a
-      sponsorship clause &mdash; see "What the Clause Actually Means" on the Rulebook's TV / Broadcast Revenue section for
-      the same rank-threshold table Sponsorship uses.</p>
-      <p style="margin-top:10px;"><b>The League-Wide (National) TV Deal is separate and fully automatic</b> &mdash; a
-      shared formula-only split (base + standings/Star Power bonus) with no live negotiation, since there's no natural
-      second party to negotiate a league-wide number against. See the Rulebook's TV / Broadcast Revenue section.</p>
+      <p style="margin-top:12px;"><b>This negotiation sets the RATE and the CLAUSE.</b> The money is paid on one TV Revenue
+      Day, together with the League-Wide (National) TV Deal, once your instructor closes Local TV negotiations. The Star
+      Power modifier (+15% if your latest starting XI is top-3 league-wide that day) applies on top of your rate. A team
+      with no signed deal by the deadline gets its base rate and base clause. The clause is checked once at season end.</p>
+      <p style="margin-top:10px;"><b>The National TV Deal is automatic</b> &mdash; a shared base plus standings and Star
+      Power bonuses, with nothing to negotiate. See the Rulebook's TV / Broadcast Revenue section.</p>
     </div>
   </section>
 
@@ -223,7 +216,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
     <p class="sub-backend-warning" hidden>Backend not configured yet &mdash; submissions are disabled until BACKEND_URL is set in assets/config.js.</p>
     <div class="sub-card">
       <h2>Lock In Your Local TV Deal</h2>
-      <p class="sub-sub">The real thing -- saved live. One-time only, right after Draft Day.</p>
+      <p class="sub-sub">Backup form -- use the <a href="../tv-rep/">AI TV Rep</a> unless your instructor says otherwise. One-time only.</p>
       <div class="sub-grid">
         <div class="sub-field"><label for="tv-team">Team</label><select id="tv-team" class="sub-team-select"></select></div>
         <div class="sub-field"><label for="tv-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="tv-pin" class="sub-pin" placeholder="4-digit PIN"></div>
@@ -252,11 +245,11 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
   <section>
     <div class="section-head">
       <h2>Try a Negotiation</h2>
-      <span class="section-note">a rehearsal &mdash; the real negotiation still happens live, right after Draft Day</span>
+      <span class="section-note">a rehearsal &mdash; the real negotiation is on the AI TV Rep page</span>
     </div>
     <div class="sim">
       <p class="sim-note">Practice the math with a hypothetical rate -- real market-tier base rates aren't posted
-      publicly anywhere on this site; your network rep tells you yours face to face.</p>
+      publicly anywhere on this site; the AI TV Rep opens with yours.</p>
       <div class="sim-grid">
         <div class="field">
           <label for="sim-base">Hypothetical Base Rate ($/season)</label>
@@ -380,7 +373,7 @@ document.getElementById('sim-go').addEventListener('click', () => {{
   }}
 
   resultEl.className = 'sim-result ' + (revenueAsk === 'negotiate' && rate < baseRevenue ? 'walk_away' : 'accepted');
-  let text = `Negotiated terms: rate $${{rate.toLocaleString()}}/season, clause ${{clause}}.${{clauseNote}} Still paid at the Round 3 split, plus Star Power bonus if earned then.`;
+  let text = `Negotiated terms: rate $${{rate.toLocaleString()}}/season, clause ${{clause}}.${{clauseNote}} Paid on TV Revenue Day, plus Star Power bonus if earned then.`;
   if (commission > 0) {{
     text += ` A live network rep here would earn a $${{commission.toLocaleString()}} commission for their own team, credited now.`;
   }}

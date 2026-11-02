@@ -651,6 +651,14 @@ function negLockKey_(teamId, brandName) {
 
 // why this team can't sign this brand right now, or "" if it can
 function negBlocked_(teamId, brand, sheets) {
+  if (brand.kind === "tv") {
+    var signed = readLocalTVDeals_(sheets.localTv).some(function (d) { return String(d.team_id) === String(teamId); });
+    if (signed) return "Your Local TV Deal is already signed. It's a one-time deal.";
+    if (PropertiesService.getScriptProperties().getProperty(negLockKey_(teamId, brand.name)) === negToday_()) {
+      return brand.name + " walked away from talks with your club today. Come back tomorrow.";
+    }
+    return "";
+  }
   var deals = readSponsorshipDeals_(sheets.sponsorships);
   var mine = deals.some(function (d) { return String(d.team_id) === String(teamId) && d.category === brand.category; });
   if (mine) return "You already have a " + brand.category + " sponsor. One brand per category.";
@@ -684,6 +692,16 @@ function negModelRateOk_(teamId) {
   return true;
 }
 
+// The AI TV Rep (type "tv_negotiation", page /tv-rep/) runs through the same
+// deal rules as a sponsor: the "brand" is the regional network, its base is
+// the team's market-tier rate, and a signed deal goes to LocalTVDeals.
+var TV_NETWORK_NAME = "Regional Sports Network";
+
+function tvDeal_(teamId) {
+  var t = LOCAL_TV_BASE[String(teamId)];
+  return t ? { kind: "tv", name: TV_NETWORK_NAME, category: "Local TV", tier: t.tier, base_revenue: t.base_revenue, base_clause: t.base_clause } : null;
+}
+
 function negTemplate_(st, decision, ask, clauseNote) {
   var deal = negMoney_(st.offer) + " per season with " + negClauseText_(st.clause);
   var line = {
@@ -691,7 +709,7 @@ function negTemplate_(st, decision, ask, clauseNote) {
     agree: "You've made your case. " + st.brand + " can do " + deal + ". Ready to sign?",
     counter: "We're not at " + negMoney_(ask) + ". Right now we can do " + deal + ". Show us more about why your club is worth it.",
     final: "This is our final offer: " + deal + ". Take it or leave it.",
-    walk: "We're too far apart. " + st.brand + " is stepping away from these talks today. You could try another " + st.category + " brand.",
+    walk: "We're too far apart. " + st.brand + " is stepping away from these talks today. " + (st.kind === "tv" ? "Come back tomorrow if you'd like to talk again." : "You could try another " + st.category + " brand."),
   }[decision];
   if (clauseNote === "granted") line += " We can also agree to " + negClauseText_(st.clause) + ".";
   if (clauseNote === "refused") line += " The clause stays at " + st.clause + ".";
@@ -729,8 +747,12 @@ function negVoice_(st, decision, turn, ctx, brief, teamId) {
     "You decline the looser clause the owner asked for; it stays " + st.clause + ".";
   var facts = String(brief.briefing || "").split("\nFINANCES")[0];
   var system = [
-    "You are the sports partnerships manager for " + st.brand + " (" + st.category + "), negotiating a sponsorship with the owner of " + (brief.name || "a club") + " in the " + (ctx.league_name || "league") + ", a class simulation in SPM261 Introduction to Sport Management at Arcadia University. The owner is a student.",
-    "Brand personality: " + ((ctx.brand_flavor || {})[st.brand] || "a major brand looking for a strong partner") + ".",
+    st.kind === "tv" ?
+      "You are the head of regional rights for " + st.brand + ", negotiating a Local TV Deal with the owner of " + (brief.name || "a club") + " (" + st.tier + ") in the " + (ctx.league_name || "league") + ", a class simulation in SPM261 Introduction to Sport Management at Arcadia University. The owner is a student." :
+      "You are the sports partnerships manager for " + st.brand + " (" + st.category + "), negotiating a sponsorship with the owner of " + (brief.name || "a club") + " in the " + (ctx.league_name || "league") + ", a class simulation in SPM261 Introduction to Sport Management at Arcadia University. The owner is a student.",
+    st.kind === "tv" ?
+      "What you care about: ratings, which come from market size, star players, winning and big crowds." :
+      "Brand personality: " + ((ctx.brand_flavor || {})[st.brand] || "a major brand looking for a strong partner") + ".",
     "",
     "The league's deal engine has ALREADY decided this turn. You only say it, in character.",
     "THIS TURN: " + situation + " " + clauseLine,
@@ -802,8 +824,9 @@ function negPublic_(st) {
 }
 
 function handleNegotiation_(body, team, sheets) {
-  var brand = negBrand_(body.brand);
-  if (!brand) return jsonOut_({ ok: false, error: "Pick a brand first." });
+  var isTv = body.type === "tv_negotiation";
+  var brand = isTv ? tvDeal_(team.id) : negBrand_(body.brand);
+  if (!brand) return jsonOut_({ ok: false, error: isTv ? "No market tier on file for your team." : "Pick a brand first." });
   var cache = CacheService.getScriptCache();
   var key = "neg_" + team.id + "_" + brand.name;
   var action = String(body.action || "");
@@ -811,7 +834,7 @@ function handleNegotiation_(body, team, sheets) {
   try {
     ctx = coachContext_();
   } catch (err) {
-    return jsonOut_({ ok: false, error: "The sponsor can't load your team data right now. Try again in a minute." });
+    return jsonOut_({ ok: false, error: "The rep can't load your team data right now. Try again in a minute." });
   }
   var brief = (ctx.teams || {})[String(team.id)] || {};
   var teamName = brief.name || team.name;
@@ -830,6 +853,7 @@ function handleNegotiation_(body, team, sheets) {
     st = { brand: brand.name, category: brand.category, base: brand.base_revenue, base_clause: brand.base_clause,
            leverage: leverage, adj: -0.10 + (leverage / 100) * 0.20, best_score: 0, offer: brand.base_revenue,
            clause: brand.base_clause, turns: 0, strikes: 0, status: "open", history: [] };
+    if (isTv) { st.kind = "tv"; st.tier = brand.tier; }
     voice = negVoice_(st, "open", null, ctx, brief, team.id);
     st.history.push({ role: "rep", text: voice.reply });
     cache.put(key, JSON.stringify(st), NEG_SESSION_TTL);
@@ -854,7 +878,8 @@ function handleNegotiation_(body, team, sheets) {
     try {
       block = negBlocked_(team.id, brand, sheets);
       if (block) return jsonOut_({ ok: false, error: block });
-      sheets.sponsorships.appendRow([team.id, brand.category, brand.name, st.offer, st.clause, "", new Date().toISOString()]);
+      if (isTv) sheets.localTv.appendRow([team.id, st.offer, st.clause, "", new Date().toISOString()]);
+      else sheets.sponsorships.appendRow([team.id, brand.category, brand.name, st.offer, st.clause, "", new Date().toISOString()]);
     } finally {
       lock.releaseLock();
     }
@@ -883,7 +908,7 @@ function handleNegotiation_(body, team, sheets) {
 
   st.turns++;
   var turn = { ask: ask, pitch: pitch, clauseAsk: clauseAsk, clauseNote: "",
-               heuristic: negHeuristicScore_(pitch, brand) };
+               heuristic: negHeuristicScore_(pitch, isTv ? { name: "rating" } : brand) };
   turn.userText = "My ask: " + negMoney_(ask) + " per season." +
     (clauseAsk === "keep" ? "" : " Clause request: " + (clauseAsk === "none" ? "no performance clause." : "a " + clauseAsk + " clause.")) +
     "\n" + pitch;
@@ -1041,7 +1066,7 @@ function doPost(e) {
   if (!pinCheck.ok) return jsonOut_({ ok: false, error: pinCheck.error });
 
   if (body.type === "coach_chat") return handleCoachChat_(body, pinCheck.team);
-  if (body.type === "sponsor_negotiation") return handleNegotiation_(body, pinCheck.team, sheets);
+  if (body.type === "sponsor_negotiation" || body.type === "tv_negotiation") return handleNegotiation_(body, pinCheck.team, sheets);
 
   var now = new Date().toISOString();
 
@@ -1197,6 +1222,9 @@ function doPost(e) {
         // Same reasoning as the sponsorship_deal handler above -- don't
         // echo tvBase.base_revenue back in an error message either.
         return jsonOut_({ ok: false, error: "Rate different from base requires rep_team_id to credit the commission." });
+      }
+      if (String(body.rep_team_id) === String(body.team_id)) {
+        return jsonOut_({ ok: false, error: "A team can't be its own network rep." });
       }
       tvRepTeamId = body.rep_team_id;
     }

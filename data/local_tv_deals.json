@@ -28,7 +28,7 @@
     }
   ],
   "star_power_modifier": {
-    "description": "If a team's average starting-XI Star Power ranks in the league's top 3 at split time, its Local TV Deal pays +15% that round (same top-3 threshold as the national deal's star bonus) -- scaled off the team's own base rather than a flat dollar add, since a Major Market base and a Small Market base are already such different sizes.",
+    "description": "If a team's most recent starting-XI average Star Power ranks in the league's top 3 on TV Revenue Day, its Local TV Deal pays +15% (the same top-3 test as the national star bonus), scaled off the team's own rate.",
     "multiplier_if_top3_star_power": 1.15,
     "multiplier_otherwise": 1.0
   },
@@ -94,12 +94,7 @@
       "team_name": "Team 9",
       "market_tier": "Small Market",
       "base_revenue": 700000,
-      "base_clause": "standard",
-      "negotiated": true,
-      "mode": "live",
-      "negotiated_revenue": 450000,
-      "final_clause": "standard",
-      "network_rep_team_id": 8
+      "base_clause": "standard"
     },
     {
       "team_id": 9,

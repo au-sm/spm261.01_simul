@@ -24,14 +24,8 @@ a team can clear a loose-clause deal's bar while missing a strict-
 clause deal's bar in the same season (whether those two deals are both
 sponsors, both the Local TV deal and a sponsor, etc.).
 
-NOTE -- this enforcement is correctly wired but currently INERT for
-Local TV deals in practice: engine/resolve_tv_split.py (the script
-that would actually pay Local TV revenue into a team's
-local_tv_revenue at the Round 3 split) does not exist yet. Until that
-script exists, local_tv_revenue is never populated, so a clawback here
-computes against $0 (a no-op in dollar terms) even though the clause
-outcome is still correctly recorded. That's a separate, pre-existing
-gap -- not something this script needs to fix.
+Local TV money reaches local_tv_revenue on TV Revenue Day
+(engine/resolve_tv_split.py), which must run before this checkpoint.
 
 Usage:
     python3 engine/resolve_clause_checkpoint.py
@@ -144,7 +138,7 @@ def main():
                     print(f"  {team_names.get(tid, assignment['team_name'])} (final rank {team_rank}, needed top "
                           f"{threshold} for its {assignment['final_clause']} clause): Local TV Deal claws back "
                           f"{int(penalty_pct*100)}% = ${amount:,} "
-                          f"(inert in practice until Round 3 TV payouts exist -- see module docstring)")
+                          f"")
 
     if not any_deals_at_all:
         print("No signed sponsors or negotiated Local TV deals found yet -- nothing to check.")

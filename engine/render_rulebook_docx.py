@@ -478,11 +478,9 @@ def build(config, deals, calendar=None, ltv_deals=None):
     doc.add_paragraph(ltv["negotiation"])
     doc.add_heading("Clause", level=2)
     doc.add_paragraph(
-        "Exactly like Sponsorship, a Local TV Deal's clause is a separate ask from its rate: push for a "
-        "looser clause than your market tier's base clause, at Modest / Bold / Very Bold intensity, gated "
-        "by your same Negotiating Leverage number. Ask beyond what your leverage supports and the deal "
-        "walks away on the clause specifically — that costs you nothing on the revenue side, and you can "
-        "simply not push the clause further. See \"What the Clause Actually Means\" in the Sponsorship Deals & "
+        "Exactly like Sponsorship, a Local TV Deal's clause is a separate ask from its rate: name the looser "
+        "clause you want. One step looser than your market tier's base clause needs leverage 20+, two steps "
+        "50+, and strict to no clause 80+. Asking never costs you revenue. See \"What the Clause Actually Means\" in the Sponsorship Deals & "
         f"Negotiation section above for the rank-threshold table — the same thresholds and the same {int(ce['penalty_pct']*100)}% penalty "
         "apply to a Local TV Deal's clause, checked once at season end off your one final rank."
     )
