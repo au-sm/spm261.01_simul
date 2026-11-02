@@ -255,6 +255,17 @@ def main():
         # Team Owner Brief use; public anyway since students compute it
         avg_star = sum(p["star_power"] for p in squad) / len(squad) if squad else 50
         leverage = compute_leverage(avg_star, position[tid] if matches else None, len(team_ids))
+        def tv_line(team_id):
+            a = next((x for x in load_json("local_tv_deals.json")["assignments"] if x["team_id"] == team_id), None)
+            if not a:
+                return "TV DEAL: no market tier on file"
+            deal = (f"Local TV Deal signed at {money(a['negotiated_revenue'])}/season, {a.get('final_clause')} clause"
+                    if a.get("negotiated") else
+                    f"Local TV Deal not signed yet (opening clause {a['base_clause']}); negotiate on the AI TV Rep page; "
+                    "the rep opens with the base rate; no signed deal by the deadline means base rate and base clause")
+            paid = ("TV Revenue Day has been paid" if os.path.exists(os.path.join(BASE, "data", "tv_payout.json"))
+                    else "TV Revenue Day not paid yet, so the $0 TV lines above are expected")
+            return f"TV DEAL: {a['market_tier']}; {deal}; national TV is automatic; {paid}"
         briefing = "\n".join([
             f"TEAM: {names[tid]} (league position {position[tid]} of {len(team_ids)})",
             f"RECORD: P{rec['P']} W{rec['W']} D{rec['D']} L{rec['L']}, GF{rec['GF']} GA{rec['GA']}, {rec['PTS']} pts",
@@ -269,6 +280,7 @@ def main():
             f"national TV {money(fin.get('tv_revenue', 0))}, local TV {money(fin.get('local_tv_revenue', 0))}",
             f"PAYROLL: {money(payroll)} of the {money(config.get('salary_cap', 0))} salary cap",
             f"SPONSORS: {sponsor_txt} ({config.get('sponsorship_categories_required', 6)} categories required)",
+            tv_line(tid),
             f"SQUAD: {summary}",
             *("  " + l for l in roster_lines),
             *(scouting(next_fixture[tid][0]) if tid in next_fixture else []),

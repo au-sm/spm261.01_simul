@@ -27,6 +27,8 @@ QUICK_ASKS = [
     "Why did my attendance change?",
     "Am I spending my cash wisely?",
     "Prep me for a sponsorship negotiation",
+    "Prep me for my Local TV negotiation",
+    "How does my TV money work?",
 ]
 
 
