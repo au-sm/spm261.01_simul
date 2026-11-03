@@ -57,7 +57,12 @@
       "team_name": "Team 3",
       "market_tier": "Mid Market",
       "base_revenue": 850000,
-      "base_clause": "standard"
+      "base_clause": "standard",
+      "negotiated": true,
+      "mode": "live",
+      "negotiated_revenue": 850000,
+      "final_clause": "standard",
+      "network_rep_team_id": null
     },
     {
       "team_id": 3,
