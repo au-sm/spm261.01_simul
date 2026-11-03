@@ -38,7 +38,12 @@
       "team_name": "Team 1",
       "market_tier": "Large Market",
       "base_revenue": 1000000,
-      "base_clause": "strict"
+      "base_clause": "strict",
+      "negotiated": true,
+      "mode": "live",
+      "negotiated_revenue": 1000000,
+      "final_clause": "strict",
+      "network_rep_team_id": null
     },
     {
       "team_id": 1,
@@ -113,7 +118,12 @@
       "team_name": "Team 11",
       "market_tier": "Major Market",
       "base_revenue": 1200000,
-      "base_clause": "strict"
+      "base_clause": "strict",
+      "negotiated": true,
+      "mode": "live",
+      "negotiated_revenue": 1130000,
+      "final_clause": "standard",
+      "network_rep_team_id": null
     },
     {
       "team_id": 11,
@@ -141,7 +151,12 @@
       "team_name": "Team 15",
       "market_tier": "Major Market",
       "base_revenue": 1200000,
-      "base_clause": "strict"
+      "base_clause": "strict",
+      "negotiated": true,
+      "mode": "live",
+      "negotiated_revenue": 1190000,
+      "final_clause": "standard",
+      "network_rep_team_id": null
     },
     {
       "team_id": 15,
