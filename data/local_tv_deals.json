@@ -142,7 +142,12 @@
       "team_name": "Team 13",
       "market_tier": "Large Market",
       "base_revenue": 1000000,
-      "base_clause": "strict"
+      "base_clause": "strict",
+      "negotiated": true,
+      "mode": "live",
+      "negotiated_revenue": 1000000,
+      "final_clause": "strict",
+      "network_rep_team_id": null
     },
     {
       "team_id": 13,
@@ -180,7 +185,12 @@
       "team_name": "Team 17",
       "market_tier": "Micro Market",
       "base_revenue": 550000,
-      "base_clause": "loose"
+      "base_clause": "loose",
+      "negotiated": true,
+      "mode": "live",
+      "negotiated_revenue": 570000,
+      "final_clause": "loose",
+      "network_rep_team_id": null
     },
     {
       "team_id": 17,

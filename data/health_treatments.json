@@ -907,6 +907,46 @@
    "treatment": "sports_science",
    "submitted_at": "2026-11-03T17:36:47.211Z",
    "cost": 125000
+  },
+  {
+   "id": "16|6|361|2026-11-04T00:20:59.041Z",
+   "team_id": "16",
+   "round": 6,
+   "player_id": "361",
+   "player_name": "Rafael Horvat",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-04T00:20:59.041Z",
+   "cost": 125000
+  },
+  {
+   "id": "16|6|34|2026-11-04T00:22:05.172Z",
+   "team_id": "16",
+   "round": 6,
+   "player_id": "34",
+   "player_name": "Amara Reyes",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-04T00:22:05.172Z",
+   "cost": 125000
+  },
+  {
+   "id": "16|6|266|2026-11-04T00:24:15.765Z",
+   "team_id": "16",
+   "round": 6,
+   "player_id": "266",
+   "player_name": "Milan Haddad",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-04T00:24:15.765Z",
+   "cost": 125000
+  },
+  {
+   "id": "16|6|105|2026-11-04T00:25:06.866Z",
+   "team_id": "16",
+   "round": 6,
+   "player_id": "105",
+   "player_name": "Youssef Kucera",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-04T00:25:06.866Z",
+   "cost": 125000
   }
  ],
  "voided": [],
@@ -916,7 +956,7 @@
   "5": 1050000,
   "12": 2425000,
   "0": 625000,
-  "16": 1125000,
+  "16": 1625000,
   "14": 925000,
   "17": 175000,
   "15": 1125000,
@@ -1154,6 +1194,18 @@
     "levels": 2
    },
    "396": {
+    "levels": 2
+   },
+   "361": {
+    "levels": 2
+   },
+   "34": {
+    "levels": 2
+   },
+   "266": {
+    "levels": 2
+   },
+   "105": {
     "levels": 2
    }
   }
