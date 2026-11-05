@@ -83,7 +83,12 @@
       "team_name": "Team 6",
       "market_tier": "Micro Market",
       "base_revenue": 550000,
-      "base_clause": "loose"
+      "base_clause": "loose",
+      "negotiated": true,
+      "mode": "live",
+      "negotiated_revenue": 550000,
+      "final_clause": "loose",
+      "network_rep_team_id": null
     },
     {
       "team_id": 6,

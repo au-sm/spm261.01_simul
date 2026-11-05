@@ -343,7 +343,7 @@
     },
     "8": {
       "ticket_revenue": 376278,
-      "sponsorship_revenue": 3000000,
+      "sponsorship_revenue": 11400000,
       "tv_revenue": 0,
       "sponsors_owned": [
         {
@@ -353,6 +353,51 @@
           "outcome": "accepted",
           "final_revenue": 3000000,
           "final_clause": "strict",
+          "sponsor_rep_team_id": null
+        },
+        {
+          "category": "Beverage",
+          "sponsor": "Coca-Cola",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 1800000,
+          "final_clause": "standard",
+          "sponsor_rep_team_id": null
+        },
+        {
+          "category": "Automotive",
+          "sponsor": "Hyundai",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 1000000,
+          "final_clause": "loose",
+          "sponsor_rep_team_id": null
+        },
+        {
+          "category": "Technology",
+          "sponsor": "AT&T",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 1500000,
+          "final_clause": "standard",
+          "sponsor_rep_team_id": null
+        },
+        {
+          "category": "Financial Services",
+          "sponsor": "Visa",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 2500000,
+          "final_clause": "strict",
+          "sponsor_rep_team_id": null
+        },
+        {
+          "category": "Airline",
+          "sponsor": "Delta",
+          "mode": "live",
+          "outcome": "accepted",
+          "final_revenue": 1600000,
+          "final_clause": "standard",
           "sponsor_rep_team_id": null
         }
       ],
