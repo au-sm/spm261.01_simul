@@ -187,7 +187,6 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
         <li>The cost is deducted from your team's cash on the Budget Dashboard. It does <b>not</b> reduce the Revenue component of your Season Scorecard.</li>
         <li>Requests are processed about every 30 minutes. Check the Dashboard's Player Condition report before you submit your lineup to confirm the treatment took effect.</li>
         <li>A request that fails a check (not enough cash, round already played, limit reached) is voided and listed in the log below with the reason. Voided requests cost nothing.</li>
-        <li><b>Medical investment edge:</b> your total Health Hub spending this season lifts your whole team's Attack and Defense in every match, up to +{round(health.INVESTMENT_MAX_BONUS*100)}% (about +1.3% at $250K, +2.4% at $500K, +3.8% at $1M, +5.2% at $2M). It raises your chances of winning; it doesn't guarantee a win.</li>
         <li>A treatment is a business decision: explain it in that round's lineup rationale, where it is scored under Business/Financial Reasoning.</li>
       </ul>
     </div>
