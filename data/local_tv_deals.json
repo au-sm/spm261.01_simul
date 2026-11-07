@@ -50,7 +50,11 @@
       "team_name": "Team 2",
       "market_tier": "Major Market",
       "base_revenue": 1200000,
-      "base_clause": "strict"
+      "base_clause": "strict",
+      "negotiated": true,
+      "mode": "base_at_deadline",
+      "negotiated_revenue": 1200000,
+      "final_clause": "strict"
     },
     {
       "team_id": 2,
@@ -69,14 +73,22 @@
       "team_name": "Team 4",
       "market_tier": "Small Market",
       "base_revenue": 700000,
-      "base_clause": "standard"
+      "base_clause": "standard",
+      "negotiated": true,
+      "mode": "base_at_deadline",
+      "negotiated_revenue": 700000,
+      "final_clause": "standard"
     },
     {
       "team_id": 4,
       "team_name": "Team 5",
       "market_tier": "Mid Market",
       "base_revenue": 850000,
-      "base_clause": "standard"
+      "base_clause": "standard",
+      "negotiated": true,
+      "mode": "base_at_deadline",
+      "negotiated_revenue": 850000,
+      "final_clause": "standard"
     },
     {
       "team_id": 5,
@@ -95,21 +107,33 @@
       "team_name": "Team 7",
       "market_tier": "Micro Market",
       "base_revenue": 550000,
-      "base_clause": "loose"
+      "base_clause": "loose",
+      "negotiated": true,
+      "mode": "base_at_deadline",
+      "negotiated_revenue": 550000,
+      "final_clause": "loose"
     },
     {
       "team_id": 7,
       "team_name": "Team 8",
       "market_tier": "Mid Market",
       "base_revenue": 850000,
-      "base_clause": "standard"
+      "base_clause": "standard",
+      "negotiated": true,
+      "mode": "base_at_deadline",
+      "negotiated_revenue": 850000,
+      "final_clause": "standard"
     },
     {
       "team_id": 8,
       "team_name": "Team 9",
       "market_tier": "Small Market",
       "base_revenue": 700000,
-      "base_clause": "standard"
+      "base_clause": "standard",
+      "negotiated": true,
+      "mode": "base_at_deadline",
+      "negotiated_revenue": 700000,
+      "final_clause": "standard"
     },
     {
       "team_id": 9,
@@ -140,7 +164,11 @@
       "team_name": "Team 12",
       "market_tier": "Small Market",
       "base_revenue": 700000,
-      "base_clause": "standard"
+      "base_clause": "standard",
+      "negotiated": true,
+      "mode": "base_at_deadline",
+      "negotiated_revenue": 700000,
+      "final_clause": "standard"
     },
     {
       "team_id": 12,
@@ -159,7 +187,11 @@
       "team_name": "Team 14",
       "market_tier": "Large Market",
       "base_revenue": 1000000,
-      "base_clause": "strict"
+      "base_clause": "strict",
+      "negotiated": true,
+      "mode": "base_at_deadline",
+      "negotiated_revenue": 1000000,
+      "final_clause": "strict"
     },
     {
       "team_id": 14,
@@ -202,7 +234,11 @@
       "team_name": "Team 18",
       "market_tier": "Large Market",
       "base_revenue": 1000000,
-      "base_clause": "strict"
+      "base_clause": "strict",
+      "negotiated": true,
+      "mode": "base_at_deadline",
+      "negotiated_revenue": 1000000,
+      "final_clause": "strict"
     }
   ]
 }
