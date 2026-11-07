@@ -40,6 +40,7 @@ from player_condition import conditions_for_round, roll_new_injuries
 from match_summary import generate_summary
 from goal_events import generate_goal_events
 import render_dashboard
+import health
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -323,6 +324,8 @@ def main():
             h_lineup, h_formation, h_info["strategy"] if h_info["submitted"] else "Balanced",
             a_lineup, a_formation, a_info["strategy"] if a_info["submitted"] else "Balanced",
             rng, conditions,
+            home_health_mult=health.investment_multiplier(h_id),
+            away_health_mult=health.investment_multiplier(a_id),
         )
 
         record = {
@@ -333,6 +336,8 @@ def main():
             "home_strategy": h_info["strategy"], "away_strategy": a_info["strategy"],
             "home_submitted": h_info["submitted"], "away_submitted": a_info["submitted"],
             "goal_events": result["goal_events"],
+            "home_health_multiplier": result["home_info"]["health_multiplier"],
+            "away_health_multiplier": result["away_info"]["health_multiplier"],
             "home_starters": flatten_lineup(h_lineup),
             "away_starters": flatten_lineup(a_lineup),
         }

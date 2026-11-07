@@ -27,6 +27,7 @@ that fails a check here (cash, roster, injury status, a round already
 played) is recorded as voided with a reason, never silently dropped.
 """
 import json
+import math
 import os
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -71,6 +72,24 @@ def boosts_for_round(round_num, state=None):
 def team_spend(team_id, state=None):
     state = state if state is not None else load()
     return state.get("team_spend", {}).get(str(team_id), 0)
+
+
+# Medical investment edge (instructor, 2026-11-07): a club that keeps
+# investing in player health plays a little better as a whole, on top of
+# the per-player effects above. Cumulative season spend lifts BOTH the
+# team's Attack and Defense by up to INVESTMENT_MAX_BONUS, with
+# diminishing returns so the edge can't be bought outright:
+#   bonus = MAX * (1 - exp(-spend / SCALE))
+#   $250K -> +1.3%   $500K -> +2.4%   $1M -> +3.8%   $2M -> +5.2%
+# For scale, home advantage is +5% Attack only.
+INVESTMENT_MAX_BONUS = 0.06
+INVESTMENT_SCALE = 1_000_000
+
+
+def investment_multiplier(team_id, state=None):
+    """Attack/Defense multiplier (>= 1.0) from a team's season medical spend."""
+    spend = team_spend(team_id, state)
+    return 1 + INVESTMENT_MAX_BONUS * (1 - math.exp(-spend / INVESTMENT_SCALE))
 
 
 def request_id(row):

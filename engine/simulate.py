@@ -16,6 +16,9 @@ in this file, not reverse-engineered from behavior):
   2. Strategy shifts +/- 8% between the team's own Attack and Defense
      after formation weighting (Attacking / Balanced / Defensive).
   3. Home side gets a fixed +5% Attack bump (home advantage).
+     Each side's Attack and Defense are then scaled by its medical
+     investment multiplier (health.investment_multiplier: up to +6%,
+     from cumulative Player Health Hub spend, diminishing returns).
   4. Expected goals (xG) for each side = a saturating function of
      (own Attack - opponent Defense): a big mismatch caps out rather
      than producing absurd scorelines.
@@ -119,18 +122,27 @@ def expected_goals(own_attack, opp_defense):
 
 def simulate_match(home_lineup, home_formation, home_strategy,
                     away_lineup, away_formation, away_strategy,
-                    rng: random.Random, conditions=None):
+                    rng: random.Random, conditions=None,
+                    home_health_mult=1.0, away_health_mult=1.0):
     """
     Returns a full recap dict: score, xG, ratings breakdown for both
     sides. `rng` should be the ONE shared season Random instance,
     passed in by the caller -- never re-seeded per match.
     conditions: optional {player_id: multiplier} for this round, from
     player_condition.conditions_for_round() -- see team_ratings() above.
+    home/away_health_mult: medical investment multipliers from
+    health.investment_multiplier(); 1.0 means no edge.
     """
     h_atk, h_def, h_info = team_ratings(home_lineup, home_formation, home_strategy, conditions)
     a_atk, a_def, a_info = team_ratings(away_lineup, away_formation, away_strategy, conditions)
 
     h_atk *= HOME_ADVANTAGE
+    h_atk *= home_health_mult
+    h_def *= home_health_mult
+    a_atk *= away_health_mult
+    a_def *= away_health_mult
+    h_info["health_multiplier"] = round(home_health_mult, 4)
+    a_info["health_multiplier"] = round(away_health_mult, 4)
 
     h_xg = expected_goals(h_atk, a_def)
     a_xg = expected_goals(a_atk, h_def)

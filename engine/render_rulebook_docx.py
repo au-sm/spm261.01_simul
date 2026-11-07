@@ -256,6 +256,13 @@ def build(config, deals, calendar=None, ltv_deals=None):
         "lineup rationale; it is scored under Business/Financial Reasoning."
     )
     doc.add_paragraph(
+        "Medical investment edge: clubs that keep investing in player health play a little better as a whole. "
+        "Your total Health Hub spending this season raises your whole team's Attack and Defense in every match, "
+        f"up to +{round(health.INVESTMENT_MAX_BONUS*100)}%, with diminishing returns: about +1.3% at $250,000, "
+        "+2.4% at $500,000, +3.8% at $1,000,000 and +5.2% at $2,000,000. (For comparison, home advantage is +5% "
+        "Attack.) It raises your chances of winning; it does not guarantee a win."
+    )
+    doc.add_paragraph(
         "How to book: open the Player Health Hub page, choose your team, enter your team PIN, pick the player and "
         "the treatment, and submit. Book before you submit that round's Weekly Lineup, then check the Player "
         "Condition report to confirm the treatment took effect."

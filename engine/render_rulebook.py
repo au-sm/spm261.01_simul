@@ -265,6 +265,11 @@ def render(config, deals, calendar=None, ltv_deals=None):
           the effect before you submit your lineup. A request that fails a check (not enough cash, round already played,
           limit reached) is voided at no cost. Explain any treatment in that round's lineup rationale; it is scored under
           Business/Financial Reasoning.</p>
+          <p><strong>Medical investment edge:</strong> clubs that keep investing in player health play a little better
+          as a whole. Your total Health Hub spending this season raises your whole team's Attack and Defense in every match,
+          up to +{round(health.INVESTMENT_MAX_BONUS*100)}%, with diminishing returns: about +1.3% at $250,000, +2.4% at
+          $500,000, +3.8% at $1,000,000 and +5.2% at $2,000,000. (For comparison, home advantage is +5% Attack.) It raises
+          your chances of winning; it does not guarantee a win.</p>
           <p><strong>How to book:</strong> open the <a href="{health_url}">Player Health Hub</a>, choose your team, enter your
           team PIN, pick the player and the treatment, and submit. Book before you submit that round's Weekly Lineup, then
           check the Player Condition report to confirm the treatment took effect.</p>
