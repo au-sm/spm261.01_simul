@@ -977,13 +977,53 @@
    "treatment": "recovery",
    "submitted_at": "2026-11-05T15:42:02.776Z",
    "cost": 50000
+  },
+  {
+   "id": "5|7|58|2026-11-09T13:46:10.391Z",
+   "team_id": "5",
+   "round": 7,
+   "player_id": "58",
+   "player_name": "Milan Neumann",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-09T13:46:10.391Z",
+   "cost": 125000
+  },
+  {
+   "id": "5|7|182|2026-11-09T13:46:35.487Z",
+   "team_id": "5",
+   "round": 7,
+   "player_id": "182",
+   "player_name": "Marco Krause",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-09T13:46:35.487Z",
+   "cost": 125000
+  },
+  {
+   "id": "5|7|230|2026-11-09T13:47:03.774Z",
+   "team_id": "5",
+   "round": 7,
+   "player_id": "230",
+   "player_name": "Hassan Novak",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-09T13:47:03.774Z",
+   "cost": 125000
+  },
+  {
+   "id": "5|7|137|2026-11-09T13:52:35.325Z",
+   "team_id": "5",
+   "round": 7,
+   "player_id": "137",
+   "player_name": "Tobias Rossi",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-09T13:52:35.325Z",
+   "cost": 125000
   }
  ],
  "voided": [],
  "team_spend": {
   "8": 1175000,
   "1": 1075000,
-  "5": 1150000,
+  "5": 1650000,
   "12": 2425000,
   "0": 625000,
   "16": 1625000,
@@ -1246,6 +1286,20 @@
    },
    "54": {
     "levels": 1
+   }
+  },
+  "7": {
+   "58": {
+    "levels": 2
+   },
+   "182": {
+    "levels": 2
+   },
+   "230": {
+    "levels": 2
+   },
+   "137": {
+    "levels": 2
    }
   }
  }
