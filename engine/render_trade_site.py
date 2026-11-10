@@ -54,22 +54,56 @@ def render(config, deals, trades, calendar):
         give = side_label(t.get("players_out", []), "released") + (f" + {money(cash_out)}" if cash_out else "")
         get = side_label(t.get("players_in", []), "free agent") + (f" + {money(cash_in)}" if cash_in else "")
         detail = t.get("void_reason", "") if outcome == "voided" else t.get("rationale", "")
+        sess = tr["sessions"][t["session"]]["name"] if t.get("session") is not None else "&mdash;"
         log_rows.append(f'''
         <tr>
+          <td>{sess}</td>
           <td>{proposer} &harr; {receiver}</td>
           <td>{give}<br><span class="trade-arrow">for</span><br>{get}</td>
           <td><span class="sub-status sub-status-{outcome}">{outcome}</span></td>
           <td class="trade-detail">{detail}</td>
           <td>{t.get("applied_at") or t.get("voided_at") or ""}</td>
         </tr>''')
-    log_html = "".join(log_rows) or '<tr><td colspan="5" class="sub-empty">No trades have been finalized yet.</td></tr>'
+    log_html = "".join(log_rows) or '<tr><td colspan="6" class="sub-empty">No trades have been finalized yet.</td></tr>'
 
     import resolve_trade
-    session = resolve_trade.open_session(tr["sessions"], resolve_trade.load_json("matches.json"))
-    session_counts = trades.get("session_trade_count", {}).get(str(session), {}) if session is not None else {}
-    session_label = tr["sessions"][session]["name"] if session is not None else "No session open"
+    matches = resolve_trade.load_json("matches.json")
+    sessions = tr["sessions"]
+    session = resolve_trade.open_session(sessions, matches)
+    played = max((m["round"] for m in matches if m.get("stage", "regular") == "regular"), default=0)
+
+    # A session has started once the one before it closed (Session 1 is
+    # open from the start). Sessions that haven't started show a dash.
+    def started(i):
+        if sessions[i].get("closes_before_round") is None:
+            return False
+        return i == 0 or played >= sessions[i - 1]["closes_before_round"]
+
+    if session is not None:
+        close = sessions[session]["closes_before_round"]
+        banner = (f'<b>{sessions[session]["name"]} is OPEN.</b> Every team must move 3 players out and 3 in. '
+                  f'It closes when Round {close} is simulated.')
+        banner_cls = "open"
+    else:
+        # with nothing open, the next session is the first one still
+        # unscheduled -- every session before it has already closed
+        nxt = next((x for x in sessions if x.get("closes_before_round") is None), None)
+        if nxt is not None:
+            banner = f'<b>No trade session is open.</b> {nxt["name"]} has not been scheduled yet -- the date will be announced in class.'
+        else:
+            banner = '<b>Trading is closed for the season.</b> All trade sessions have ended.'
+        banner_cls = "closed"
+
+    def count_cell(i, team_id):
+        if not started(i):
+            return '<td class="num">&mdash;</td>'
+        n = trades.get("session_trade_count", {}).get(str(i), {}).get(str(team_id), 0)
+        return f'<td class="num">{n}/3</td>'
+
+    session_heads = "".join(
+        f'<th class="num">{s["name"]}{" (open)" if i == session else ""}</th>' for i, s in enumerate(sessions))
     trade_count_rows = "".join(
-        f'<tr><td>{t["name"]}</td><td class="num">{session_counts.get(str(t["team_id"]), 0)}/3 players traded</td></tr>'
+        f'<tr><td>{t["name"]}</td>' + "".join(count_cell(i, t["team_id"]) for i in range(len(sessions))) + '</tr>'
         for t in sorted(config["teams"], key=lambda t: t["team_id"])
     )
 
@@ -132,6 +166,9 @@ thead th.num{{text-align:right;}}
 tbody td{{padding:7px 10px;border-top:1px solid var(--line);vertical-align:top;}}
 .trade-arrow{{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);text-transform:uppercase;}}
 .trade-detail{{font-size:12.5px;color:var(--muted);max-width:320px;}}
+.session-banner{{padding:14px 18px;border-radius:6px;font-size:15px;margin:0 0 6px;border:1px solid var(--line);}}
+.session-banner.open{{background:#e6f4ea;border-color:#7cb98a;}}
+.session-banner.closed{{background:#f4f1ea;}}
 
 footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:var(--muted);font-size:12px;font-family:"IBM Plex Mono",monospace;}}
 {NAV_CSS}
@@ -148,6 +185,10 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
 
 <div class="wrap">
   <section>
+    <p class="session-banner {banner_cls}">{banner}</p>
+  </section>
+
+  <section>
     <div class="section-head"><h2>How It Works</h2></div>
     <div class="how-it-works">
       <p><b>Deadline.</b> {tr["deadline"]}</p>
@@ -161,9 +202,9 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
   </section>
 
   <section>
-    <div class="section-head"><h2>Players Traded This Season</h2><span class="section-note">{session_label} &middot; every team must move 3 players</span></div>
+    <div class="section-head"><h2>Players Moved by Session</h2><span class="section-note">every team must move 3 players in each session</span></div>
     <table>
-      <thead><tr><th>Team</th><th class="num">Moved this session</th></tr></thead>
+      <thead><tr><th>Team</th>{session_heads}</tr></thead>
       <tbody>{trade_count_rows}</tbody>
     </table>
   </section>
@@ -241,7 +282,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
   <section>
     <div class="section-head"><h2>Final Trade Log</h2><span class="section-note">applied or voided, after roster/cap re-check -- the official record</span></div>
     <table>
-      <thead><tr><th>Teams</th><th>Trade</th><th>Result</th><th>Detail</th><th>Date</th></tr></thead>
+      <thead><tr><th>Session</th><th>Teams</th><th>Trade</th><th>Result</th><th>Detail</th><th>Date</th></tr></thead>
       <tbody>{log_html}</tbody>
     </table>
   </section>

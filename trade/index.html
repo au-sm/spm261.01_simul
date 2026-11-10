@@ -57,6 +57,9 @@ thead th.num{text-align:right;}
 tbody td{padding:7px 10px;border-top:1px solid var(--line);vertical-align:top;}
 .trade-arrow{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);text-transform:uppercase;}
 .trade-detail{font-size:12.5px;color:var(--muted);max-width:320px;}
+.session-banner{padding:14px 18px;border-radius:6px;font-size:15px;margin:0 0 6px;border:1px solid var(--line);}
+.session-banner.open{background:#e6f4ea;border-color:#7cb98a;}
+.session-banner.closed{background:#f4f1ea;}
 
 footer{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:var(--muted);font-size:12px;font-family:"IBM Plex Mono",monospace;}
 
@@ -107,6 +110,10 @@ footer{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
 
 <div class="wrap">
   <section>
+    <p class="session-banner open"><b>Trade Session 1 is OPEN.</b> Every team must move 3 players out and 3 in. It closes when Round 7 is simulated.</p>
+  </section>
+
+  <section>
     <div class="section-head"><h2>How It Works</h2></div>
     <div class="how-it-works">
       <p><b>Deadline.</b> There are two trade sessions this season. Trade Session 1 is open now and closes when Round 7 is simulated -- a trade must be accepted by both teams before then. Trade Session 2 will open later in the season; its date will be announced in class and on this page. Outside an open session, no trade can take effect -- this prevents last-minute roster stacking, the same reason real leagues carry a trade deadline.</p>
@@ -115,15 +122,15 @@ footer{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
       <p><b>Salary cap.</b> A trade is only valid if BOTH teams remain at or under salary_cap (see league_config.json) after the trade completes.</p>
       <p><b>Cash considerations.</b> Either side may add cash (from its budget, not a salary-cap item) on top of the player swap to make up for a value gap -- paying extra cash to land a clearly better player than what you're giving up is a normal, allowed trade structure, the same way real clubs attach cash to a deal. Cash only applies to deals with a partner team, not to free-agent moves.</p>
       <p><b>Approval.</b> A deal with another team only takes effect once BOTH teams agree to it: the proposing team submits a Trade Proposal, and it sits pending until the receiving team accepts or declines it on the Trade Center page. Accepting applies it at the next league-office check (once it clears the roster/cap checks below); declining ends it with no changes to either roster. A free-agent-only move needs no one's approval and applies at the next check.</p>
-      <p><b>Trade Day.</b> Each trade session includes an in-class Trade Day as the in-class window to negotiate face to face. Every team is paired with exactly one partner from a published rotation (engine/generate_trade_day_rotation.py, same no-repeat pairing method as the Sponsorship Negotiation rotation) to talk through a possible trade that class period; an odd team count leaves one team unpaired, and the instructor fills in as that team's partner, the same convention already used for the Sponsorship Negotiation rotation's bye. Your Trade Day partner is a starting point, not a requirement -- your one required 3-for-3 trade can be with any team, and the session stays open until it closes.</p>
+      <p><b>Trade Day.</b> Each trade session includes an in-class Trade Day. Owners sit in two facing rows and meet every other owner in 2-minute speed meetings, rotating seats after each one. Each meeting is for finding leads: what you would move, what positions you need, and your salary room. After the meetings, owners go back to their best leads, agree on deals and submit them on this page before class ends. Your 3 players can be moved with any team or the free-agent pool, and the session stays open until it closes.</p>
     </div>
   </section>
 
   <section>
-    <div class="section-head"><h2>Players Traded This Season</h2><span class="section-note">Trade Session 1 &middot; every team must move 3 players</span></div>
+    <div class="section-head"><h2>Players Moved by Session</h2><span class="section-note">every team must move 3 players in each session</span></div>
     <table>
-      <thead><tr><th>Team</th><th class="num">Moved this session</th></tr></thead>
-      <tbody><tr><td>Knights FC</td><td class="num">0/3 players traded</td></tr><tr><td>Knight Knight</td><td class="num">0/3 players traded</td></tr><tr><td>Pink Venom</td><td class="num">0/3 players traded</td></tr><tr><td>jake dunphy fc</td><td class="num">0/3 players traded</td></tr><tr><td>Team 5</td><td class="num">0/3 players traded</td></tr><tr><td>Oceanic FC</td><td class="num">0/3 players traded</td></tr><tr><td>JSN FC</td><td class="num">0/3 players traded</td></tr><tr><td>Wildcats</td><td class="num">0/3 players traded</td></tr><tr><td>Pitch Perfect</td><td class="num">0/3 players traded</td></tr><tr><td>Knight United</td><td class="num">0/3 players traded</td></tr><tr><td>Kyles team</td><td class="num">0/3 players traded</td></tr><tr><td>team twelve</td><td class="num">0/3 players traded</td></tr><tr><td>New Jersey FC</td><td class="num">0/3 players traded</td></tr><tr><td>arcadiaballerz</td><td class="num">0/3 players traded</td></tr><tr><td>Jovanni's Team</td><td class="num">0/3 players traded</td></tr><tr><td>The Jersey Kickers</td><td class="num">0/3 players traded</td></tr><tr><td>Peaches United</td><td class="num">0/3 players traded</td></tr><tr><td>Montreal FC</td><td class="num">0/3 players traded</td></tr></tbody>
+      <thead><tr><th>Team</th><th class="num">Trade Session 1 (open)</th><th class="num">Trade Session 2</th></tr></thead>
+      <tbody><tr><td>Knights FC</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>Knight Knight</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>Pink Venom</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>jake dunphy fc</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>Team 5</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>Oceanic FC</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>JSN FC</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>Wildcats</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>Pitch Perfect</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>Knight United</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>Kyles team</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>team twelve</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>New Jersey FC</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>arcadiaballerz</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>Jovanni's Team</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>The Jersey Kickers</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>Peaches United</td><td class="num">0/3</td><td class="num">&mdash;</td></tr><tr><td>Montreal FC</td><td class="num">0/3</td><td class="num">&mdash;</td></tr></tbody>
     </table>
   </section>
 
@@ -200,8 +207,8 @@ footer{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
   <section>
     <div class="section-head"><h2>Final Trade Log</h2><span class="section-note">applied or voided, after roster/cap re-check -- the official record</span></div>
     <table>
-      <thead><tr><th>Teams</th><th>Trade</th><th>Result</th><th>Detail</th><th>Date</th></tr></thead>
-      <tbody><tr><td colspan="5" class="sub-empty">No trades have been finalized yet.</td></tr></tbody>
+      <thead><tr><th>Session</th><th>Teams</th><th>Trade</th><th>Result</th><th>Detail</th><th>Date</th></tr></thead>
+      <tbody><tr><td colspan="6" class="sub-empty">No trades have been finalized yet.</td></tr></tbody>
     </table>
   </section>
 </div>

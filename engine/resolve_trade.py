@@ -125,7 +125,7 @@ def main():
             continue  # still pending/declined, or already resolved earlier -- nothing to do
 
         def void(reason):
-            trades["voided"].append({**prop, "void_reason": reason, "voided_at": today})
+            trades["voided"].append({**prop, "void_reason": reason, "voided_at": today, "session": session})
 
         if session is None:
             void("No trade session is open right now -- this trade never took effect.")
@@ -223,7 +223,7 @@ def main():
             trades["team_cash_net"][str(proposer)] = trades["team_cash_net"].get(str(proposer), 0) + net_to_proposer
             trades["team_cash_net"][str(receiver)] = trades["team_cash_net"].get(str(receiver), 0) - net_to_proposer
 
-        trades["applied"].append({**prop, "applied_at": today})
+        trades["applied"].append({**prop, "applied_at": today, "session": session})
         applied_count += 1
         print(f"  Applied trade {pid}: team {proposer} <-> team {receiver} ({count} out/in, {len(signed)} free agent)")
 
