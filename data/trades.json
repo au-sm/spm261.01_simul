@@ -157,45 +157,29 @@
       "responded_at": "2026-11-10T16:47:09.603Z",
       "applied_at": "2026-11-10",
       "session": 0
-    }
-  ],
-  "voided": [],
-  "team_trade_count": {
-    "1": 1,
-    "9": 1,
-    "0": 3,
-    "2": 3,
-    "12": 3,
-    "17": 3,
-    "14": 2,
-    "5": 2
-  },
-  "team_cash_net": {
-    "1": 0,
-    "9": 0,
-    "0": 0,
-    "2": 0,
-    "12": 0,
-    "17": 0,
-    "14": -50000,
-    "5": 50000
-  },
-  "session_trade_count": {
-    "0": {
-      "1": 1,
-      "9": 1,
-      "0": 3,
-      "2": 3,
-      "12": 3,
-      "17": 3,
-      "14": 2,
-      "5": 2
-    }
-  },
-  "waiver_queue": [
+    },
     {
       "proposal_id": "8f9d202e-d67f-4152-8fb5-09922a347972",
+      "timestamp": "2026-11-10T16:18:29.995Z",
       "proposer_team_id": 13,
+      "receiver_team_id": "",
+      "players_out": [
+        {
+          "id": 285,
+          "name": "Lars Neumann",
+          "fa": true
+        },
+        {
+          "id": 328,
+          "name": "Nico Sokol",
+          "fa": true
+        },
+        {
+          "id": 127,
+          "name": "Igor Petrov",
+          "fa": true
+        }
+      ],
       "players_in": [
         {
           "id": 40,
@@ -212,98 +196,91 @@
           "name": "Enzo Ferreira",
           "fa": true
         }
-      ]
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "losing season",
+      "status": "accepted",
+      "responded_at": "2026-11-10T16:18:29.995Z",
+      "applied_at": "2026-11-10",
+      "session": 0
     },
     {
       "proposal_id": "48cb28c7-7a7b-44ac-b551-37ae287684ed",
+      "timestamp": "2026-11-10T16:19:50.694Z",
       "proposer_team_id": 1,
+      "receiver_team_id": "",
+      "players_out": [
+        {
+          "id": 33,
+          "name": "Pavel Rossi",
+          "fa": true
+        }
+      ],
       "players_in": [
         {
           "id": 289,
           "name": "Tobias Sokol",
           "fa": true
         }
-      ]
-    },
-    {
-      "proposal_id": "7600064c-f7b2-4312-8bd3-4ab6fc622b53",
-      "proposer_team_id": 3,
-      "players_in": [
-        {
-          "id": 177,
-          "name": "Enzo Ferreira",
-          "fa": true
-        },
-        {
-          "id": 318,
-          "name": "Sven Sato",
-          "fa": true
-        },
-        {
-          "id": 23,
-          "name": "Luca Fischer",
-          "fa": true
-        }
-      ]
-    },
-    {
-      "proposal_id": "ff939460-a303-44dd-8f85-3a8f3f9b9b76",
-      "proposer_team_id": 8,
-      "players_in": [
-        {
-          "id": 289,
-          "name": "Tobias Sokol",
-          "fa": true
-        }
-      ]
-    },
-    {
-      "proposal_id": "8d174a40-2873-4d26-a5e2-87ef4c1cb3f3",
-      "proposer_team_id": 15,
-      "players_in": [
-        {
-          "id": 177,
-          "name": "Enzo Ferreira",
-          "fa": true
-        }
-      ]
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "Better overall for less money",
+      "status": "accepted",
+      "responded_at": "2026-11-10T16:19:50.694Z",
+      "applied_at": "2026-11-10",
+      "session": 0
     },
     {
       "proposal_id": "837ab8ed-4fab-41af-958a-1871819bf070",
+      "timestamp": "2026-11-10T16:06:17.272Z",
       "proposer_team_id": 15,
+      "receiver_team_id": "",
+      "players_out": [
+        {
+          "id": 225,
+          "name": "Hassan Petrov",
+          "fa": true
+        }
+      ],
       "players_in": [
         {
           "id": 133,
           "name": "Leon Suarez",
           "fa": true
         }
-      ]
-    },
-    {
-      "proposal_id": "242cbf48-303b-48da-8af6-1ec2113cfc3d",
-      "proposer_team_id": 15,
-      "players_in": [
-        {
-          "id": 289,
-          "name": "Tobias Sokol",
-          "fa": true
-        }
-      ]
-    },
-    {
-      "proposal_id": "d7eae8bb-43d5-4497-9c5b-dde1aaefef37",
-      "proposer_team_id": 5,
-      "players_in": [
-        {
-          "id": 177,
-          "name": "Enzo Ferreira",
-          "fa": true
-        }
-      ]
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "I want to lower my salary cap numbers",
+      "status": "accepted",
+      "responded_at": "2026-11-10T16:06:17.272Z",
+      "applied_at": "2026-11-10",
+      "session": 0
     },
     {
       "proposal_id": "01ff5d4b-6942-4b6b-81be-d92324b63fa7",
+      "timestamp": "2026-11-10T16:25:46.863Z",
       "proposer_team_id": 16,
+      "receiver_team_id": "",
+      "players_out": [
+        {
+          "id": 248,
+          "name": "Adrian Malik",
+          "fa": true
+        },
+        {
+          "id": 390,
+          "name": "Lars Barros",
+          "fa": true
+        },
+        {
+          "id": 1,
+          "name": "Amara Adamu",
+          "fa": true
+        }
+      ],
       "players_in": [
         {
           "id": 314,
@@ -320,9 +297,217 @@
           "name": "Kenji Lindqvist",
           "fa": true
         }
-      ]
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "I calculated who has performed the worst out of my players and traded them out. Gambling on players who have not played before in the league.",
+      "status": "accepted",
+      "responded_at": "2026-11-10T16:25:46.863Z",
+      "applied_at": "2026-11-10",
+      "session": 0
     }
   ],
+  "voided": [
+    {
+      "proposal_id": "7600064c-f7b2-4312-8bd3-4ab6fc622b53",
+      "timestamp": "2026-11-10T16:06:48.205Z",
+      "proposer_team_id": 3,
+      "receiver_team_id": "",
+      "players_out": [
+        {
+          "id": 204,
+          "name": "Kofi Suarez",
+          "fa": true
+        },
+        {
+          "id": 144,
+          "name": "Marco Bauer",
+          "fa": true
+        },
+        {
+          "id": 342,
+          "name": "Felix Adamu",
+          "fa": true
+        }
+      ],
+      "players_in": [
+        {
+          "id": 177,
+          "name": "Enzo Ferreira",
+          "fa": true
+        },
+        {
+          "id": 318,
+          "name": "Sven Sato",
+          "fa": true
+        },
+        {
+          "id": 23,
+          "name": "Luca Fischer",
+          "fa": true
+        }
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "I wanted to get rid of the most expensive players that I don't use to bring in new and improved players and save money.",
+      "status": "accepted",
+      "responded_at": "2026-11-10T16:06:48.205Z",
+      "void_reason": "A free agent in this deal was already signed by another team (lower-ranked teams have priority). Submit a different move.",
+      "voided_at": "2026-11-10",
+      "session": 0
+    },
+    {
+      "proposal_id": "ff939460-a303-44dd-8f85-3a8f3f9b9b76",
+      "timestamp": "2026-11-10T16:10:48.517Z",
+      "proposer_team_id": 8,
+      "receiver_team_id": "",
+      "players_out": [
+        {
+          "id": 97,
+          "name": "Pavel Suarez",
+          "fa": true
+        }
+      ],
+      "players_in": [
+        {
+          "id": 289,
+          "name": "Tobias Sokol",
+          "fa": true
+        }
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "We are doing this for a salar dump purpose of 50,000",
+      "status": "accepted",
+      "responded_at": "2026-11-10T16:10:48.517Z",
+      "void_reason": "A free agent in this deal was already signed by another team (lower-ranked teams have priority). Submit a different move.",
+      "voided_at": "2026-11-10",
+      "session": 0
+    },
+    {
+      "proposal_id": "8d174a40-2873-4d26-a5e2-87ef4c1cb3f3",
+      "timestamp": "2026-11-10T16:02:12.492Z",
+      "proposer_team_id": 15,
+      "receiver_team_id": "",
+      "players_out": [
+        {
+          "id": 165,
+          "name": "Jonas Costa",
+          "fa": true
+        }
+      ],
+      "players_in": [
+        {
+          "id": 177,
+          "name": "Enzo Ferreira",
+          "fa": true
+        }
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "I wanted to replace this guy for a overall better player",
+      "status": "accepted",
+      "responded_at": "2026-11-10T16:02:12.492Z",
+      "void_reason": "A free agent in this deal was already signed by another team (lower-ranked teams have priority). Submit a different move.",
+      "voided_at": "2026-11-10",
+      "session": 0
+    },
+    {
+      "proposal_id": "242cbf48-303b-48da-8af6-1ec2113cfc3d",
+      "timestamp": "2026-11-10T16:08:41.049Z",
+      "proposer_team_id": 15,
+      "receiver_team_id": "",
+      "players_out": [
+        {
+          "id": 218,
+          "name": "Radek Adamu",
+          "fa": true
+        }
+      ],
+      "players_in": [
+        {
+          "id": 289,
+          "name": "Tobias Sokol",
+          "fa": true
+        }
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "Lowering salary cap",
+      "status": "accepted",
+      "responded_at": "2026-11-10T16:08:41.049Z",
+      "void_reason": "A free agent in this deal was already signed by another team (lower-ranked teams have priority). Submit a different move.",
+      "voided_at": "2026-11-10",
+      "session": 0
+    },
+    {
+      "proposal_id": "d7eae8bb-43d5-4497-9c5b-dde1aaefef37",
+      "timestamp": "2026-11-10T16:14:39.049Z",
+      "proposer_team_id": 5,
+      "receiver_team_id": "",
+      "players_out": [
+        {
+          "id": 339,
+          "name": "Emil Ivanov",
+          "fa": true
+        }
+      ],
+      "players_in": [
+        {
+          "id": 177,
+          "name": "Enzo Ferreira",
+          "fa": true
+        }
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "I've decided to trade Emil Ivanov due to my need for a strong defense going into my 7th round and beyond. I also need to make up for Hassan Adeyemi's absence.",
+      "status": "accepted",
+      "responded_at": "2026-11-10T16:14:39.049Z",
+      "void_reason": "A free agent in this deal was already signed by another team (lower-ranked teams have priority). Submit a different move.",
+      "voided_at": "2026-11-10",
+      "session": 0
+    }
+  ],
+  "team_trade_count": {
+    "1": 2,
+    "9": 1,
+    "0": 3,
+    "2": 3,
+    "12": 3,
+    "17": 3,
+    "14": 2,
+    "5": 2,
+    "13": 3,
+    "15": 1,
+    "16": 3
+  },
+  "team_cash_net": {
+    "1": 0,
+    "9": 0,
+    "0": 0,
+    "2": 0,
+    "12": 0,
+    "17": 0,
+    "14": -50000,
+    "5": 50000
+  },
+  "session_trade_count": {
+    "0": {
+      "1": 2,
+      "9": 1,
+      "0": 3,
+      "2": 3,
+      "12": 3,
+      "17": 3,
+      "14": 2,
+      "5": 2,
+      "13": 3,
+      "15": 1,
+      "16": 3
+    }
+  },
+  "waiver_queue": [],
   "waiver_priority": [
     13,
     11,
