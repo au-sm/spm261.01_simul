@@ -39,19 +39,20 @@ def render(config, deals, trades, calendar):
     tr = deals["trade_rules"]
     team_map = {t["team_id"]: t["name"] for t in config["teams"]}
 
-    def side_label(entry):
-        return ", ".join(p["name"] for p in entry) if entry else "&mdash;"
+    def side_label(entry, fa_label):
+        return ", ".join(p["name"] + (f" ({fa_label})" if p.get("fa") else "") for p in entry) if entry else "&mdash;"
 
     log_rows = []
     for t in sorted(trades.get("applied", []) + trades.get("voided", []),
                      key=lambda t: t.get("applied_at") or t.get("voided_at") or "", reverse=True):
         outcome = "applied" if "applied_at" in t else "voided"
         proposer = team_map.get(int(t["proposer_team_id"]), f"Team {t['proposer_team_id']}")
-        receiver = team_map.get(int(t["receiver_team_id"]), f"Team {t['receiver_team_id']}")
+        receiver = ("Free-agent pool" if t.get("receiver_team_id") in ("", None)
+                    else team_map.get(int(t["receiver_team_id"]), f"Team {t['receiver_team_id']}"))
         cash_out = int(t.get("cash_from_proposer") or 0)
         cash_in = int(t.get("cash_from_receiver") or 0)
-        give = side_label(t.get("players_out", [])) + (f" + {money(cash_out)}" if cash_out else "")
-        get = side_label(t.get("players_in", [])) + (f" + {money(cash_in)}" if cash_in else "")
+        give = side_label(t.get("players_out", []), "released") + (f" + {money(cash_out)}" if cash_out else "")
+        get = side_label(t.get("players_in", []), "free agent") + (f" + {money(cash_in)}" if cash_in else "")
         detail = t.get("void_reason", "") if outcome == "voided" else t.get("rationale", "")
         log_rows.append(f'''
         <tr>
@@ -141,7 +142,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
 <div class="masthead">
   <div class="masthead-inner">
     <h1>Trade Center</h1>
-    <p>{config["league_name"]} &middot; propose a trade, respond to one sent to you, two trade sessions, one 3-for-3 trade each</p>
+    <p>{config["league_name"]} &middot; propose a trade, respond to one sent to you, two trade sessions, 3 players out and 3 in each</p>
   </div>
 </div>
 
@@ -160,9 +161,9 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
   </section>
 
   <section>
-    <div class="section-head"><h2>Players Traded This Season</h2><span class="section-note">{session_label} &middot; one required 3-for-3 trade per team</span></div>
+    <div class="section-head"><h2>Players Traded This Season</h2><span class="section-note">{session_label} &middot; every team must move 3 players</span></div>
     <table>
-      <thead><tr><th>Team</th><th class="num">Traded so far</th></tr></thead>
+      <thead><tr><th>Team</th><th class="num">Moved this session</th></tr></thead>
       <tbody>{trade_count_rows}</tbody>
     </table>
   </section>
@@ -171,7 +172,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
     <p class="sub-backend-warning" hidden>Backend not configured yet &mdash; submissions are disabled until BACKEND_URL is set in assets/config.js.</p>
     <div class="sub-card">
       <h2>Propose a Trade</h2>
-      <p class="sub-sub">Pick who you're giving and who you want back -- every trade is exactly 3-for-3 (pick 3 on each side). Add cash on either side to bridge a value gap. Nothing moves until the other team accepts.</p>
+      <p class="sub-sub">Pick who you're giving and who you want back. Each session your team moves exactly 3 players out and 3 in, in one deal or several. Players you swap with a partner must match one-for-one; for the rest, release a player (set it to "release to free agents") and sign a free agent. Pick "No partner -- free agents only" for a free-agent-only move, which needs no one's approval. Cash is only for deals with a partner team.</p>
       <div class="sub-grid">
         <div class="sub-field"><label for="tp-team">Your Team</label><select id="tp-team" class="sub-team-select"></select></div>
         <div class="sub-field"><label for="tp-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="tp-pin" class="sub-pin" placeholder="4-digit PIN"></div>
@@ -194,7 +195,11 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
 
       <h3 style="font-size:14px;margin:22px 0 8px;">You Want Back</h3>
       <div class="sub-search-row">
-        <input type="text" id="tp-want-search" placeholder="Search the partner's roster by name...">
+        <input type="text" id="tp-want-search" placeholder="Search by name...">
+        <select id="tp-want-src">
+          <option value="partner">Partner's roster</option>
+          <option value="fa">Free agents</option>
+        </select>
         <select id="tp-want-pos">
           <option value="ALL">All positions</option>
           <option value="GK">GK</option><option value="DF">DF</option>

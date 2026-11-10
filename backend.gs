@@ -319,7 +319,9 @@ function committedOutgoingCount_(trades, teamId) {
     // block the next one (resolve_trade.py enforces the per-session limit)
     if (t.status !== "pending") return;
     if (String(t.proposer_team_id) === String(teamId)) total += (t.players_out || []).length;
-    if (String(t.receiver_team_id) === String(teamId)) total += (t.players_in || []).length;
+    if (String(t.receiver_team_id) === String(teamId)) {
+      total += (t.players_in || []).filter(function (p) { return !p.fa; }).length;
+    }
   });
   return total;
 }
@@ -1270,18 +1272,27 @@ function doPost(e) {
   // back VOIDED later (shown in the Trade Center's Final Trade Log) if
   // something about the rosters changed in between.
   if (body.type === "trade_proposal") {
-    var receiverId = body.receiver_team_id;
-    if (String(receiverId) === String(body.team_id)) {
-      return jsonOut_({ ok: false, error: "Pick a different team to trade with." });
-    }
-    var receiverExists = teams.some(function (t) { return String(t.id) === String(receiverId); });
-    if (!receiverExists) return jsonOut_({ ok: false, error: "Unknown receiving team." });
-
+    // A deal can mix a team-to-team swap with free-agent swaps (fa:true
+    // on players_out = released, on players_in = signed). A free-agent-only
+    // deal has no receiver and needs no one's approval.
     var playersOut = body.players_out;
     var playersIn = body.players_in;
     if (!Array.isArray(playersOut) || !Array.isArray(playersIn) ||
-        playersOut.length !== 3 || playersIn.length !== 3) {
-      return jsonOut_({ ok: false, error: "Every trade must be exactly 3-for-3 -- 3 players each way." });
+        playersOut.length < 1 || playersOut.length > 3 || playersOut.length !== playersIn.length) {
+      return jsonOut_({ ok: false, error: "A deal must send out and bring in the same number of players (1 to 3)." });
+    }
+    var toPartner = playersOut.filter(function (p) { return !p.fa; }).length;
+    var fromPartner = playersIn.filter(function (p) { return !p.fa; }).length;
+    if (toPartner !== fromPartner) {
+      return jsonOut_({ ok: false, error: "Players swapped with the partner team must match one-for-one -- release one player for each free agent you sign." });
+    }
+    var receiverId = fromPartner > 0 ? body.receiver_team_id : "";
+    if (fromPartner > 0) {
+      if (String(receiverId) === String(body.team_id)) {
+        return jsonOut_({ ok: false, error: "Pick a different team to trade with." });
+      }
+      var receiverExists = teams.some(function (t) { return String(t.id) === String(receiverId); });
+      if (!receiverExists) return jsonOut_({ ok: false, error: "Unknown receiving team." });
     }
     var rationale = String(body.rationale || "").trim();
     if (!rationale) return jsonOut_({ ok: false, error: "A short rationale is required." });
@@ -1292,18 +1303,20 @@ function doPost(e) {
     if (proposerCommitted + playersOut.length > 3) {
       return jsonOut_({ ok: false, error: "This would put your team over the 3-player per-session trade limit (" + proposerCommitted + " already pending)." });
     }
-    if (receiverCommitted + playersIn.length > 3) {
+    if (fromPartner > 0 && receiverCommitted + fromPartner > 3) {
       return jsonOut_({ ok: false, error: "This would put the receiving team over the 3-player per-session trade limit (" + receiverCommitted + " already pending)." });
     }
 
     var proposalId = Utilities.getUuid();
+    var status = fromPartner > 0 ? "pending" : "accepted";
     sheets.trades.appendRow([
       proposalId, now, body.team_id, receiverId,
       JSON.stringify(playersOut), JSON.stringify(playersIn),
-      Number(body.cash_from_proposer) || 0, Number(body.cash_from_receiver) || 0,
-      rationale, "pending", "",
+      fromPartner > 0 ? (Number(body.cash_from_proposer) || 0) : 0,
+      fromPartner > 0 ? (Number(body.cash_from_receiver) || 0) : 0,
+      rationale, status, fromPartner > 0 ? "" : now,
     ]);
-    return jsonOut_({ ok: true, proposal_id: proposalId, status: "pending" });
+    return jsonOut_({ ok: true, proposal_id: proposalId, status: status });
   }
 
   if (body.type === "trade_response") {

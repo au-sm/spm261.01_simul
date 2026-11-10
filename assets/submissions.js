@@ -45,7 +45,8 @@ async function loadCatalog() {
 
 function populateTeamSelects() {
   document.querySelectorAll('.sub-team-select').forEach(sel => {
-    sel.innerHTML = TEAMS.map(t => `<option value="${t.id}">${t.name} (${t.owner})</option>`).join('');
+    sel.innerHTML = (sel.id === 'tp-partner' ? '<option value="">No partner -- free agents only</option>' : '') +
+      TEAMS.map(t => `<option value="${t.id}">${t.name} (${t.owner})</option>`).join('');
   });
 }
 
@@ -462,12 +463,18 @@ function initLineupForm() {
 // the client already knows (roster membership, matching counts), so a
 // proposal that looks fine here can still come back voided later (shown
 // in the trade log) if something about the rosters changed in between.
-let tradeGivePicks = []; // players from your own roster, up to 3
-let tradeWantPicks = []; // players from the partner's roster, up to 3
+let tradeGivePicks = []; // players from your own roster, up to 3; .release = goes to the free-agent pool
+let tradeWantPicks = []; // players from the partner's roster or the free-agent pool, up to 3
 
 function tradeTeamRoster(teamId) {
   return PLAYERS.filter(p => String(p.team_id) === String(teamId));
 }
+
+function freeAgentPool() {
+  return PLAYERS.filter(p => p.team_id === null || p.team_id === undefined || p.team_id === '');
+}
+
+const isFreeAgent = p => p.team_id === null || p.team_id === undefined || p.team_id === '';
 
 function renderTradeSide(listId, picks, countLabelId) {
   const list = document.getElementById(listId);
@@ -479,6 +486,9 @@ function renderTradeSide(listId, picks, countLabelId) {
         <span class="sub-pos sub-pos-${p.position}">${p.position}</span>
         <span class="sub-name">${p.name}</span>
         <span class="sub-ovr">OVR ${p.ovr} &middot; $${p.salary.toLocaleString()}</span>
+        ${listId === 'tp-give-list'
+          ? `<select class="sub-dest" data-i="${i}"><option value="partner" ${p.release ? '' : 'selected'}>to partner</option><option value="release" ${p.release ? 'selected' : ''}>release to free agents</option></select>`
+          : (isFreeAgent(p) ? '<span class="sub-ovr">free agent</span>' : '')}
         <button type="button" class="sub-remove" data-list="${listId}" data-i="${i}">remove</button>
       </li>`).join('');
   }
@@ -522,18 +532,24 @@ function initTradeProposeForm() {
   const pinInput = document.getElementById('tp-pin');
   const btn = document.getElementById('tp-submit');
   const msg = document.getElementById('tp-msg');
+  const wantSrc = document.getElementById('tp-want-src');
 
   function refreshGive() {
+    if (!partnerSel.value) tradeGivePicks.forEach(p => { p.release = true; });
     renderTradeSide('tp-give-list', tradeGivePicks, 'tp-give-count');
     renderTradeSearch('tp-give-results', 'tp-give-search', 'tp-give-pos', () => tradeTeamRoster(teamSel.value), tradeGivePicks, 'tp-give-list', 'tp-give-count');
   }
   function refreshWant() {
     renderTradeSide('tp-want-list', tradeWantPicks, 'tp-want-count');
-    renderTradeSearch('tp-want-results', 'tp-want-search', 'tp-want-pos', () => tradeTeamRoster(partnerSel.value), tradeWantPicks, 'tp-want-list', 'tp-want-count');
+    renderTradeSearch('tp-want-results', 'tp-want-search', 'tp-want-pos',
+      () => (wantSrc.value === 'fa' || !partnerSel.value) ? freeAgentPool() : tradeTeamRoster(partnerSel.value),
+      tradeWantPicks, 'tp-want-list', 'tp-want-count');
   }
   function resetAndRebuild() {
     tradeGivePicks = [];
     tradeWantPicks = [];
+    wantSrc.value = partnerSel.value ? 'partner' : 'fa';
+    wantSrc.disabled = !partnerSel.value;
     document.getElementById('tp-give-search').value = '';
     document.getElementById('tp-want-search').value = '';
     refreshGive();
@@ -546,6 +562,12 @@ function initTradeProposeForm() {
   document.getElementById('tp-give-pos').addEventListener('change', refreshGive);
   document.getElementById('tp-want-search').addEventListener('input', refreshWant);
   document.getElementById('tp-want-pos').addEventListener('change', refreshWant);
+  wantSrc.addEventListener('change', refreshWant);
+  document.getElementById('tp-give-list').addEventListener('change', (e) => {
+    const s = e.target.closest('.sub-dest');
+    if (!s) return;
+    tradeGivePicks[parseInt(s.dataset.i, 10)].release = s.value === 'release';
+  });
 
   // event delegation on the (stable) parent <ul> elements -- survives
   // innerHTML rebuilds in renderTradeSide, unlike binding on the buttons
@@ -569,8 +591,16 @@ function initTradeProposeForm() {
     const pin = pinInput.value.trim();
     if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'sub-msg'; return; }
     if (teamSel.value === partnerSel.value) { msg.textContent = 'Pick a different team to trade with.'; msg.className = 'sub-msg'; return; }
-    if (tradeGivePicks.length !== 3 || tradeWantPicks.length !== 3) {
-      msg.textContent = `You're offering ${tradeGivePicks.length} player(s) for ${tradeWantPicks.length} -- every trade must be exactly 3-for-3.`;
+    if (!partnerSel.value) tradeGivePicks.forEach(p => { p.release = true; });
+    if (tradeGivePicks.length === 0 || tradeGivePicks.length !== tradeWantPicks.length) {
+      msg.textContent = `You're sending out ${tradeGivePicks.length} player(s) and bringing in ${tradeWantPicks.length} -- the numbers must match (1 to 3 each way).`;
+      msg.className = 'sub-msg';
+      return;
+    }
+    const toPartner = tradeGivePicks.filter(p => !p.release).length;
+    const fromPartner = tradeWantPicks.filter(p => !isFreeAgent(p)).length;
+    if (toPartner !== fromPartner) {
+      msg.textContent = `${toPartner} of your player(s) go to the partner but you want ${fromPartner} of theirs -- these must match. Release one of your players for each free agent you sign.`;
       msg.className = 'sub-msg';
       return;
     }
@@ -579,9 +609,9 @@ function initTradeProposeForm() {
 
     const body = {
       type: 'trade_proposal', team_id: teamSel.value, pin,
-      receiver_team_id: partnerSel.value,
-      players_out: tradeGivePicks.map(p => ({ id: p.id, name: p.name })),
-      players_in: tradeWantPicks.map(p => ({ id: p.id, name: p.name })),
+      receiver_team_id: fromPartner > 0 ? partnerSel.value : '',
+      players_out: tradeGivePicks.map(p => ({ id: p.id, name: p.name, fa: !!p.release })),
+      players_in: tradeWantPicks.map(p => ({ id: p.id, name: p.name, fa: isFreeAgent(p) })),
       cash_from_proposer: parseInt(document.getElementById('tp-cash-give').value, 10) || 0,
       cash_from_receiver: parseInt(document.getElementById('tp-cash-want').value, 10) || 0,
       rationale,
@@ -593,7 +623,9 @@ function initTradeProposeForm() {
     try {
       const result = await postSubmission(body);
       if (result.ok) {
-        msg.textContent = 'Trade proposed -- it now sits pending until the other team accepts or declines it below.';
+        msg.textContent = result.status === 'accepted'
+          ? 'Free-agent move submitted -- it applies at the next league-office check (usually within the hour).'
+          : 'Trade proposed -- it now sits pending until the other team accepts or declines it below.';
         msg.className = 'sub-msg ok';
         pinInput.value = '';
         await loadCatalog();
@@ -624,9 +656,9 @@ function renderTradeInbox() {
   const teamName = id => (TEAMS.find(t => String(t.id) === String(id)) || {}).name || `Team ${id}`;
   list.innerHTML = pending.map(p => `
     <li class="sub-trade-offer">
-      <p><b>${teamName(p.proposer_team_id)}</b> offers: ${p.players_out.map(pl => pl.name).join(', ')}${p.cash_from_proposer ? ` + $${Number(p.cash_from_proposer).toLocaleString()}` : ''}
+      <p><b>${teamName(p.proposer_team_id)}</b> offers: ${p.players_out.filter(pl => !pl.fa).map(pl => pl.name).join(', ')}${p.cash_from_proposer ? ` + $${Number(p.cash_from_proposer).toLocaleString()}` : ''}
       &nbsp;&rarr;&nbsp; for &nbsp;&rarr;&nbsp;
-      ${p.players_in.map(pl => pl.name).join(', ')}${p.cash_from_receiver ? ` + $${Number(p.cash_from_receiver).toLocaleString()}` : ''}</p>
+      ${p.players_in.filter(pl => !pl.fa).map(pl => pl.name).join(', ')}${p.cash_from_receiver ? ` + $${Number(p.cash_from_receiver).toLocaleString()}` : ''}</p>
       <p class="sub-trade-rationale">&ldquo;${p.rationale}&rdquo;</p>
       <button type="button" class="sub-btn sub-trade-accept" data-id="${p.proposal_id}">Accept</button>
       <button type="button" class="sub-btn sub-trade-decline" data-id="${p.proposal_id}">Decline</button>
@@ -679,7 +711,9 @@ function initTradeRespondForm() {
 function renderTradeLog() {
   const el = document.getElementById('tp-live-log');
   if (!el) return;
-  const teamName = id => (TEAMS.find(t => String(t.id) === String(id)) || {}).name || `Team ${id}`;
+  const teamName = id => id === '' || id === null || id === undefined ? 'Free-agent pool'
+    : (TEAMS.find(t => String(t.id) === String(id)) || {}).name || `Team ${id}`;
+  const tag = (pl, label) => pl.fa ? `${pl.name} (${label})` : pl.name;
   const rows = EXISTING_TRADE_PROPOSALS.slice().reverse();
   if (rows.length === 0) {
     el.innerHTML = '<tr><td colspan="4" class="sub-empty">No trades proposed yet.</td></tr>';
@@ -688,7 +722,7 @@ function renderTradeLog() {
   el.innerHTML = rows.map(p => `
     <tr>
       <td>${teamName(p.proposer_team_id)} &rarr; ${teamName(p.receiver_team_id)}</td>
-      <td>${p.players_out.map(pl => pl.name).join(', ')} for ${p.players_in.map(pl => pl.name).join(', ')}</td>
+      <td>${p.players_out.map(pl => tag(pl, 'released')).join(', ')} for ${p.players_in.map(pl => tag(pl, 'free agent')).join(', ')}</td>
       <td><span class="sub-status sub-status-${p.status}">${p.status}</span></td>
       <td>${(p.timestamp || '').slice(0, 10)}</td>
     </tr>`).join('');

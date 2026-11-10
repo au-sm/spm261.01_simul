@@ -134,47 +134,60 @@ def main():
 
         try:
             proposer = int(prop["proposer_team_id"])
-            receiver = int(prop["receiver_team_id"])
+            receiver = None if prop.get("receiver_team_id") in ("", None) else int(prop["receiver_team_id"])
         except (TypeError, ValueError):
             void("Malformed team id on this proposal.")
             continue
-        if proposer == receiver or proposer not in team_ids or receiver not in team_ids:
+        if proposer not in team_ids or proposer == receiver or (receiver is not None and receiver not in team_ids):
             void("Invalid team(s) on this proposal.")
             continue
 
+        # A deal mixes a team-to-team swap with free-agent swaps: players
+        # flagged fa=True on the way out are released to the free-agent
+        # pool, and fa=True on the way in are signed from it.
         out_ids = [int(p["id"]) for p in prop.get("players_out", [])]
         in_ids = [int(p["id"]) for p in prop.get("players_in", [])]
-        if len(out_ids) != 3 or len(in_ids) != 3:
-            void("Every trade must be exactly 3-for-3.")
+        released = [int(p["id"]) for p in prop.get("players_out", []) if p.get("fa")]
+        signed = [int(p["id"]) for p in prop.get("players_in", []) if p.get("fa")]
+        to_partner = [i for i in out_ids if i not in released]
+        from_partner = [i for i in in_ids if i not in signed]
+        if not 1 <= len(out_ids) <= 3 or len(out_ids) != len(in_ids):
+            void("A deal must send out and bring in the same number of players (1 to 3).")
+            continue
+        if len(to_partner) != len(from_partner) or (from_partner and receiver is None):
+            void("Players swapped with the partner team must match one-for-one.")
             continue
 
         # Roster ownership -- re-verified here since backend.gs has no
         # roster data to check this against at submission time.
-        bad_out = any(i not in players_by_id or players_by_id[i]["team_id"] in ("", None)
-                       or int(players_by_id[i]["team_id"]) != proposer for i in out_ids)
-        bad_in = any(i not in players_by_id or players_by_id[i]["team_id"] in ("", None)
-                      or int(players_by_id[i]["team_id"]) != receiver for i in in_ids)
-        if bad_out:
+        def on_team(i, team):
+            return (i in players_by_id and players_by_id[i]["team_id"] not in ("", None)
+                    and int(players_by_id[i]["team_id"]) == team)
+        if not all(on_team(i, proposer) for i in out_ids):
             void("One or more outgoing players are no longer on the proposing team's roster.")
             continue
-        if bad_in:
+        if not all(on_team(i, receiver) for i in from_partner):
             void("One or more incoming players are no longer on the receiving team's roster.")
+            continue
+        if not all(i in players_by_id and players_by_id[i]["team_id"] in ("", None) for i in signed):
+            void("One or more free agents in this deal have already been signed by another team.")
             continue
 
         count = len(out_ids)
+        partner_count = len(from_partner)
         proposer_count = session_counts.get(str(proposer), 0)
         receiver_count = session_counts.get(str(receiver), 0)
         if proposer_count + count > 3:
-            void(f"The proposing team already made its 3-for-3 trade in {sessions[session]['name']}.")
+            void(f"Would put the proposing team over its 3 players for {sessions[session]['name']} ({proposer_count} already moved).")
             continue
-        if receiver_count + count > 3:
-            void(f"The receiving team already made its 3-for-3 trade in {sessions[session]['name']}.")
+        if receiver is not None and receiver_count + partner_count > 3:
+            void(f"Would put the receiving team over its 3 players for {sessions[session]['name']} ({receiver_count} already moved).")
             continue
 
-        out_salary = sum(int(players_by_id[i]["salary"]) for i in out_ids)
-        in_salary = sum(int(players_by_id[i]["salary"]) for i in in_ids)
-        proposer_cap_after = team_cap_used(players_by_id, proposer) - out_salary + in_salary
-        receiver_cap_after = team_cap_used(players_by_id, receiver) - in_salary + out_salary
+        salary = lambda ids: sum(int(players_by_id[i]["salary"]) for i in ids)
+        proposer_cap_after = team_cap_used(players_by_id, proposer) - salary(out_ids) + salary(in_ids)
+        receiver_cap_after = (team_cap_used(players_by_id, receiver) - salary(from_partner) + salary(to_partner)
+                              if receiver is not None else 0)
         if proposer_cap_after > salary_cap:
             void(f"Would put the proposing team over the salary cap (${proposer_cap_after:,} > ${salary_cap:,}).")
             continue
@@ -182,8 +195,8 @@ def main():
             void(f"Would put the receiving team over the salary cap (${receiver_cap_after:,} > ${salary_cap:,}).")
             continue
 
-        cash_from_proposer = int(prop.get("cash_from_proposer") or 0)
-        cash_from_receiver = int(prop.get("cash_from_receiver") or 0)
+        cash_from_proposer = int(prop.get("cash_from_proposer") or 0) if receiver is not None else 0
+        cash_from_receiver = int(prop.get("cash_from_receiver") or 0) if receiver is not None else 0
         if cash_from_proposer > team_available_cash(finances, config, trades, proposer):
             void("Proposing team does not have enough cash on hand for this trade.")
             continue
@@ -192,22 +205,27 @@ def main():
             continue
 
         # everything checks out -- apply it
-        for i in out_ids:
+        for i in to_partner:
             players_by_id[i]["team_id"] = str(receiver)
+        for i in released:
+            players_by_id[i]["team_id"] = ""
         for i in in_ids:
             players_by_id[i]["team_id"] = str(proposer)
 
-        session_counts[str(proposer)] = proposer_count + count
-        session_counts[str(receiver)] = receiver_count + count
-        for t in (proposer, receiver):
-            trades["team_trade_count"][str(t)] = trades["team_trade_count"].get(str(t), 0) + count
-        net_to_proposer = cash_from_receiver - cash_from_proposer
-        trades["team_cash_net"][str(proposer)] = trades["team_cash_net"].get(str(proposer), 0) + net_to_proposer
-        trades["team_cash_net"][str(receiver)] = trades["team_cash_net"].get(str(receiver), 0) - net_to_proposer
+        moved = {proposer: count}
+        if receiver is not None:
+            moved[receiver] = partner_count
+        for t, n in moved.items():
+            session_counts[str(t)] = session_counts.get(str(t), 0) + n
+            trades["team_trade_count"][str(t)] = trades["team_trade_count"].get(str(t), 0) + n
+        if receiver is not None:
+            net_to_proposer = cash_from_receiver - cash_from_proposer
+            trades["team_cash_net"][str(proposer)] = trades["team_cash_net"].get(str(proposer), 0) + net_to_proposer
+            trades["team_cash_net"][str(receiver)] = trades["team_cash_net"].get(str(receiver), 0) - net_to_proposer
 
         trades["applied"].append({**prop, "applied_at": today})
         applied_count += 1
-        print(f"  Applied trade {pid}: team {proposer} <-> team {receiver} ({count}-for-{count})")
+        print(f"  Applied trade {pid}: team {proposer} <-> team {receiver} ({count} out/in, {len(signed)} free agent)")
 
     save_players(list(players_by_id.values()))
     save_json("trades.json", trades)
