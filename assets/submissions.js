@@ -466,8 +466,20 @@ function initLineupForm() {
 let tradeGivePicks = []; // players from your own roster, up to 3; .release = goes to the free-agent pool
 let tradeWantPicks = []; // players from the partner's roster or the free-agent pool, up to 3
 
+// Players already tied up in a pending offer (either side) can't be put
+// in a second deal -- if both were accepted, the second would be voided.
+function playersInPendingOffers() {
+  const ids = new Set();
+  EXISTING_TRADE_PROPOSALS.filter(t => t.status === 'pending').forEach(t => {
+    (t.players_out || []).forEach(p => ids.add(Number(p.id)));
+    (t.players_in || []).filter(p => !p.fa).forEach(p => ids.add(Number(p.id)));
+  });
+  return ids;
+}
+
 function tradeTeamRoster(teamId) {
-  return PLAYERS.filter(p => String(p.team_id) === String(teamId));
+  const busy = playersInPendingOffers();
+  return PLAYERS.filter(p => String(p.team_id) === String(teamId) && !busy.has(Number(p.id)));
 }
 
 function freeAgentPool() {
@@ -626,9 +638,14 @@ function initTradeProposeForm() {
         msg.textContent = result.status === 'accepted'
           ? 'Free-agent claim submitted -- it waits for waivers and is processed with the others, lowest-ranked team first.'
           : 'Trade proposed -- it now sits pending until the other team accepts or declines it below.';
+        msg.textContent += ' To deal with another team, pick the next partner and send another proposal.';
         msg.className = 'sub-msg ok';
         pinInput.value = '';
+        document.getElementById('tp-rationale').value = '';
+        document.getElementById('tp-cash-give').value = '';
+        document.getElementById('tp-cash-want').value = '';
         await loadCatalog();
+        resetAndRebuild();
         renderTradeLog();
         renderTradeInbox();
       } else {

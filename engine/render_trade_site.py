@@ -233,11 +233,11 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
     <p class="sub-backend-warning" hidden>Backend not configured yet &mdash; submissions are disabled until BACKEND_URL is set in assets/config.js.</p>
     <div class="sub-card">
       <h2>Propose a Trade</h2>
-      <p class="sub-sub">Pick who you're giving and who you want back. Each session your team moves exactly 3 players out and 3 in, in one deal or several. Players you swap with a partner must match one-for-one; for the rest, release a player (set it to "release to free agents") and sign a free agent. Pick "No partner -- free agents only" for a free-agent-only move, which needs no one's approval. Cash is only for deals with a partner team.</p>
+      <p class="sub-sub">One proposal = one deal with one partner. To trade with two or three teams (for example, three 1-for-1 trades), send a separate proposal to each team -- the form clears after each one. Each session your team moves exactly 3 players out and 3 in, in one deal or several. Players you swap with a partner must match one-for-one; for the rest, release a player (set it to "release to free agents") and sign a free agent. Pick "No partner -- free agents only" for a free-agent-only move, which needs no one's approval. Cash is only for deals with a partner team.</p>
       <div class="sub-grid">
         <div class="sub-field"><label for="tp-team">Your Team</label><select id="tp-team" class="sub-team-select"></select></div>
         <div class="sub-field"><label for="tp-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="tp-pin" class="sub-pin" placeholder="4-digit PIN"></div>
-        <div class="sub-field"><label for="tp-partner">Trade Partner</label><select id="tp-partner" class="sub-team-select"></select></div>
+        <div class="sub-field"><label for="tp-partner">Trade Partner (one per proposal)</label><select id="tp-partner" class="sub-team-select"></select></div>
       </div>
 
       <h3 style="font-size:14px;margin:18px 0 8px;">You Give Up</h3>
