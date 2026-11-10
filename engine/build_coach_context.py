@@ -220,6 +220,72 @@ def main():
                   or ["    none played yet"]),
                 "  Their best players:", *top]
 
+    # ---- trade market: shared by every briefing (rosters are public) ----
+    tr_rules = load_json("deals.json")["trade_rules"]
+    sessions = tr_rules["sessions"]
+    open_idx = resolve_trade.open_session(sessions, matches)
+    cap = config.get("salary_cap", 0)
+    session_counts = trades_state.get("session_trade_count", {}).get(str(open_idx), {}) if open_idx is not None else {}
+    priority = resolve_trade.waiver_order(matches, team_ids)
+    payrolls = {tid: sum(p["salary"] for p in rosters[tid]) for tid in team_ids}
+
+    def short_money(n):
+        return f"${n / 1_000_000:.2f}M"
+
+    def flag(p):
+        _t, _m, inj_until = cond.get(p["player_id"], ("Average", 1.0, None))
+        return f" inj thru R{inj_until}" if inj_until else ""
+
+    def line_avgs(tid):
+        out = {}
+        for pos in ("GK", "DF", "MF", "FW"):
+            g = [p["ovr"] for p in rosters[tid] if p["position"] == pos]
+            out[pos] = round(sum(g) / len(g), 1) if g else None
+        return out
+
+    league_avg = {pos: round(sum(v for v in (line_avgs(t)[pos] for t in team_ids) if v) /
+                              max(1, sum(1 for t in team_ids if line_avgs(t)[pos])), 1)
+                  for pos in ("GK", "DF", "MF", "FW")}
+
+    def market_line(tid):
+        squad = sorted(rosters[tid], key=lambda p: -p["ovr"])
+        players_txt = ", ".join(f"{p['position']} {p['name']} {p['ovr']} {short_money(p['salary'])}{flag(p)}" for p in squad)
+        moved = session_counts.get(str(tid), 0) if open_idx is not None else "-"
+        return (f"  {names[tid]} (table {position[tid]}, cap room {short_money(cap - payrolls[tid])}, "
+                f"moved {moved}/3): {players_txt}")
+
+    free_agents = sorted((p for p in players if p["team_id"] in ("", None)), key=lambda p: -p["ovr"])
+    fa_lines = [f"  {p['position']} {p['name']} OVR{p['ovr']} {short_money(p['salary'])} age {p['age']}"
+                for p in free_agents[:25]]
+    if open_idx is not None:
+        session_txt = (f"{sessions[open_idx]['name']} is OPEN and closes when Round "
+                       f"{sessions[open_idx]['closes_before_round']} is simulated")
+    else:
+        session_txt = "no trade session is open right now"
+
+    def trade_market(tid):
+        mine = line_avgs(tid)
+        gaps = ", ".join(f"{pos} {mine[pos]} vs league {league_avg[pos]}" for pos in ("GK", "DF", "MF", "FW") if mine[pos] is not None)
+        moved = session_counts.get(str(tid), 0) if open_idx is not None else 0
+        return [
+            "TRADE MARKET (use for trade questions; full rules are in the rulebook's Trades & Free Agency section):",
+            f"  Session: {session_txt}. This team has moved {moved}/3 players this session.",
+            f"  Rule summary: each team must move exactly 3 players out and 3 in per session, one deal or several. "
+            f"Swaps with a team must be one-for-one; each free agent signed needs one of your players released. "
+            f"Both teams must stay at or under the {short_money(cap)} salary cap after a deal. "
+            f"Free agents go to the lowest-ranked team first: this team is #{priority.index(tid) + 1} of {len(team_ids)} in free-agent priority (1 = first pick).",
+            f"  This team: payroll {short_money(payrolls[tid])}, cap room {short_money(cap - payrolls[tid])}. "
+            f"Average OVR by line: {gaps}.",
+            "  How to advise: find this team's weakest line against the league average, then point to players on other teams "
+            "or free agents who fit that line AND the cap room of both sides, and to players this team could spare. "
+            "Give 2-3 options with tradeoffs (OVR, salary, age, injuries, and whether the partner team would want what they get back). "
+            "Never present one deal as the answer and never write the trade rationale -- that is graded and must be the student's own.",
+            "  OTHER TEAMS (players listed best first: position, name, OVR, salary):",
+            *(market_line(t) for t in sorted(team_ids, key=lambda t: position[t]) if t != tid),
+            f"  TOP FREE AGENTS ({len(free_agents)} available, best 25 shown):",
+            *fa_lines,
+        ]
+
     teams_out = {}
     for tid in team_ids:
         rec = dict(ranked)[tid]
@@ -285,6 +351,7 @@ def main():
             *("  " + l for l in roster_lines),
             *(scouting(next_fixture[tid][0]) if tid in next_fixture else []),
             *trends_txt,
+            *trade_market(tid),
         ])
         teams_out[str(tid)] = {"name": names[tid], "position": position[tid],
                                "avg_star_power": round(avg_star, 1), "leverage": round(leverage, 1),
