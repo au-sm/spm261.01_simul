@@ -1,6 +1,346 @@
 {
-  "applied": [],
+  "applied": [
+    {
+      "proposal_id": "0923472f-b4df-4df3-8c20-9302731f2134",
+      "timestamp": "2026-11-10T16:07:33.011Z",
+      "proposer_team_id": 1,
+      "receiver_team_id": 9,
+      "players_out": [
+        {
+          "id": 355,
+          "name": "Yusuf Novak",
+          "fa": false
+        }
+      ],
+      "players_in": [
+        {
+          "id": 45,
+          "name": "Mateo Haddad",
+          "fa": false
+        }
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "Yusuf feels unwanted and wants to a contending team, We personally believe Knight United is the best destination for him. We receive a decent player back who will save us roughly $200,000 in salary.",
+      "status": "accepted",
+      "responded_at": "2026-11-10T16:10:05.025Z",
+      "applied_at": "2026-11-10",
+      "session": 0
+    },
+    {
+      "proposal_id": "a89dac81-5b03-4a37-9e4f-7d7d68409ee2",
+      "timestamp": "2026-11-10T16:10:35.325Z",
+      "proposer_team_id": 0,
+      "receiver_team_id": 2,
+      "players_out": [
+        {
+          "id": 161,
+          "name": "Amara Horvat",
+          "fa": false
+        },
+        {
+          "id": 117,
+          "name": "Stefan Fischer",
+          "fa": false
+        },
+        {
+          "id": 166,
+          "name": "Kai Wallin",
+          "fa": false
+        }
+      ],
+      "players_in": [
+        {
+          "id": 352,
+          "name": "Tobias Santos",
+          "fa": false
+        },
+        {
+          "id": 172,
+          "name": "Marco Sato",
+          "fa": false
+        },
+        {
+          "id": 198,
+          "name": "Marco Mensah",
+          "fa": false
+        }
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "I picked one player from each position that is struggling in the lineup, or hasn't produced very much of an outcome. In return, I hope to replace them with improved players from Pink Venom, and improve my teams defence, as that is something we are struggling with.",
+      "status": "accepted",
+      "responded_at": "2026-11-10T16:19:04.693Z",
+      "applied_at": "2026-11-10",
+      "session": 0
+    },
+    {
+      "proposal_id": "80bc9681-6a8b-4de0-adbe-428e7619d282",
+      "timestamp": "2026-11-10T16:11:17.908Z",
+      "proposer_team_id": 12,
+      "receiver_team_id": 17,
+      "players_out": [
+        {
+          "id": 94,
+          "name": "Youssef Fischer",
+          "fa": false
+        },
+        {
+          "id": 228,
+          "name": "Youssef Osei",
+          "fa": false
+        },
+        {
+          "id": 60,
+          "name": "Yusuf Haddad",
+          "fa": false
+        }
+      ],
+      "players_in": [
+        {
+          "id": 187,
+          "name": "Youssef Costa",
+          "fa": false
+        },
+        {
+          "id": 24,
+          "name": "Sven Kucera",
+          "fa": false
+        },
+        {
+          "id": 8,
+          "name": "Stefan Lindqvist",
+          "fa": false
+        }
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "We both agreed that our teams will both benefit from this trade and help us both win more games in the future. I gave up one of my top midfielders but in return got 2 good defenders.",
+      "status": "accepted",
+      "responded_at": "2026-11-10T16:12:07.726Z",
+      "applied_at": "2026-11-10",
+      "session": 0
+    },
+    {
+      "proposal_id": "80e6127b-d50c-4287-ba7b-15dfa3df2fef",
+      "timestamp": "2026-11-10T16:15:14.814Z",
+      "proposer_team_id": 14,
+      "receiver_team_id": 5,
+      "players_out": [
+        {
+          "id": 269,
+          "name": "Lars Suarez",
+          "fa": false
+        },
+        {
+          "id": 293,
+          "name": "Nico Vidal",
+          "fa": false
+        }
+      ],
+      "players_in": [
+        {
+          "id": 341,
+          "name": "Tariq Ferreira",
+          "fa": false
+        },
+        {
+          "id": 83,
+          "name": "Cesar Bauer",
+          "fa": false
+        }
+      ],
+      "cash_from_proposer": 50000,
+      "cash_from_receiver": 0,
+      "rationale": "Hi Oceanic,\nIm reaching out to offer my GK Lars Suarez and FW Nico Vidal for your backup GK Tariq Ferreira and FW Cesar Bauer. It gives me a needed upgrade at GK and depth for you at FW.",
+      "status": "accepted",
+      "responded_at": "2026-11-10T16:47:09.603Z",
+      "applied_at": "2026-11-10",
+      "session": 0
+    }
+  ],
   "voided": [],
-  "team_trade_count": {},
-  "team_cash_net": {}
+  "team_trade_count": {
+    "1": 1,
+    "9": 1,
+    "0": 3,
+    "2": 3,
+    "12": 3,
+    "17": 3,
+    "14": 2,
+    "5": 2
+  },
+  "team_cash_net": {
+    "1": 0,
+    "9": 0,
+    "0": 0,
+    "2": 0,
+    "12": 0,
+    "17": 0,
+    "14": -50000,
+    "5": 50000
+  },
+  "session_trade_count": {
+    "0": {
+      "1": 1,
+      "9": 1,
+      "0": 3,
+      "2": 3,
+      "12": 3,
+      "17": 3,
+      "14": 2,
+      "5": 2
+    }
+  },
+  "waiver_queue": [
+    {
+      "proposal_id": "8f9d202e-d67f-4152-8fb5-09922a347972",
+      "proposer_team_id": 13,
+      "players_in": [
+        {
+          "id": 40,
+          "name": "Tariq Osei",
+          "fa": true
+        },
+        {
+          "id": 318,
+          "name": "Sven Sato",
+          "fa": true
+        },
+        {
+          "id": 177,
+          "name": "Enzo Ferreira",
+          "fa": true
+        }
+      ]
+    },
+    {
+      "proposal_id": "48cb28c7-7a7b-44ac-b551-37ae287684ed",
+      "proposer_team_id": 1,
+      "players_in": [
+        {
+          "id": 289,
+          "name": "Tobias Sokol",
+          "fa": true
+        }
+      ]
+    },
+    {
+      "proposal_id": "7600064c-f7b2-4312-8bd3-4ab6fc622b53",
+      "proposer_team_id": 3,
+      "players_in": [
+        {
+          "id": 177,
+          "name": "Enzo Ferreira",
+          "fa": true
+        },
+        {
+          "id": 318,
+          "name": "Sven Sato",
+          "fa": true
+        },
+        {
+          "id": 23,
+          "name": "Luca Fischer",
+          "fa": true
+        }
+      ]
+    },
+    {
+      "proposal_id": "ff939460-a303-44dd-8f85-3a8f3f9b9b76",
+      "proposer_team_id": 8,
+      "players_in": [
+        {
+          "id": 289,
+          "name": "Tobias Sokol",
+          "fa": true
+        }
+      ]
+    },
+    {
+      "proposal_id": "8d174a40-2873-4d26-a5e2-87ef4c1cb3f3",
+      "proposer_team_id": 15,
+      "players_in": [
+        {
+          "id": 177,
+          "name": "Enzo Ferreira",
+          "fa": true
+        }
+      ]
+    },
+    {
+      "proposal_id": "837ab8ed-4fab-41af-958a-1871819bf070",
+      "proposer_team_id": 15,
+      "players_in": [
+        {
+          "id": 133,
+          "name": "Leon Suarez",
+          "fa": true
+        }
+      ]
+    },
+    {
+      "proposal_id": "242cbf48-303b-48da-8af6-1ec2113cfc3d",
+      "proposer_team_id": 15,
+      "players_in": [
+        {
+          "id": 289,
+          "name": "Tobias Sokol",
+          "fa": true
+        }
+      ]
+    },
+    {
+      "proposal_id": "d7eae8bb-43d5-4497-9c5b-dde1aaefef37",
+      "proposer_team_id": 5,
+      "players_in": [
+        {
+          "id": 177,
+          "name": "Enzo Ferreira",
+          "fa": true
+        }
+      ]
+    },
+    {
+      "proposal_id": "01ff5d4b-6942-4b6b-81be-d92324b63fa7",
+      "proposer_team_id": 16,
+      "players_in": [
+        {
+          "id": 314,
+          "name": "Igor Novak",
+          "fa": true
+        },
+        {
+          "id": 369,
+          "name": "Tobias Petrov",
+          "fa": true
+        },
+        {
+          "id": 359,
+          "name": "Kenji Lindqvist",
+          "fa": true
+        }
+      ]
+    }
+  ],
+  "waiver_priority": [
+    13,
+    11,
+    4,
+    1,
+    3,
+    10,
+    0,
+    12,
+    8,
+    9,
+    17,
+    14,
+    7,
+    2,
+    6,
+    15,
+    5,
+    16
+  ]
 }

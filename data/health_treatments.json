@@ -1027,6 +1027,90 @@
    "treatment": "recovery",
    "submitted_at": "2026-11-09T21:01:14.052Z",
    "cost": 50000
+  },
+  {
+   "id": "15|7|174|2026-11-10T15:16:49.736Z",
+   "team_id": "15",
+   "round": 7,
+   "player_id": "174",
+   "player_name": "Tobias Bauer",
+   "treatment": "rehab_elite",
+   "submitted_at": "2026-11-10T15:16:49.736Z",
+   "injured_until_before": 9,
+   "injured_until_after": 6,
+   "cost": 375000
+  },
+  {
+   "id": "15|7|309|2026-11-10T15:17:27.662Z",
+   "team_id": "15",
+   "round": 7,
+   "player_id": "309",
+   "player_name": "Emil Diallo",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-10T15:17:27.662Z",
+   "cost": 125000
+  },
+  {
+   "id": "15|7|190|2026-11-10T15:18:32.193Z",
+   "team_id": "15",
+   "round": 7,
+   "player_id": "190",
+   "player_name": "Cesar Barros",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-10T15:18:32.193Z",
+   "cost": 125000
+  },
+  {
+   "id": "13|7|111|2026-11-10T16:06:13.842Z",
+   "team_id": "13",
+   "round": 7,
+   "player_id": "111",
+   "player_name": "Leon Santos",
+   "treatment": "rehab_standard",
+   "submitted_at": "2026-11-10T16:06:13.842Z",
+   "injured_until_before": 8,
+   "injured_until_after": 7,
+   "cost": 75000
+  },
+  {
+   "id": "12|7|265|2026-11-10T16:19:00.961Z",
+   "team_id": "12",
+   "round": 7,
+   "player_id": "265",
+   "player_name": "Tariq Kovac",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-10T16:19:00.961Z",
+   "cost": 125000
+  },
+  {
+   "id": "12|7|373|2026-11-10T16:19:16.224Z",
+   "team_id": "12",
+   "round": 7,
+   "player_id": "373",
+   "player_name": "Lars Horvat",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-10T16:19:16.224Z",
+   "cost": 125000
+  },
+  {
+   "id": "12|7|243|2026-11-10T16:19:49.898Z",
+   "team_id": "12",
+   "round": 7,
+   "player_id": "243",
+   "player_name": "Luca Weber",
+   "treatment": "recovery",
+   "submitted_at": "2026-11-10T16:19:49.898Z",
+   "cost": 50000
+  },
+  {
+   "id": "12|7|396|2026-11-10T16:20:05.608Z",
+   "team_id": "12",
+   "round": 7,
+   "player_id": "396",
+   "player_name": "Milan Reyes",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-10T16:20:05.608Z",
+   "cost": 125000
   }
  ],
  "voided": [],
@@ -1034,15 +1118,16 @@
   "8": 1175000,
   "1": 1075000,
   "5": 1650000,
-  "12": 2425000,
+  "12": 2850000,
   "0": 625000,
   "16": 1625000,
   "14": 925000,
   "17": 175000,
-  "15": 1125000,
+  "15": 1750000,
   "10": 350000,
   "11": 250000,
-  "7": 50000
+  "7": 50000,
+  "13": 75000
  },
  "boosts": {
   "3": {
@@ -1314,6 +1399,27 @@
    },
    "360": {
     "levels": 1
+   },
+   "174": {
+    "set": "Average"
+   },
+   "309": {
+    "levels": 2
+   },
+   "190": {
+    "levels": 2
+   },
+   "265": {
+    "levels": 2
+   },
+   "373": {
+    "levels": 2
+   },
+   "243": {
+    "levels": 1
+   },
+   "396": {
+    "levels": 2
    }
   }
  }
