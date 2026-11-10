@@ -296,7 +296,11 @@ def resolve_trades(trade_proposals):
     before = load_json("trades.json") if os.path.exists(trades_path) else {"applied": [], "voided": []}
     before_ids = {t["proposal_id"] for t in before.get("applied", [])} | {t["proposal_id"] for t in before.get("voided", [])}
 
-    run(["python3", "engine/resolve_trade.py", "--proposals-file", proposals_path])
+    # free-agent claims wait for waivers: processed on an explicit request,
+    # and always right before a round is simulated so none are stranded
+    waivers = os.environ.get("PROCESS_WAIVERS") == "1" or os.environ.get("RESOLVE_ROUNDS") == "1"
+    run(["python3", "engine/resolve_trade.py", "--proposals-file", proposals_path]
+        + (["--process-waivers"] if waivers else []))
 
     after = load_json("trades.json")
     actions = []

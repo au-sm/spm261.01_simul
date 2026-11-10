@@ -387,6 +387,7 @@ def render(config, deals, calendar=None, ltv_deals=None):
           <p><strong>Salary cap rule:</strong> {tr["salary_cap"]}</p>
           <p><strong>Cash considerations:</strong> {tr["cash_considerations"]}</p>
           <p><strong>Approval:</strong> {tr["approval"]}</p>
+          <p><strong>Free-agent priority:</strong> {tr["free_agent_priority"]}</p>
           <h3>Trade Day</h3>
           <p>{tr["mid_season_trade_day"]}</p>
           <p>Propose and respond to real trades on the <a href="{trade_center_url}">Trade Center</a> page.</p>'''),

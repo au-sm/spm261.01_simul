@@ -11,6 +11,10 @@ on:
         description: "Simulate the next round now (instructor request only)"
         type: boolean
         default: false
+      process_waivers:
+        description: "Process waiting free-agent claims, lowest-ranked team first"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -35,6 +39,7 @@ jobs:
         env:
           ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
           RESOLVE_ROUNDS: ${{ inputs.resolve_rounds && '1' || '0' }}
+          PROCESS_WAIVERS: ${{ inputs.process_waivers && '1' || '0' }}
         run: python3 engine/auto_resolve.py
 
       - name: Commit and push if anything changed

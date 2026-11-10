@@ -624,7 +624,7 @@ function initTradeProposeForm() {
       const result = await postSubmission(body);
       if (result.ok) {
         msg.textContent = result.status === 'accepted'
-          ? 'Free-agent move submitted -- it applies at the next league-office check (usually within the hour).'
+          ? 'Free-agent claim submitted -- it waits for waivers and is processed with the others, lowest-ranked team first.'
           : 'Trade proposed -- it now sits pending until the other team accepts or declines it below.';
         msg.className = 'sub-msg ok';
         pinInput.value = '';

@@ -82,6 +82,20 @@ def team_available_cash(finances, config, trades_state, team_id):
     return config.get("starting_budget", 0) + revenue_total + trade_cash_net - health.team_spend(team_id)
 
 
+def waiver_order(matches, team_ids):
+    """Free-agent priority: lowest-ranked team first (reverse standings)."""
+    from simulate import Standings
+    st = Standings(list(team_ids))
+    for m in matches:
+        if m.get("stage", "regular") == "regular":
+            st.record(m["home_id"], m["away_id"], m["home_goals"], m["away_goals"], m.get("forfeit"))
+    return [tid for tid, _ in st.ranked()][::-1]
+
+
+def signs_free_agent(prop):
+    return any(p.get("fa") for p in prop.get("players_in", []))
+
+
 def load_trades_state():
     path = os.path.join(BASE, "data", "trades.json")
     if os.path.exists(path):
@@ -99,6 +113,8 @@ def load_trades_state():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--proposals-file", required=True)
+    ap.add_argument("--process-waivers", action="store_true",
+                    help="also apply waiting free-agent claims, lowest-ranked team first")
     args = ap.parse_args()
 
     with open(args.proposals_file) as f:
@@ -118,11 +134,23 @@ def main():
     session = open_session(sessions, matches)
     today = datetime.date.today().isoformat()
 
+    # Deals without free agents apply in the order they were accepted.
+    # Deals that sign a free agent wait in the waiver queue until the
+    # instructor processes waivers; then they go lowest-ranked team first
+    # (ties: earliest submitted), so the worst team gets first pick.
+    live = [p for p in proposals if p["proposal_id"] not in already_done and p.get("status") == "accepted"]
+    priority = waiver_order(matches, team_ids)
+    rank = lambda p: priority.index(int(p["proposer_team_id"])) if str(p.get("proposer_team_id", "")).lstrip("-").isdigit() and int(p["proposer_team_id"]) in priority else len(priority)
+    claims = sorted((p for p in live if signs_free_agent(p)), key=lambda p: (rank(p), str(p.get("timestamp", ""))))
+    queue = [p for p in live if not signs_free_agent(p)] + (claims if args.process_waivers else [])
+    trades["waiver_queue"] = [] if args.process_waivers else [
+        {"proposal_id": p["proposal_id"], "proposer_team_id": p["proposer_team_id"],
+         "players_in": [x for x in p.get("players_in", []) if x.get("fa")]} for p in claims]
+    trades["waiver_priority"] = priority
+
     applied_count = 0
-    for prop in proposals:
+    for prop in queue:
         pid = prop["proposal_id"]
-        if pid in already_done or prop.get("status") != "accepted":
-            continue  # still pending/declined, or already resolved earlier -- nothing to do
 
         def void(reason):
             trades["voided"].append({**prop, "void_reason": reason, "voided_at": today, "session": session})
@@ -170,7 +198,7 @@ def main():
             void("One or more incoming players are no longer on the receiving team's roster.")
             continue
         if not all(i in players_by_id and players_by_id[i]["team_id"] in ("", None) for i in signed):
-            void("One or more free agents in this deal have already been signed by another team.")
+            void("A free agent in this deal was already signed by another team (lower-ranked teams have priority). Submit a different move.")
             continue
 
         count = len(out_ids)

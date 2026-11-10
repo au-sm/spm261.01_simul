@@ -100,6 +100,16 @@ def render(config, deals, trades, calendar):
         n = trades.get("session_trade_count", {}).get(str(i), {}).get(str(team_id), 0)
         return f'<td class="num">{n}/3</td>'
 
+    names = {t["team_id"]: t["name"] for t in config["teams"]}
+    priority = trades.get("waiver_priority") or [t["team_id"] for t in config["teams"]]
+    waiting_by_team = {}
+    for c in trades.get("waiver_queue", []):
+        waiting_by_team.setdefault(int(c["proposer_team_id"]), []).extend(p["name"] for p in c["players_in"])
+    priority_rows = "".join(
+        f'<tr><td class="num">{i + 1}</td><td>{names.get(tid, f"Team {tid}")}</td>'
+        f'<td>{", ".join(waiting_by_team.get(tid, [])) or "&mdash;"}</td></tr>'
+        for i, tid in enumerate(priority))
+
     session_heads = "".join(
         f'<th class="num">{s["name"]}{" (open)" if i == session else ""}</th>' for i, s in enumerate(sessions))
     trade_count_rows = "".join(
@@ -197,6 +207,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
       <p><b>Salary cap.</b> {tr["salary_cap"]}</p>
       <p><b>Cash considerations.</b> {tr["cash_considerations"]}</p>
       <p><b>Approval.</b> {tr["approval"]}</p>
+      <p><b>Free-agent priority.</b> {tr["free_agent_priority"]}</p>
       <p><b>Trade Day.</b> {tr["mid_season_trade_day"]}</p>
     </div>
   </section>
@@ -206,6 +217,15 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
     <table>
       <thead><tr><th>Team</th>{session_heads}</tr></thead>
       <tbody>{trade_count_rows}</tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Free-Agent Priority</h2><span class="section-note">lowest-ranked team picks first</span></div>
+    <p class="section-intro" style="margin:0 0 10px;font-size:14px;">Free-agent claims do not apply right away. They wait here until the instructor processes waivers, then they are applied in this order. If two teams claim the same free agent, the team higher on this list gets him and the other claim is voided. Waiting claims are also processed right before the next round is simulated.</p>
+    <table>
+      <thead><tr><th class="num">Priority</th><th>Team (worst record first)</th><th>Free agents claimed, waiting</th></tr></thead>
+      <tbody>{priority_rows}</tbody>
     </table>
   </section>
 
