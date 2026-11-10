@@ -488,10 +488,13 @@ def build(config, deals, calendar=None, ltv_deals=None):
     # ---- 12. Trades ----
     doc.add_heading("13. Trades & Free Agency", level=1)
     doc.add_paragraph(f'Deadline: {tr["deadline"]}')
+    doc.add_paragraph(f'How many players: {tr["player_limits"]}')
+    doc.add_paragraph(f'Mandatory: {tr["voluntary"]}')
     doc.add_paragraph(f'Salary cap rule: {tr["salary_cap"]}')
     doc.add_paragraph(f'Cash considerations: {tr["cash_considerations"]}')
     doc.add_paragraph(f'Approval: {tr["approval"]}')
-    doc.add_heading("Mandatory Mid-Season Trade Day", level=2)
+    doc.add_paragraph(f'Free-agent priority: {tr["free_agent_priority"]}')
+    doc.add_heading("Trade Day", level=2)
     doc.add_paragraph(tr["mid_season_trade_day"])
 
     # ---- 13. Standings ----
