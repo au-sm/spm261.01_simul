@@ -315,7 +315,9 @@ var HEALTH_MAX_PER_ROUND = 4;
 function committedOutgoingCount_(trades, teamId) {
   var total = 0;
   trades.forEach(function (t) {
-    if (t.status !== "pending" && t.status !== "accepted") return;
+    // pending only: accepted trades from an earlier session must not
+    // block the next one (resolve_trade.py enforces the per-session limit)
+    if (t.status !== "pending") return;
     if (String(t.proposer_team_id) === String(teamId)) total += (t.players_out || []).length;
     if (String(t.receiver_team_id) === String(teamId)) total += (t.players_in || []).length;
   });
@@ -1278,8 +1280,8 @@ function doPost(e) {
     var playersOut = body.players_out;
     var playersIn = body.players_in;
     if (!Array.isArray(playersOut) || !Array.isArray(playersIn) ||
-        playersOut.length === 0 || playersOut.length !== playersIn.length || playersOut.length > 3) {
-      return jsonOut_({ ok: false, error: "Both sides of a trade must send the same number of players -- 1-for-1, 2-for-2, or 3-for-3 only." });
+        playersOut.length !== 3 || playersIn.length !== 3) {
+      return jsonOut_({ ok: false, error: "Every trade must be exactly 3-for-3 -- 3 players each way." });
     }
     var rationale = String(body.rationale || "").trim();
     if (!rationale) return jsonOut_({ ok: false, error: "A short rationale is required." });
@@ -1288,10 +1290,10 @@ function doPost(e) {
     var proposerCommitted = committedOutgoingCount_(existingTrades, body.team_id);
     var receiverCommitted = committedOutgoingCount_(existingTrades, receiverId);
     if (proposerCommitted + playersOut.length > 3) {
-      return jsonOut_({ ok: false, error: "This would put your team over the 3-player season trade limit (" + proposerCommitted + " already committed)." });
+      return jsonOut_({ ok: false, error: "This would put your team over the 3-player per-session trade limit (" + proposerCommitted + " already pending)." });
     }
     if (receiverCommitted + playersIn.length > 3) {
-      return jsonOut_({ ok: false, error: "This would put the receiving team over the 3-player season trade limit (" + receiverCommitted + " already committed)." });
+      return jsonOut_({ ok: false, error: "This would put the receiving team over the 3-player per-session trade limit (" + receiverCommitted + " already pending)." });
     }
 
     var proposalId = Utilities.getUuid();

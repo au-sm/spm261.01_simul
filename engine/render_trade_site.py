@@ -63,8 +63,12 @@ def render(config, deals, trades, calendar):
         </tr>''')
     log_html = "".join(log_rows) or '<tr><td colspan="5" class="sub-empty">No trades have been finalized yet.</td></tr>'
 
+    import resolve_trade
+    session = resolve_trade.open_session(tr["sessions"], resolve_trade.load_json("matches.json"))
+    session_counts = trades.get("session_trade_count", {}).get(str(session), {}) if session is not None else {}
+    session_label = tr["sessions"][session]["name"] if session is not None else "No session open"
     trade_count_rows = "".join(
-        f'<tr><td>{t["name"]}</td><td class="num">{trades.get("team_trade_count", {}).get(str(t["team_id"]), 0)}/3 players traded</td></tr>'
+        f'<tr><td>{t["name"]}</td><td class="num">{session_counts.get(str(t["team_id"]), 0)}/3 players traded</td></tr>'
         for t in sorted(config["teams"], key=lambda t: t["team_id"])
     )
 
@@ -137,7 +141,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
 <div class="masthead">
   <div class="masthead-inner">
     <h1>Trade Center</h1>
-    <p>{config["league_name"]} &middot; propose a trade, respond to one sent to you, deadline before Round 7</p>
+    <p>{config["league_name"]} &middot; propose a trade, respond to one sent to you, two trade sessions, one 3-for-3 trade each</p>
   </div>
 </div>
 
@@ -147,7 +151,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
     <div class="how-it-works">
       <p><b>Deadline.</b> {tr["deadline"]}</p>
       <p><b>How many players.</b> {tr["player_limits"]}</p>
-      <p><b>Voluntary.</b> {tr["voluntary"]}</p>
+      <p><b>Mandatory.</b> {tr["voluntary"]}</p>
       <p><b>Salary cap.</b> {tr["salary_cap"]}</p>
       <p><b>Cash considerations.</b> {tr["cash_considerations"]}</p>
       <p><b>Approval.</b> {tr["approval"]}</p>
@@ -156,7 +160,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
   </section>
 
   <section>
-    <div class="section-head"><h2>Players Traded This Season</h2><span class="section-note">3-player season limit, per team</span></div>
+    <div class="section-head"><h2>Players Traded This Season</h2><span class="section-note">{session_label} &middot; one required 3-for-3 trade per team</span></div>
     <table>
       <thead><tr><th>Team</th><th class="num">Traded so far</th></tr></thead>
       <tbody>{trade_count_rows}</tbody>
@@ -167,7 +171,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
     <p class="sub-backend-warning" hidden>Backend not configured yet &mdash; submissions are disabled until BACKEND_URL is set in assets/config.js.</p>
     <div class="sub-card">
       <h2>Propose a Trade</h2>
-      <p class="sub-sub">Pick who you're giving and who you want back -- both sides must be the same count (1-3 players). Add cash on either side to bridge a value gap. Nothing moves until the other team accepts.</p>
+      <p class="sub-sub">Pick who you're giving and who you want back -- every trade is exactly 3-for-3 (pick 3 on each side). Add cash on either side to bridge a value gap. Nothing moves until the other team accepts.</p>
       <div class="sub-grid">
         <div class="sub-field"><label for="tp-team">Your Team</label><select id="tp-team" class="sub-team-select"></select></div>
         <div class="sub-field"><label for="tp-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="tp-pin" class="sub-pin" placeholder="4-digit PIN"></div>

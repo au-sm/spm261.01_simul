@@ -569,9 +569,8 @@ function initTradeProposeForm() {
     const pin = pinInput.value.trim();
     if (!pin || pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN.'; msg.className = 'sub-msg'; return; }
     if (teamSel.value === partnerSel.value) { msg.textContent = 'Pick a different team to trade with.'; msg.className = 'sub-msg'; return; }
-    if (tradeGivePicks.length === 0) { msg.textContent = 'Select at least one player to give up.'; msg.className = 'sub-msg'; return; }
-    if (tradeGivePicks.length !== tradeWantPicks.length) {
-      msg.textContent = `You're offering ${tradeGivePicks.length} player(s) for ${tradeWantPicks.length} -- both sides must match: 1-for-1, 2-for-2, or 3-for-3.`;
+    if (tradeGivePicks.length !== 3 || tradeWantPicks.length !== 3) {
+      msg.textContent = `You're offering ${tradeGivePicks.length} player(s) for ${tradeWantPicks.length} -- every trade must be exactly 3-for-3.`;
       msg.className = 'sub-msg';
       return;
     }

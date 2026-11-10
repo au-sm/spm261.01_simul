@@ -52,13 +52,19 @@ def save_players(players):
         w.writerows(players)
 
 
-def trade_deadline_date(calendar):
-    """The match day that resolves Round 7 -- a trade must be accepted
-    and applied before this date; Round 6, whichever day it lands on,
-    is the last day a trade can take effect."""
-    for entry in calendar["match_day_schedule"]:
-        if 7 in entry["rounds"]:
-            return entry["date"]
+def open_session(sessions, matches):
+    """Index of the trade session that is open right now, or None.
+    Sessions run in order; each stays open until its closes_before_round
+    has been simulated (rounds are simulated manually, so this follows
+    matches.json, not the calendar). A session whose closes_before_round
+    is still null hasn't been scheduled yet, so nothing after it is open."""
+    played = max((m["round"] for m in matches if m.get("stage", "regular") == "regular"), default=0)
+    for i, s in enumerate(sessions):
+        close = s.get("closes_before_round")
+        if close is None:
+            return None
+        if played < close:
+            return i
     return None
 
 
@@ -86,6 +92,7 @@ def load_trades_state():
     state.setdefault("voided", [])
     state.setdefault("team_trade_count", {})
     state.setdefault("team_cash_net", {})
+    state.setdefault("session_trade_count", {})
     return state
 
 
@@ -101,13 +108,14 @@ def main():
     already_done = {t["proposal_id"] for t in trades["applied"]} | {t["proposal_id"] for t in trades["voided"]}
 
     config = load_json("league_config.json")
-    calendar = load_json("season_calendar.json")
+    sessions = load_json("deals.json")["trade_rules"]["sessions"]
+    matches = load_json("matches.json")
     finances = load_json("team_finances.json")
     players = load_players()
     players_by_id = {int(p["player_id"]): p for p in players}
     team_ids = {t["team_id"] for t in config["teams"]}
     salary_cap = config.get("salary_cap", 0)
-    deadline = trade_deadline_date(calendar)
+    session = open_session(sessions, matches)
     today = datetime.date.today().isoformat()
 
     applied_count = 0
@@ -119,9 +127,10 @@ def main():
         def void(reason):
             trades["voided"].append({**prop, "void_reason": reason, "voided_at": today})
 
-        if deadline and today >= deadline:
-            void(f"Trade deadline has passed (Round 7's match day is {deadline}) -- this trade never took effect.")
+        if session is None:
+            void("No trade session is open right now -- this trade never took effect.")
             continue
+        session_counts = trades["session_trade_count"].setdefault(str(session), {})
 
         try:
             proposer = int(prop["proposer_team_id"])
@@ -135,8 +144,8 @@ def main():
 
         out_ids = [int(p["id"]) for p in prop.get("players_out", [])]
         in_ids = [int(p["id"]) for p in prop.get("players_in", [])]
-        if not out_ids or len(out_ids) != len(in_ids) or len(out_ids) > 3:
-            void("Player counts must match on both sides (1-for-1, 2-for-2, or 3-for-3).")
+        if len(out_ids) != 3 or len(in_ids) != 3:
+            void("Every trade must be exactly 3-for-3.")
             continue
 
         # Roster ownership -- re-verified here since backend.gs has no
@@ -153,13 +162,13 @@ def main():
             continue
 
         count = len(out_ids)
-        proposer_count = trades["team_trade_count"].get(str(proposer), 0)
-        receiver_count = trades["team_trade_count"].get(str(receiver), 0)
+        proposer_count = session_counts.get(str(proposer), 0)
+        receiver_count = session_counts.get(str(receiver), 0)
         if proposer_count + count > 3:
-            void(f"Would put the proposing team over the 3-player season trade limit ({proposer_count} already traded).")
+            void(f"The proposing team already made its 3-for-3 trade in {sessions[session]['name']}.")
             continue
         if receiver_count + count > 3:
-            void(f"Would put the receiving team over the 3-player season trade limit ({receiver_count} already traded).")
+            void(f"The receiving team already made its 3-for-3 trade in {sessions[session]['name']}.")
             continue
 
         out_salary = sum(int(players_by_id[i]["salary"]) for i in out_ids)
@@ -188,8 +197,10 @@ def main():
         for i in in_ids:
             players_by_id[i]["team_id"] = str(proposer)
 
-        trades["team_trade_count"][str(proposer)] = proposer_count + count
-        trades["team_trade_count"][str(receiver)] = receiver_count + count
+        session_counts[str(proposer)] = proposer_count + count
+        session_counts[str(receiver)] = receiver_count + count
+        for t in (proposer, receiver):
+            trades["team_trade_count"][str(t)] = trades["team_trade_count"].get(str(t), 0) + count
         net_to_proposer = cash_from_receiver - cash_from_proposer
         trades["team_cash_net"][str(proposer)] = trades["team_cash_net"].get(str(proposer), 0) + net_to_proposer
         trades["team_cash_net"][str(receiver)] = trades["team_cash_net"].get(str(receiver), 0) - net_to_proposer

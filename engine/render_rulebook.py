@@ -383,7 +383,7 @@ def render(config, deals, calendar=None, ltv_deals=None):
         ("trades", "13. Trades &amp; Free Agency", f'''
           <p><strong>Deadline:</strong> {tr["deadline"]}</p>
           <p><strong>How many players:</strong> {tr["player_limits"]}</p>
-          <p><strong>Voluntary:</strong> {tr["voluntary"]}</p>
+          <p><strong>Mandatory:</strong> {tr["voluntary"]}</p>
           <p><strong>Salary cap rule:</strong> {tr["salary_cap"]}</p>
           <p><strong>Cash considerations:</strong> {tr["cash_considerations"]}</p>
           <p><strong>Approval:</strong> {tr["approval"]}</p>
