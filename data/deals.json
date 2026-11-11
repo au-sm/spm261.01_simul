@@ -280,6 +280,6 @@
         "closes_before_round": null
       }
     ],
-    "free_agent_priority": "Free agents go to the lowest-ranked team first. Any deal that signs a free agent waits as a claim until the instructor processes waivers. Then every waiting claim is applied in reverse standings order, worst record first. If two teams claim the same free agent, the lower-ranked team gets him and the other claim is voided, so that team should submit a different move. Waiting claims are also processed right before the next round is simulated. Deals that don't involve free agents apply at the next league-office check as usual."
+    "free_agent_priority": "Once a team claims a free agent, he is removed from the free-agent list, so no other team can pick him. Any deal that signs a free agent waits as a claim until the instructor processes waivers. Then every waiting claim is applied in reverse standings order, worst record first. If two claims for the same player arrive at the same moment, the lower-ranked team gets him and the other claim is voided, so that team should submit a different move. A voided claim puts the player back on the free-agent list. Waiting claims are also processed right before the next round is simulated. Deals that don't involve free agents apply at the next league-office check as usual."
   }
 }

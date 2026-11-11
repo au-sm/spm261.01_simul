@@ -41,6 +41,7 @@ async function loadCatalog() {
     EXISTING_LOCAL_TV_DEALS = data.local_tv_deals;
     EXISTING_TRADE_PROPOSALS = data.trade_proposals || [];
   }
+  await loadVoidedProposals();
 }
 
 function populateTeamSelects() {
@@ -482,8 +483,29 @@ function tradeTeamRoster(teamId) {
   return PLAYERS.filter(p => String(p.team_id) === String(teamId) && !busy.has(Number(p.id)));
 }
 
+// A free agent someone has already claimed (offer pending, or accepted and
+// waiting for waivers) is taken -- hide him so no second team picks him.
+// Claims the league office voided free the player up again.
+let VOIDED_PROPOSAL_IDS = new Set();
+async function loadVoidedProposals() {
+  try {
+    const res = await fetch('../data/trades.json', { cache: 'no-store' });
+    const t = await res.json();
+    VOIDED_PROPOSAL_IDS = new Set((t.voided || []).map(v => v.proposal_id));
+  } catch (e) { /* keep hiding every claimed free agent */ }
+}
+
+function claimedFreeAgents() {
+  const ids = new Set();
+  EXISTING_TRADE_PROPOSALS
+    .filter(t => (t.status === 'pending' || t.status === 'accepted') && !VOIDED_PROPOSAL_IDS.has(t.proposal_id))
+    .forEach(t => (t.players_in || []).filter(p => p.fa).forEach(p => ids.add(Number(p.id))));
+  return ids;
+}
+
 function freeAgentPool() {
-  return PLAYERS.filter(p => p.team_id === null || p.team_id === undefined || p.team_id === '');
+  const taken = claimedFreeAgents();
+  return PLAYERS.filter(p => (p.team_id === null || p.team_id === undefined || p.team_id === '') && !taken.has(Number(p.id)));
 }
 
 const isFreeAgent = p => p.team_id === null || p.team_id === undefined || p.team_id === '';

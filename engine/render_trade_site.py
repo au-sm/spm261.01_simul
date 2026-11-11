@@ -222,7 +222,7 @@ footer{{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color
 
   <section>
     <div class="section-head"><h2>Free-Agent Priority</h2><span class="section-note">lowest-ranked team picks first</span></div>
-    <p class="section-intro" style="margin:0 0 10px;font-size:14px;">Free-agent claims do not apply right away. They wait here until the instructor processes waivers, then they are applied in this order. If two teams claim the same free agent, the team higher on this list gets him and the other claim is voided. Waiting claims are also processed right before the next round is simulated.</p>
+    <p class="section-intro" style="margin:0 0 10px;font-size:14px;">Free-agent claims do not apply right away. They wait here until the instructor processes waivers, then they are applied in this order. Once a team claims a free agent, he disappears from the free-agent list, so no other team can pick him. If two claims for the same player arrive at the same moment, the team higher on this list gets him and the other claim is voided. Waiting claims are also processed right before the next round is simulated.</p>
     <table>
       <thead><tr><th class="num">Priority</th><th>Team (worst record first)</th><th>Free agents claimed, waiting</th></tr></thead>
       <tbody>{priority_rows}</tbody>

@@ -254,7 +254,9 @@ def main():
         return (f"  {names[tid]} (table {position[tid]}, cap room {short_money(cap - payrolls[tid])}, "
                 f"moved {moved}/3): {players_txt}")
 
-    free_agents = sorted((p for p in players if p["team_id"] in ("", None)), key=lambda p: -p["ovr"])
+    claimed = {int(p["id"]) for c in trades_state.get("waiver_queue", []) for p in c.get("players_in", [])}
+    free_agents = sorted((p for p in players if p["team_id"] in ("", None) and int(p["player_id"]) not in claimed),
+                         key=lambda p: -p["ovr"])
     fa_lines = [f"  {p['position']} {p['name']} OVR{p['ovr']} {short_money(p['salary'])} age {p['age']}"
                 for p in free_agents[:25]]
     if open_idx is not None:
