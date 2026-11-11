@@ -491,7 +491,7 @@ async function loadVoidedProposals() {
   try {
     const res = await fetch('../data/trades.json', { cache: 'no-store' });
     const t = await res.json();
-    VOIDED_PROPOSAL_IDS = new Set((t.voided || []).map(v => v.proposal_id));
+    VOIDED_PROPOSAL_IDS = new Set((t.voided || []).concat(t.applied || []).map(v => v.proposal_id));
   } catch (e) { /* keep hiding every claimed free agent */ }
 }
 

@@ -269,6 +269,27 @@ function readLocalTVDeals_(sheet) {
   return out;
 }
 
+// Free agents already claimed in a live deal (pending, or accepted and
+// waiting for waivers). Deals the league office has settled -- applied
+// (player now on a roster) or voided (player free again) -- are read from
+// the published data/trades.json so they don't block anyone.
+function claimedFreeAgents_(trades) {
+  var settled = {};
+  try {
+    var resp = UrlFetchApp.fetch(COACH_CONTEXT_URL.replace("coach_context.json", "trades.json") + "?t=" + Date.now(), { muteHttpExceptions: true });
+    if (resp.getResponseCode() === 200) {
+      var st = JSON.parse(resp.getContentText());
+      (st.applied || []).concat(st.voided || []).forEach(function (t) { settled[t.proposal_id] = true; });
+    }
+  } catch (e) {}
+  var ids = {};
+  trades.forEach(function (t) {
+    if ((t.status !== "pending" && t.status !== "accepted") || settled[t.proposal_id]) return;
+    (t.players_in || []).forEach(function (p) { if (p.fa) ids[String(p.id)] = true; });
+  });
+  return ids;
+}
+
 function readTradeProposals_(sheet) {
   var rows = sheet.getDataRange().getValues();
   var out = [];
@@ -1298,6 +1319,12 @@ function doPost(e) {
     if (!rationale) return jsonOut_({ ok: false, error: "A short rationale is required." });
 
     var existingTrades = readTradeProposals_(sheets.trades);
+    var taken = claimedFreeAgents_(existingTrades);
+    var clash = playersIn.filter(function (p) { return p.fa && taken[String(p.id)]; });
+    if (clash.length) {
+      return jsonOut_({ ok: false, error: clash.map(function (p) { return p.name; }).join(", ") +
+        " was already claimed by another team. Reload the page and pick a different free agent." });
+    }
     var proposerCommitted = committedOutgoingCount_(existingTrades, body.team_id);
     var receiverCommitted = committedOutgoingCount_(existingTrades, receiverId);
     if (proposerCommitted + playersOut.length > 3) {
