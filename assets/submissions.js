@@ -719,7 +719,6 @@ function renderTradeInbox() {
           ? 'Accepted -- this trade will apply automatically once the next league-office check confirms rosters and cap room (usually within the hour).'
           : 'Declined.';
         msg.className = 'sub-msg ok';
-        pinInput.value = '';
         await loadCatalog();
         renderTradeInbox();
         renderTradeLog();
@@ -738,8 +737,27 @@ function renderTradeInbox() {
 
 function initTradeRespondForm() {
   const teamSel = document.getElementById('tr-team');
-  teamSel.addEventListener('change', renderTradeInbox);
-  renderTradeInbox();
+  const list = document.getElementById('tr-inbox');
+  const showBtn = document.getElementById('tr-show');
+  const msg = document.getElementById('tr-msg');
+  const prompt = () => { list.innerHTML = '<li class="sub-empty">Enter your PIN and click Show Trade Offers.</li>'; msg.textContent = ''; };
+  teamSel.addEventListener('change', prompt);
+  prompt();
+  // pull the latest offers from the Sheet on every click, so nothing is stale
+  showBtn.addEventListener('click', async () => {
+    const pin = document.getElementById('tr-pin').value.trim();
+    if (pin.length !== 4) { msg.textContent = 'Enter your 4-digit PIN first.'; msg.className = 'sub-msg'; return; }
+    showBtn.disabled = true;
+    msg.textContent = '';
+    list.innerHTML = '<li class="sub-empty">Loading the latest trade offers...</li>';
+    try {
+      await loadCatalog();
+      renderTradeInbox();
+    } catch (e) {
+      list.innerHTML = '<li class="sub-empty">Could not load trade offers -- please try again.</li>';
+    }
+    showBtn.disabled = false;
+  });
 }
 
 // ---------------- Trade Center: live pending/responded log ----------------

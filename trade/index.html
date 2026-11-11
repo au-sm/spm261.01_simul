@@ -196,11 +196,12 @@ footer{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px) 50px;color:
   <section>
     <div class="sub-card">
       <h2>Respond to a Trade</h2>
-      <p class="sub-sub">Pick your team to see any trades sent to you, then accept or decline.</p>
+      <p class="sub-sub">Pick your team, enter your PIN, and click Show Trade Offers to see any trades sent to you. Then accept or decline.</p>
       <div class="sub-grid">
         <div class="sub-field"><label for="tr-team">Your Team</label><select id="tr-team" class="sub-team-select"></select></div>
         <div class="sub-field"><label for="tr-pin">Team PIN</label><input type="password" inputmode="numeric" maxlength="4" id="tr-pin" class="sub-pin" placeholder="4-digit PIN"></div>
       </div>
+      <button class="sub-btn" id="tr-show" style="margin-top:10px;">Show Trade Offers</button>
       <ul class="sub-board" id="tr-inbox" style="margin-top:10px;"></ul>
       <p class="sub-msg" id="tr-msg"></p>
     </div>
