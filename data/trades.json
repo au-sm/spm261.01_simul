@@ -507,7 +507,35 @@
       "16": 3
     }
   },
-  "waiver_queue": [],
+  "waiver_queue": [
+    {
+      "proposal_id": "09a6fe63-fcfe-4f70-8dcf-05b30ac0f771",
+      "proposer_team_id": 9,
+      "players_in": [
+        {
+          "id": 1,
+          "name": "Amara Adamu",
+          "fa": true
+        },
+        {
+          "id": 127,
+          "name": "Igor Petrov",
+          "fa": true
+        }
+      ]
+    },
+    {
+      "proposal_id": "1cb9977d-991d-4f81-bb6b-c72bcbc026b6",
+      "proposer_team_id": 5,
+      "players_in": [
+        {
+          "id": 162,
+          "name": "Jonas Bauer",
+          "fa": true
+        }
+      ]
+    }
+  ],
   "waiver_priority": [
     13,
     11,

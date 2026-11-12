@@ -1111,6 +1111,56 @@
    "treatment": "sports_science",
    "submitted_at": "2026-11-10T16:20:05.608Z",
    "cost": 125000
+  },
+  {
+   "id": "16|7|280|2026-11-12T15:36:20.128Z",
+   "team_id": "16",
+   "round": 7,
+   "player_id": "280",
+   "player_name": "Lars Nowak",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-12T15:36:20.128Z",
+   "cost": 125000
+  },
+  {
+   "id": "14|7|391|2026-11-12T15:36:31.195Z",
+   "team_id": "14",
+   "round": 7,
+   "player_id": "391",
+   "player_name": "Tomas Toure",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-12T15:36:31.195Z",
+   "cost": 125000
+  },
+  {
+   "id": "14|7|143|2026-11-12T15:36:44.581Z",
+   "team_id": "14",
+   "round": 7,
+   "player_id": "143",
+   "player_name": "Cesar Adeyemi",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-12T15:36:44.581Z",
+   "cost": 125000
+  },
+  {
+   "id": "16|7|12|2026-11-12T15:39:08.403Z",
+   "team_id": "16",
+   "round": 7,
+   "player_id": "12",
+   "player_name": "Amara Krause",
+   "treatment": "recovery",
+   "submitted_at": "2026-11-12T15:39:08.403Z",
+   "cost": 50000
+  },
+  {
+   "id": "16|7|210|2026-11-12T15:42:00.584Z",
+   "team_id": "16",
+   "round": 7,
+   "player_id": "210",
+   "player_name": "Yusuf Braga",
+   "treatment": "recovery",
+   "submitted_at": "2026-11-12T15:42:00.584Z",
+   "cost": 50000
   }
  ],
  "voided": [],
@@ -1120,8 +1170,8 @@
   "5": 1650000,
   "12": 2850000,
   "0": 625000,
-  "16": 1625000,
-  "14": 925000,
+  "16": 1850000,
+  "14": 1175000,
   "17": 175000,
   "15": 1750000,
   "10": 350000,
@@ -1420,6 +1470,21 @@
    },
    "396": {
     "levels": 2
+   },
+   "280": {
+    "levels": 2
+   },
+   "391": {
+    "levels": 2
+   },
+   "143": {
+    "levels": 2
+   },
+   "12": {
+    "levels": 1
+   },
+   "210": {
+    "levels": 1
    }
   }
  }
