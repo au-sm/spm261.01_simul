@@ -40,7 +40,7 @@ def build_rows():
     rows = [["Round", "Match date", "Team that lost by forfeit", "Owner", "Reason", "Opponent",
              "Result shown publicly", "Ticket revenue given"]]
     for m in sorted(matches, key=lambda m: (m["round"], m["home_id"])):
-        ff = m.get("forfeit")
+        ff = m.get("forfeit") or ("both" if m.get("forfeit_draw") else None)
         if not ff:
             continue
         reasons = m.get("forfeit_reason") or {}
@@ -50,7 +50,9 @@ def build_rows():
             tid = m[f"{side}_id"]
             opp = m["away_id"] if side == "home" else m["home_id"]
             reason = reasons.get(side) or "no valid lineup"
-            if ff == "both":
+            if m.get("forfeit_draw"):
+                reason += " (both teams forced: shown as a 0-0 draw, 1 point each)"
+            elif ff == "both":
                 reason += " (both teams forfeited: both take a loss)"
             g = m.get("gate") or {}
             amt = g.get(f"{side}_forfeit_gate", 0)

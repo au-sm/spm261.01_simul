@@ -107,7 +107,7 @@ def league_trends(matches):
     from matches where that side actually submitted a lineup"""
     by_form, by_strat, tiers = {}, {}, {}
     for m in matches:
-        if m.get("forfeit"):
+        if m.get("forfeit") or m.get("forfeit_draw"):
             continue
         for side, other in (("home", "away"), ("away", "home")):
             gf, ga = m[f"{side}_goals"], m[f"{other}_goals"]

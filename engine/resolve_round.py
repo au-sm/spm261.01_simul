@@ -181,7 +181,18 @@ def main():
     parsed = {}
     pin_by_team = {t["team_id"]: t.get("pin") for t in config["teams"]}
     forfeit_reason = {}  # team_id -> why it had no valid lineup (private: instructor's Forfeits tab only)
+    # INSTRUCTOR-FORCED FORFEITS (2026-11-16): data/forced_forfeits.json maps
+    # round -> {team_id: reason}, e.g. teams that did not finish a trade
+    # session. A listed team loses 3-0 like a missing lineup ($0 gate); if BOTH
+    # teams in a fixture are listed, the match is a 0-0 draw (1 point each).
+    forced = {str(k): v for k, v in load_json_or_default("forced_forfeits.json", {}).get(str(args.round), {}).items()}
     for team_id, name in {t["team_id"]: t["name"] for t in config["teams"]}.items():
+        if str(team_id) in forced:
+            forfeit_reason[team_id] = forced[str(team_id)]
+            parsed[team_id] = {"lineup": None, "formation": None, "strategy": "Balanced",
+                               "ticket_price": None, "roster": list(build_roster_index(players, team_id).values()),
+                               "submitted": False}
+            continue
         row = submissions.get(name)
         roster_by_name = build_roster_index(players, team_id)
         roster = list(roster_by_name.values())
@@ -256,6 +267,7 @@ def main():
         if not (h_info["submitted"] and a_info["submitted"]):
             forfeit = "both" if not (h_info["submitted"] or a_info["submitted"]) else ("home" if not h_info["submitted"] else "away")
             fg = {"both": (0, 0), "home": (0, 3), "away": (3, 0)}[forfeit]
+            forced_draw = forfeit == "both" and str(h_id) in forced and str(a_id) in forced
             # PUBLICLY a forfeit must look like an ordinary result (instructor's
             # call, 2026-10-07): the forfeiting side fields the league office's
             # default XI, the winner's 3 goals get normal-looking scorers from its
@@ -276,7 +288,8 @@ def main():
             record = {
                 "round": args.round, "stage": "regular",
                 "home_id": h_id, "away_id": a_id,
-                "home_goals": fg[0], "away_goals": fg[1], "forfeit": forfeit,
+                "home_goals": fg[0], "away_goals": fg[1], "forfeit": None if forced_draw else forfeit,
+                "forfeit_draw": forced_draw,
                 "home_formation": h_formation, "away_formation": a_formation,
                 "home_strategy": h_info["strategy"] if h_info["submitted"] else "Balanced",
                 "away_strategy": a_info["strategy"] if a_info["submitted"] else "Balanced",
@@ -301,7 +314,7 @@ def main():
             else:
                 record["gate"] = {"price_tier": None, "price": 0, "attendance": 0, "attendance_rate": 0,
                                   "revenue": 0, "home_revenue": 0, "away_revenue": 0, "away_share_rate": 0}
-            label = {"both": "BOTH teams forfeit (no lineups) -- both take a loss",
+            label = {"both": ("BOTH teams instructor-forced -- recorded as a 0-0 draw" if forced_draw else "BOTH teams forfeit (no lineups) -- both take a loss"),
                      "home": f"{h_name} forfeits (no lineup) -- {a_name} wins 3-0",
                      "away": f"{a_name} forfeits (no lineup) -- {h_name} wins 3-0"}[forfeit]
             print(f"Round {args.round}: {h_name} {fg[0]}-{fg[1]} {a_name}  FORFEIT: {label}"
