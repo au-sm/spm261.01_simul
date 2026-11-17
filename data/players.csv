@@ -1,5 +1,5 @@
 player_id,name,position,age,att,def,pace,phy,ovr,star_power,salary,team_id
-1,Amara Adamu,DF,32,39,72,74,68,61,69,879000,9
+1,Amara Adamu,DF,32,39,72,74,68,61,69,879000,
 2,Sami Kovac,DF,27,59,79,48,88,69,45,781000,13
 3,Kofi Diallo,MF,29,78,67,73,50,69,77,1015000,1
 4,Stefan Adeyemi,GK,19,36,67,48,55,52,53,814000,
@@ -16,7 +16,7 @@ player_id,name,position,age,att,def,pace,phy,ovr,star_power,salary,team_id
 15,Hassan Almeida,MF,21,76,45,92,58,66,67,747000,8
 16,Luca Vidal,MF,22,74,62,62,84,70,72,823000,8
 17,Kofi Petrov,GK,21,43,60,62,74,57,49,705000,6
-18,Luca Larsson,DF,34,35,69,91,64,61,76,1001000,
+18,Luca Larsson,DF,34,35,69,91,64,61,76,1001000,9
 19,Kai Duarte,MF,34,59,53,68,77,62,79,903000,6
 20,Diego Vidal,MF,20,69,66,90,48,68,52,797000,1
 21,Sven Vidal,MF,27,51,68,67,84,65,59,875000,6
@@ -66,7 +66,7 @@ player_id,name,position,age,att,def,pace,phy,ovr,star_power,salary,team_id
 65,Kenji Berg,MF,30,61,70,66,80,68,83,1069000,2
 66,Sami Sato,MF,26,51,54,69,84,61,58,923000,0
 67,Nikolai Novak,MF,21,66,59,78,90,70,58,995000,9
-68,Kenji Barros,GK,25,42,78,66,51,59,49,657000,
+68,Kenji Barros,GK,25,42,78,66,51,59,49,657000,9
 69,Andre Larsson,FW,20,84,42,68,79,67,78,1033000,0
 70,Kai Novak,GK,26,43,56,46,50,49,45,634000,
 71,Tobias Ivanov,DF,28,37,86,93,60,67,71,827000,3
@@ -125,7 +125,7 @@ player_id,name,position,age,att,def,pace,phy,ovr,star_power,salary,team_id
 124,Tomas Silva,FW,29,86,48,54,67,65,54,797000,6
 125,Mateo Malik,MF,24,59,59,83,90,69,61,935000,1
 126,Pavel Adamu,GK,22,30,74,65,76,59,39,784000,10
-127,Igor Petrov,GK,32,38,60,92,73,61,64,845000,9
+127,Igor Petrov,GK,32,38,60,92,73,61,64,845000,
 128,Leon Ferreira,FW,31,76,44,77,57,63,73,829000,11
 129,Tobias Costa,FW,25,74,43,72,69,63,40,649000,12
 130,Adrian Sokol,MF,28,69,50,68,68,63,80,891000,0
@@ -160,7 +160,7 @@ player_id,name,position,age,att,def,pace,phy,ovr,star_power,salary,team_id
 159,Enzo Mensah,DF,22,37,85,70,45,60,50,737000,
 160,Sami Suarez,DF,24,51,73,81,88,70,77,859000,8
 161,Amara Horvat,MF,22,61,49,62,57,57,79,733000,2
-162,Jonas Bauer,DF,23,45,71,45,56,55,76,860000,5
+162,Jonas Bauer,DF,23,45,71,45,56,55,76,860000,
 163,Youssef Sato,GK,23,32,72,58,77,58,50,840000,1
 164,Youssef Duarte,FW,29,77,33,83,79,64,47,891000,6
 165,Jonas Costa,DF,25,38,87,74,50,62,69,904000,15
@@ -337,7 +337,7 @@ player_id,name,position,age,att,def,pace,phy,ovr,star_power,salary,team_id
 336,Bruno Wallin,DF,23,43,81,93,91,73,77,1037000,2
 337,Omar Mensah,FW,32,72,29,56,47,51,61,662000,
 338,Tariq Malik,FW,22,78,33,77,88,65,77,812000,3
-339,Emil Ivanov,DF,32,52,74,71,48,62,49,731000,
+339,Emil Ivanov,DF,32,52,74,71,48,62,49,731000,5
 340,Idris Lindqvist,MF,27,66,57,80,52,63,51,832000,1
 341,Tariq Ferreira,GK,29,31,73,92,79,64,42,628000,14
 342,Felix Adamu,MF,28,56,69,94,48,66,46,706000,3
