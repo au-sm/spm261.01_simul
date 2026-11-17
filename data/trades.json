@@ -305,6 +305,70 @@
       "responded_at": "2026-11-10T16:25:46.863Z",
       "applied_at": "2026-11-10",
       "session": 0
+    },
+    {
+      "proposal_id": "09a6fe63-fcfe-4f70-8dcf-05b30ac0f771",
+      "timestamp": "2026-11-12T15:44:53.111Z",
+      "proposer_team_id": 9,
+      "receiver_team_id": "",
+      "players_out": [
+        {
+          "id": 18,
+          "name": "Luca Larsson",
+          "fa": true
+        },
+        {
+          "id": 68,
+          "name": "Kenji Barros",
+          "fa": true
+        }
+      ],
+      "players_in": [
+        {
+          "id": 1,
+          "name": "Amara Adamu",
+          "fa": true
+        },
+        {
+          "id": 127,
+          "name": "Igor Petrov",
+          "fa": true
+        }
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "Our defense is weaker than the league, so even though we are losing Larsson's 91 pace I believe adding Amara Adamu will benefit us. Adamu is 2 years younger and will save us a good amount of money. Trading Kenji Barros for Igor Petrov adds depth to our GK but they won't start over Kai Petrov. I think the 183k salary increase is justified to make sure if injuries occur that we can recover.",
+      "status": "accepted",
+      "responded_at": "2026-11-12T15:44:53.111Z",
+      "applied_at": "2026-11-17",
+      "session": 0
+    },
+    {
+      "proposal_id": "1cb9977d-991d-4f81-bb6b-c72bcbc026b6",
+      "timestamp": "2026-11-12T15:00:46.371Z",
+      "proposer_team_id": 5,
+      "receiver_team_id": "",
+      "players_out": [
+        {
+          "id": 339,
+          "name": "Emil Ivanov",
+          "fa": true
+        }
+      ],
+      "players_in": [
+        {
+          "id": 162,
+          "name": "Jonas Bauer",
+          "fa": true
+        }
+      ],
+      "cash_from_proposer": 0,
+      "cash_from_receiver": 0,
+      "rationale": "I would like to trade in Emil Ivanov for Jonas Bauer since Bauer is a younger player and his defensive stats shows that he's at a good pace for my defense. Additionally, due to the formation I regularly use, the 3-5-2, I think pulling in a different defense could keep the momentum or even strengthen it.",
+      "status": "accepted",
+      "responded_at": "2026-11-12T15:00:46.371Z",
+      "applied_at": "2026-11-17",
+      "session": 0
     }
   ],
   "voided": [
@@ -471,13 +535,13 @@
   ],
   "team_trade_count": {
     "1": 2,
-    "9": 1,
+    "9": 3,
     "0": 3,
     "2": 3,
     "12": 3,
     "17": 3,
     "14": 2,
-    "5": 2,
+    "5": 3,
     "13": 3,
     "15": 1,
     "16": 3
@@ -495,47 +559,19 @@
   "session_trade_count": {
     "0": {
       "1": 2,
-      "9": 1,
+      "9": 3,
       "0": 3,
       "2": 3,
       "12": 3,
       "17": 3,
       "14": 2,
-      "5": 2,
+      "5": 3,
       "13": 3,
       "15": 1,
       "16": 3
     }
   },
-  "waiver_queue": [
-    {
-      "proposal_id": "09a6fe63-fcfe-4f70-8dcf-05b30ac0f771",
-      "proposer_team_id": 9,
-      "players_in": [
-        {
-          "id": 1,
-          "name": "Amara Adamu",
-          "fa": true
-        },
-        {
-          "id": 127,
-          "name": "Igor Petrov",
-          "fa": true
-        }
-      ]
-    },
-    {
-      "proposal_id": "1cb9977d-991d-4f81-bb6b-c72bcbc026b6",
-      "proposer_team_id": 5,
-      "players_in": [
-        {
-          "id": 162,
-          "name": "Jonas Bauer",
-          "fa": true
-        }
-      ]
-    }
-  ],
+  "waiver_queue": [],
   "waiver_priority": [
     13,
     11,
