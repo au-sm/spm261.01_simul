@@ -16,7 +16,9 @@ let EXISTING_LOCAL_TV_DEALS = []; // {team_id} -- just "has negotiated"
 let EXISTING_TRADE_PROPOSALS = []; // full proposal objects, status: pending/accepted/rejected -- public, same as deal data
 
 async function loadPlayers() {
-  const res = await fetch('../players.json');
+  // no-store: a tab left open (or a cached copy) must never show a roster
+  // from before a trade -- one player can only ever be on one club.
+  const res = await fetch('../players.json', { cache: 'no-store' });
   PLAYERS = await res.json();
 }
 
@@ -423,6 +425,18 @@ function initLineupForm() {
     if (chosen.some(c => !c.name)) { msg.textContent = 'Fill every starting slot first.'; msg.className = 'sub-msg'; return; }
     const names = chosen.map(c => c.name);
     if (new Set(names).size !== names.length) { msg.textContent = 'The same player is selected in two slots.'; msg.className = 'sub-msg'; return; }
+
+    // Re-check the live roster right before submitting: if a trade moved a
+    // selected player to another club since this page loaded, refuse.
+    try { await loadPlayers(); } catch (e) { /* keep the loaded roster */ }
+    const rosterNow = new Set(teamRoster().map(p => p.name));
+    const gone = names.filter(n => !rosterNow.has(n));
+    if (gone.length) {
+      rebuildSlots();
+      msg.textContent = `Not submitted: ${gone.join(', ')} ${gone.length > 1 ? 'are' : 'is'} no longer on your roster (traded or released). Your lineup slots have been refreshed with your current roster -- pick again and resubmit.`;
+      msg.className = 'sub-msg';
+      return;
+    }
 
     const byPos = pos => chosen.filter(c => c.pos === pos).map(c => c.name);
     const rationale = document.getElementById('lu-rationale').value.trim();
