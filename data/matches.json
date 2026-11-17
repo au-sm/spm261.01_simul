@@ -4657,5 +4657,690 @@
       "away_forfeit_gate": 0,
       "forfeit_gate": 258660
     }
+  },
+  {
+    "round": 7,
+    "stage": "regular",
+    "home_id": 0,
+    "away_id": 11,
+    "home_goals": 3,
+    "away_goals": 0,
+    "forfeit": "away",
+    "forfeit_draw": false,
+    "home_formation": "4-4-2",
+    "away_formation": "4-4-2",
+    "home_strategy": "Defensive",
+    "away_strategy": "Balanced",
+    "home_submitted": true,
+    "away_submitted": false,
+    "forfeit_reason": {
+      "home": null,
+      "away": "Trade Session 1 not completed (0/3 moves)"
+    },
+    "goal_events": [
+      {
+        "minute": 7,
+        "side": "home",
+        "type": "Penalty Kick",
+        "scorer": "Enzo Novak",
+        "scorer_position": "FW",
+        "scorer_id": "346"
+      },
+      {
+        "minute": 10,
+        "side": "home",
+        "type": "Strike",
+        "scorer": "Andre Suarez",
+        "scorer_position": "FW",
+        "scorer_id": "77"
+      },
+      {
+        "minute": 56,
+        "side": "home",
+        "type": "Header",
+        "scorer": "Rafael Adeyemi",
+        "scorer_position": "DF",
+        "scorer_id": "134"
+      }
+    ],
+    "home_starters": [
+      "150",
+      "93",
+      "372",
+      "172",
+      "134",
+      "130",
+      "320",
+      "66",
+      "123",
+      "77",
+      "346"
+    ],
+    "away_starters": [
+      "138",
+      "281",
+      "378",
+      "100",
+      "283",
+      "116",
+      "365",
+      "167",
+      "213",
+      "128",
+      "249"
+    ],
+    "gate": {
+      "price_tier": "Standard",
+      "price": 30,
+      "attendance": 11698,
+      "attendance_rate": 0.585,
+      "revenue": 350940,
+      "home_revenue": 350940,
+      "away_revenue": 0,
+      "away_share_rate": 0,
+      "away_forfeit_gate": 0,
+      "forfeit_gate": 350940
+    }
+  },
+  {
+    "round": 7,
+    "stage": "regular",
+    "home_id": 12,
+    "away_id": 10,
+    "home_goals": 3,
+    "away_goals": 0,
+    "forfeit": "away",
+    "forfeit_draw": false,
+    "home_formation": "4-4-2",
+    "away_formation": "4-4-2",
+    "home_strategy": "Balanced",
+    "away_strategy": "Balanced",
+    "home_submitted": true,
+    "away_submitted": false,
+    "forfeit_reason": {
+      "home": null,
+      "away": "Trade Session 1 not completed (0/3 moves)"
+    },
+    "goal_events": [
+      {
+        "minute": 13,
+        "side": "home",
+        "type": "Free Kick",
+        "scorer": "Lars Horvat",
+        "scorer_position": "FW",
+        "scorer_id": "373"
+      },
+      {
+        "minute": 46,
+        "side": "home",
+        "type": "Strike",
+        "scorer": "Lars Horvat",
+        "scorer_position": "FW",
+        "scorer_id": "373"
+      },
+      {
+        "minute": 48,
+        "side": "home",
+        "type": "Strike",
+        "scorer": "Sven Keller",
+        "scorer_position": "MF",
+        "scorer_id": "261"
+      }
+    ],
+    "home_starters": [
+      "304",
+      "24",
+      "187",
+      "347",
+      "396",
+      "261",
+      "8",
+      "243",
+      "215",
+      "265",
+      "373"
+    ],
+    "away_starters": [
+      "126",
+      "303",
+      "327",
+      "78",
+      "101",
+      "237",
+      "149",
+      "118",
+      "5",
+      "115",
+      "14"
+    ],
+    "gate": {
+      "price_tier": "Standard",
+      "price": 30,
+      "attendance": 11245,
+      "attendance_rate": 0.562,
+      "revenue": 337350,
+      "home_revenue": 337350,
+      "away_revenue": 0,
+      "away_share_rate": 0,
+      "away_forfeit_gate": 0,
+      "forfeit_gate": 337350
+    }
+  },
+  {
+    "round": 7,
+    "stage": "regular",
+    "home_id": 9,
+    "away_id": 13,
+    "home_goals": 3,
+    "away_goals": 0,
+    "forfeit": "away",
+    "forfeit_draw": false,
+    "home_formation": "3-5-2",
+    "away_formation": "4-4-2",
+    "home_strategy": "Balanced",
+    "away_strategy": "Balanced",
+    "home_submitted": true,
+    "away_submitted": false,
+    "forfeit_reason": {
+      "home": null,
+      "away": "no lineup submitted"
+    },
+    "goal_events": [
+      {
+        "minute": 17,
+        "side": "home",
+        "type": "Strike",
+        "scorer": "Omar Vidal",
+        "scorer_position": "DF",
+        "scorer_id": "219"
+      },
+      {
+        "minute": 54,
+        "side": "home",
+        "type": "Penalty Kick",
+        "scorer": "Tariq Moreno",
+        "scorer_position": "FW",
+        "scorer_id": "110"
+      },
+      {
+        "minute": 85,
+        "side": "home",
+        "type": "Corner Kick",
+        "scorer": "Kai Sokol",
+        "scorer_position": "MF",
+        "scorer_id": "73"
+      }
+    ],
+    "home_starters": [
+      "22",
+      "132",
+      "219",
+      "397",
+      "387",
+      "67",
+      "47",
+      "355",
+      "73",
+      "211",
+      "110"
+    ],
+    "away_starters": [
+      "102",
+      "183",
+      "111",
+      "2",
+      "180",
+      "153",
+      "131",
+      "108",
+      "296",
+      "375"
+    ],
+    "gate": {
+      "price_tier": "Budget",
+      "price": 15,
+      "attendance": 11731,
+      "attendance_rate": 0.587,
+      "revenue": 175965,
+      "home_revenue": 175965,
+      "away_revenue": 0,
+      "away_share_rate": 0,
+      "away_forfeit_gate": 0,
+      "forfeit_gate": 175965
+    }
+  },
+  {
+    "round": 7,
+    "stage": "regular",
+    "home_id": 14,
+    "away_id": 8,
+    "home_goals": 0,
+    "away_goals": 0,
+    "forfeit": null,
+    "forfeit_draw": true,
+    "home_formation": "4-4-2",
+    "away_formation": "4-4-2",
+    "home_strategy": "Balanced",
+    "away_strategy": "Balanced",
+    "home_submitted": false,
+    "away_submitted": false,
+    "forfeit_reason": {
+      "home": "Trade Session 1 not completed (2/3 moves)",
+      "away": "Trade Session 1 not completed (0/3 moves)"
+    },
+    "goal_events": [],
+    "home_starters": [
+      "341",
+      "391",
+      "143",
+      "6",
+      "323",
+      "343",
+      "288",
+      "380",
+      "194",
+      "392",
+      "271"
+    ],
+    "away_starters": [
+      "54",
+      "324",
+      "160",
+      "356",
+      "32",
+      "319",
+      "284",
+      "16",
+      "193",
+      "274",
+      "81"
+    ],
+    "gate": {
+      "price_tier": null,
+      "price": 0,
+      "attendance": 0,
+      "attendance_rate": 0,
+      "revenue": 0,
+      "home_revenue": 0,
+      "away_revenue": 0,
+      "away_share_rate": 0
+    }
+  },
+  {
+    "round": 7,
+    "stage": "regular",
+    "home_id": 7,
+    "away_id": 15,
+    "home_goals": 0,
+    "away_goals": 0,
+    "forfeit": null,
+    "forfeit_draw": true,
+    "home_formation": "4-4-2",
+    "away_formation": "4-4-2",
+    "home_strategy": "Balanced",
+    "away_strategy": "Balanced",
+    "home_submitted": false,
+    "away_submitted": false,
+    "forfeit_reason": {
+      "home": "Trade Session 1 not completed (0/3 moves)",
+      "away": "Trade Session 1 not completed (1/3 moves)"
+    },
+    "goal_events": [],
+    "home_starters": [
+      "39",
+      "272",
+      "360",
+      "224",
+      "367",
+      "317",
+      "377",
+      "209",
+      "235",
+      "141",
+      "189"
+    ],
+    "away_starters": [
+      "295",
+      "309",
+      "27",
+      "246",
+      "165",
+      "190",
+      "174",
+      "88",
+      "395",
+      "121",
+      "146"
+    ],
+    "gate": {
+      "price_tier": null,
+      "price": 0,
+      "attendance": 0,
+      "attendance_rate": 0,
+      "revenue": 0,
+      "home_revenue": 0,
+      "away_revenue": 0,
+      "away_share_rate": 0
+    }
+  },
+  {
+    "round": 7,
+    "stage": "regular",
+    "home_id": 16,
+    "away_id": 6,
+    "home_goals": 3,
+    "away_goals": 0,
+    "forfeit": "away",
+    "forfeit_draw": false,
+    "home_formation": "4-4-2",
+    "away_formation": "4-4-2",
+    "home_strategy": "Defensive",
+    "away_strategy": "Balanced",
+    "home_submitted": true,
+    "away_submitted": false,
+    "forfeit_reason": {
+      "home": null,
+      "away": "Trade Session 1 not completed (0/3 moves)"
+    },
+    "goal_events": [
+      {
+        "minute": 7,
+        "side": "home",
+        "type": "Corner Kick",
+        "scorer": "Youssef Petrov",
+        "scorer_position": "MF",
+        "scorer_id": "258"
+      },
+      {
+        "minute": 78,
+        "side": "home",
+        "type": "Strike",
+        "scorer": "Amara Krause",
+        "scorer_position": "FW",
+        "scorer_id": "12"
+      },
+      {
+        "minute": 90,
+        "side": "home",
+        "type": "Penalty Kick",
+        "scorer": "Amara Krause",
+        "scorer_position": "FW",
+        "scorer_id": "12"
+      }
+    ],
+    "home_starters": [
+      "280",
+      "105",
+      "210",
+      "266",
+      "135",
+      "258",
+      "362",
+      "34",
+      "51",
+      "12",
+      "181"
+    ],
+    "away_starters": [
+      "381",
+      "44",
+      "46",
+      "299",
+      "41",
+      "179",
+      "212",
+      "57",
+      "119",
+      "188",
+      "124"
+    ],
+    "gate": {
+      "price_tier": "Standard",
+      "price": 30,
+      "attendance": 17195,
+      "attendance_rate": 0.86,
+      "revenue": 515850,
+      "home_revenue": 515850,
+      "away_revenue": 0,
+      "away_share_rate": 0,
+      "away_forfeit_gate": 0,
+      "forfeit_gate": 515850
+    }
+  },
+  {
+    "round": 7,
+    "stage": "regular",
+    "home_id": 5,
+    "away_id": 17,
+    "home_goals": 4,
+    "away_goals": 1,
+    "home_formation": "3-5-2",
+    "away_formation": "4-4-2",
+    "home_strategy": "Balanced",
+    "away_strategy": "Balanced",
+    "home_submitted": true,
+    "away_submitted": true,
+    "goal_events": [
+      {
+        "minute": 2,
+        "side": "away",
+        "type": "Corner Kick",
+        "scorer": "Felix Krause",
+        "scorer_position": "DF",
+        "scorer_id": "76"
+      },
+      {
+        "minute": 16,
+        "side": "home",
+        "type": "Header",
+        "scorer": "Amara Braga",
+        "scorer_position": "FW",
+        "scorer_id": "59"
+      },
+      {
+        "minute": 19,
+        "side": "home",
+        "type": "Free Kick",
+        "scorer": "Ivan Duarte",
+        "scorer_position": "FW",
+        "scorer_id": "311"
+      },
+      {
+        "minute": 21,
+        "side": "home",
+        "type": "Strike",
+        "scorer": "Amara Braga",
+        "scorer_position": "FW",
+        "scorer_id": "59"
+      },
+      {
+        "minute": 23,
+        "side": "home",
+        "type": "Header",
+        "scorer": "Hassan Novak",
+        "scorer_position": "DF",
+        "scorer_id": "230"
+      }
+    ],
+    "home_health_multiplier": 1.0485,
+    "away_health_multiplier": 1.0096,
+    "home_starters": [
+      "58",
+      "92",
+      "230",
+      "252",
+      "25",
+      "62",
+      "182",
+      "268",
+      "315",
+      "59",
+      "311"
+    ],
+    "away_starters": [
+      "49",
+      "195",
+      "107",
+      "76",
+      "251",
+      "94",
+      "353",
+      "61",
+      "238",
+      "214",
+      "228"
+    ],
+    "gate": {
+      "price_tier": "Standard",
+      "price": 30,
+      "attendance": 16616,
+      "attendance_rate": 0.831,
+      "revenue": 498480,
+      "home_revenue": 459061,
+      "away_revenue": 39419,
+      "away_share_rate": 0.079
+    }
+  },
+  {
+    "round": 7,
+    "stage": "regular",
+    "home_id": 1,
+    "away_id": 4,
+    "home_goals": 0,
+    "away_goals": 0,
+    "forfeit": null,
+    "forfeit_draw": true,
+    "home_formation": "4-4-2",
+    "away_formation": "4-4-2",
+    "home_strategy": "Balanced",
+    "away_strategy": "Balanced",
+    "home_submitted": false,
+    "away_submitted": false,
+    "forfeit_reason": {
+      "home": "Trade Session 1 not completed (2/3 moves)",
+      "away": "Trade Session 1 not completed (0/3 moves)"
+    },
+    "goal_events": [],
+    "home_starters": [
+      "82",
+      "394",
+      "223",
+      "55",
+      "171",
+      "256",
+      "3",
+      "125",
+      "20",
+      "122",
+      "216"
+    ],
+    "away_starters": [
+      "241",
+      "201",
+      "203",
+      "231",
+      "322",
+      "185",
+      "245",
+      "152",
+      "242",
+      "206",
+      "145"
+    ],
+    "gate": {
+      "price_tier": null,
+      "price": 0,
+      "attendance": 0,
+      "attendance_rate": 0,
+      "revenue": 0,
+      "home_revenue": 0,
+      "away_revenue": 0,
+      "away_share_rate": 0
+    }
+  },
+  {
+    "round": 7,
+    "stage": "regular",
+    "home_id": 3,
+    "away_id": 2,
+    "home_goals": 0,
+    "away_goals": 3,
+    "forfeit": "home",
+    "forfeit_draw": false,
+    "home_formation": "4-4-2",
+    "away_formation": "4-3-3",
+    "home_strategy": "Balanced",
+    "away_strategy": "Attacking",
+    "home_submitted": false,
+    "away_submitted": true,
+    "forfeit_reason": {
+      "home": "Trade Session 1 not completed (0/3 moves)",
+      "away": null
+    },
+    "goal_events": [
+      {
+        "minute": 11,
+        "side": "away",
+        "type": "Strike",
+        "scorer": "Tomas Osei",
+        "scorer_position": "MF",
+        "scorer_id": "297"
+      },
+      {
+        "minute": 49,
+        "side": "away",
+        "type": "Header",
+        "scorer": "Nico Kucera",
+        "scorer_position": "FW",
+        "scorer_id": "103"
+      },
+      {
+        "minute": 75,
+        "side": "away",
+        "type": "Corner Kick",
+        "scorer": "Cesar Horvat",
+        "scorer_position": "DF",
+        "scorer_id": "306"
+      }
+    ],
+    "home_starters": [
+      "255",
+      "332",
+      "197",
+      "330",
+      "71",
+      "345",
+      "114",
+      "184",
+      "74",
+      "310",
+      "338"
+    ],
+    "away_starters": [
+      "344",
+      "336",
+      "306",
+      "264",
+      "313",
+      "85",
+      "297",
+      "65",
+      "308",
+      "148",
+      "103"
+    ],
+    "gate": {
+      "price_tier": null,
+      "price": 0,
+      "attendance": 0,
+      "attendance_rate": 0,
+      "revenue": 0,
+      "home_revenue": 0,
+      "away_revenue": 74772,
+      "away_share_rate": 0,
+      "home_forfeit_gate": 0,
+      "away_forfeit_gate": 74772,
+      "forfeit_gate": 498480
+    }
   }
 ]
