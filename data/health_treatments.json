@@ -1161,16 +1161,66 @@
    "treatment": "recovery",
    "submitted_at": "2026-11-12T15:42:00.584Z",
    "cost": 50000
+  },
+  {
+   "id": "16|8|105|2026-11-17T14:08:18.567Z",
+   "team_id": "16",
+   "round": 8,
+   "player_id": "105",
+   "player_name": "Youssef Kucera",
+   "treatment": "recovery",
+   "submitted_at": "2026-11-17T14:08:18.567Z",
+   "cost": 50000
+  },
+  {
+   "id": "5|8|230|2026-11-17T16:32:30.198Z",
+   "team_id": "5",
+   "round": 8,
+   "player_id": "230",
+   "player_name": "Hassan Novak",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-17T16:32:30.198Z",
+   "cost": 125000
+  },
+  {
+   "id": "5|8|252|2026-11-17T16:32:44.498Z",
+   "team_id": "5",
+   "round": 8,
+   "player_id": "252",
+   "player_name": "Hassan Moreno",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-17T16:32:44.498Z",
+   "cost": 125000
+  },
+  {
+   "id": "5|8|182|2026-11-17T16:33:12.719Z",
+   "team_id": "5",
+   "round": 8,
+   "player_id": "182",
+   "player_name": "Marco Krause",
+   "treatment": "recovery",
+   "submitted_at": "2026-11-17T16:33:12.719Z",
+   "cost": 50000
+  },
+  {
+   "id": "5|8|25|2026-11-17T16:33:28.672Z",
+   "team_id": "5",
+   "round": 8,
+   "player_id": "25",
+   "player_name": "Bruno Ivanov",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-17T16:33:28.672Z",
+   "cost": 125000
   }
  ],
  "voided": [],
  "team_spend": {
   "8": 1175000,
   "1": 1075000,
-  "5": 1650000,
+  "5": 2075000,
   "12": 2850000,
   "0": 625000,
-  "16": 1850000,
+  "16": 1900000,
   "14": 1175000,
   "17": 175000,
   "15": 1750000,
@@ -1485,6 +1535,23 @@
    },
    "210": {
     "levels": 1
+   }
+  },
+  "8": {
+   "105": {
+    "levels": 1
+   },
+   "230": {
+    "levels": 2
+   },
+   "252": {
+    "levels": 2
+   },
+   "182": {
+    "levels": 1
+   },
+   "25": {
+    "levels": 2
    }
   }
  }
