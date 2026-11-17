@@ -1,7 +1,7 @@
 {
   "teams": {
     "0": {
-      "ticket_revenue": 1377326,
+      "ticket_revenue": 1026386,
       "sponsorship_revenue": 9400000,
       "tv_revenue": 800000,
       "sponsors_owned": [
@@ -125,7 +125,7 @@
       "local_tv_revenue": 1200000
     },
     "2": {
-      "ticket_revenue": 1321572,
+      "ticket_revenue": 1270970,
       "sponsorship_revenue": 13100000,
       "tv_revenue": 1300000,
       "sponsors_owned": [
@@ -211,7 +211,7 @@
       "local_tv_revenue": 850000
     },
     "5": {
-      "ticket_revenue": 1847342,
+      "ticket_revenue": 1388281,
       "sponsorship_revenue": 10300000,
       "tv_revenue": 1400000,
       "sponsors_owned": [
@@ -280,7 +280,7 @@
       "local_tv_revenue": 550000
     },
     "7": {
-      "ticket_revenue": 822611,
+      "ticket_revenue": 462857,
       "sponsorship_revenue": 13240000,
       "tv_revenue": 800000,
       "sponsors_owned": [
@@ -404,7 +404,7 @@
       "local_tv_revenue": 700000
     },
     "9": {
-      "ticket_revenue": 1517688,
+      "ticket_revenue": 1341723,
       "sponsorship_revenue": 12580000,
       "tv_revenue": 800000,
       "sponsors_owned": [
@@ -466,7 +466,7 @@
       "local_tv_revenue": 1100000
     },
     "10": {
-      "ticket_revenue": 1063118,
+      "ticket_revenue": 1037643,
       "sponsorship_revenue": 8730000,
       "tv_revenue": 800000,
       "sponsors_owned": [
@@ -590,7 +590,7 @@
       "local_tv_revenue": 700000
     },
     "12": {
-      "ticket_revenue": 1103029,
+      "ticket_revenue": 791154,
       "sponsorship_revenue": 9400000,
       "tv_revenue": 800000,
       "sponsors_owned": [
@@ -731,7 +731,7 @@
       "local_tv_revenue": 1190000
     },
     "15": {
-      "ticket_revenue": 1423240,
+      "ticket_revenue": 1359754,
       "sponsorship_revenue": 10890000,
       "tv_revenue": 1600000,
       "sponsors_owned": [
@@ -793,7 +793,7 @@
       "local_tv_revenue": 977500
     },
     "16": {
-      "ticket_revenue": 1969335,
+      "ticket_revenue": 1453485,
       "sponsorship_revenue": 16800000,
       "tv_revenue": 2300000,
       "sponsors_owned": [
@@ -855,7 +855,7 @@
       "local_tv_revenue": 655500
     },
     "17": {
-      "ticket_revenue": 1395612,
+      "ticket_revenue": 1356193,
       "sponsorship_revenue": 0,
       "tv_revenue": 800000,
       "sponsors_owned": [],
