@@ -225,6 +225,19 @@ def main():
                                 "ticket_price": None, "roster": roster, "submitted": False}
             continue
 
+        # INSTRUCTOR LINEUP SUBSTITUTIONS (2026-11-17): data/lineup_substitutions.json
+        # maps round -> {team_id: {old player name: new player name}}, for a lineup
+        # that still lists a player the club traded away during a trade session.
+        subs = load_json_or_default("lineup_substitutions.json", {}).get(str(args.round), {}).get(str(team_id), {})
+        if subs:
+            row = dict(row)
+            for k, v in row.items():
+                if k and v and "rationale" not in k.lower():
+                    for old, new in subs.items():
+                        v = v.replace(old, new)
+                    row[k] = v
+            print(f"  lineup substitution applied for {name}: {subs}")
+
         formation = row.get("Formation", "").strip()
         if formation not in FORMATIONS:
             all_errors[name] = [f"unknown formation '{formation}'"]
