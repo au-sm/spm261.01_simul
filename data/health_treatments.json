@@ -1211,6 +1211,58 @@
    "treatment": "sports_science",
    "submitted_at": "2026-11-17T16:33:28.672Z",
    "cost": 125000
+  },
+  {
+   "id": "12|8|304|2026-11-19T15:47:26.166Z",
+   "team_id": "12",
+   "round": 8,
+   "player_id": "304",
+   "player_name": "Nikolai Toure",
+   "treatment": "rehab_standard",
+   "submitted_at": "2026-11-19T15:47:26.166Z",
+   "injured_until_before": 8,
+   "injured_until_after": 7,
+   "cost": 75000
+  },
+  {
+   "id": "12|8|261|2026-11-19T15:48:11.614Z",
+   "team_id": "12",
+   "round": 8,
+   "player_id": "261",
+   "player_name": "Sven Keller",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-19T15:48:11.614Z",
+   "cost": 125000
+  },
+  {
+   "id": "12|8|24|2026-11-19T15:48:25.359Z",
+   "team_id": "12",
+   "round": 8,
+   "player_id": "24",
+   "player_name": "Sven Kucera",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-19T15:48:25.359Z",
+   "cost": 125000
+  },
+  {
+   "id": "12|8|265|2026-11-19T15:48:43.419Z",
+   "team_id": "12",
+   "round": 8,
+   "player_id": "265",
+   "player_name": "Tariq Kovac",
+   "treatment": "recovery",
+   "submitted_at": "2026-11-19T15:48:43.419Z",
+   "cost": 50000
+  },
+  {
+   "id": "7|8|141|2026-11-19T16:34:43.110Z",
+   "team_id": "7",
+   "round": 8,
+   "player_id": "141",
+   "player_name": "Stefan Neumann",
+   "treatment": "sports_science",
+   "submitted_at": "2026-11-19T16:34:43.110Z",
+   "cost": 125000
   }
  ],
  "voided": [],
@@ -1218,7 +1270,7 @@
   "8": 1175000,
   "1": 1075000,
   "5": 2075000,
-  "12": 2850000,
+  "12": 3225000,
   "0": 625000,
   "16": 1900000,
   "14": 1175000,
@@ -1226,7 +1278,7 @@
   "15": 1750000,
   "10": 350000,
   "11": 250000,
-  "7": 50000,
+  "7": 175000,
   "13": 75000
  },
  "boosts": {
@@ -1551,6 +1603,18 @@
     "levels": 1
    },
    "25": {
+    "levels": 2
+   },
+   "261": {
+    "levels": 2
+   },
+   "24": {
+    "levels": 2
+   },
+   "265": {
+    "levels": 1
+   },
+   "141": {
     "levels": 2
    }
   }
