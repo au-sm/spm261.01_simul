@@ -228,7 +228,10 @@ def main():
         # INSTRUCTOR LINEUP SUBSTITUTIONS (2026-11-17): data/lineup_substitutions.json
         # maps round -> {team_id: {old player name: new player name}}, for a lineup
         # that still lists a player the club traded away during a trade session.
-        subs = load_json_or_default("lineup_substitutions.json", {}).get(str(args.round), {}).get(str(team_id), {})
+        # An "all" key applies to every round (e.g. a released player the club keeps listing).
+        _sub_cfg = load_json_or_default("lineup_substitutions.json", {})
+        subs = {**_sub_cfg.get("all", {}).get(str(team_id), {}),
+                **_sub_cfg.get(str(args.round), {}).get(str(team_id), {})}
         if subs:
             row = dict(row)
             for k, v in row.items():
